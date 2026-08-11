@@ -1,12 +1,8 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { readMessagingConfig, validateEmailConfig, validateTelegramConfig } from "@/lib/messaging/config";
-import { sendEmailToRecipient } from "@/lib/messaging/email";
-import { MessagingError, type MessagingErrorCode } from "@/lib/messaging/errors";
-import { checkAndRecordSend } from "@/lib/messaging/rateLimit";
-import { recordSendAttempt } from "@/lib/messaging/auditLog";
-import { sendTelegramMessage } from "@/lib/messaging/telegram";
-import { isValidEmailAddress, isValidMessageLength } from "@/lib/messaging/validation";
+import { MessagingError } from "@/lib/messaging/errors";
+import { sendEmailBatch } from "@/lib/messaging/sendEmail";
+import { sendTelegramTextMessage } from "@/lib/messaging/sendTelegram";
 import { z } from "zod";
 import { ok } from "./result";
 import { registerGatedTool } from "./toolGate";
@@ -26,13 +22,6 @@ function messagingErrorResult(err: unknown): CallToolResult {
     isError: true,
     content: [{ type: "text", text: JSON.stringify({ code: messagingError.code, message: messagingError.message }) }],
   };
-}
-
-interface EmailRecipientResult {
-  to: string;
-  status: "success" | "failure";
-  errorCode?: MessagingErrorCode;
-  errorMessage?: string;
 }
 
 /** Registers the send_email and send_telegram_message MCP tools (spec 017). */
@@ -55,36 +44,7 @@ export async function registerMessagingTools(server: McpServer, disabledTools: R
     },
     async ({ to, subject, body }) => {
       try {
-        if (!subject.trim() || !body.trim()) {
-          throw new MessagingError("invalid_message", "subject and body must not be empty");
-        }
-
-        const config = readMessagingConfig();
-        validateEmailConfig(config);
-        await checkAndRecordSend(config);
-
-        const results: EmailRecipientResult[] = [];
-        for (const address of to) {
-          if (!isValidEmailAddress(address)) {
-            const errorCode: MessagingErrorCode = "invalid_recipient";
-            const errorMessage = `"${address}" is not a valid email address`;
-            await recordSendAttempt({ channel: "email", destination: address, status: "failure", errorCode, errorMessage });
-            results.push({ to: address, status: "failure", errorCode, errorMessage });
-            continue;
-          }
-
-          try {
-            await sendEmailToRecipient(address, subject, body, config);
-            await recordSendAttempt({ channel: "email", destination: address, status: "success" });
-            results.push({ to: address, status: "success" });
-          } catch (err) {
-            const errorCode: MessagingErrorCode = "delivery_failed";
-            const errorMessage = (err as Error)?.message ?? String(err);
-            await recordSendAttempt({ channel: "email", destination: address, status: "failure", errorCode, errorMessage });
-            results.push({ to: address, status: "failure", errorCode, errorMessage });
-          }
-        }
-
+        const results = await sendEmailBatch(to, subject, body);
         return ok({ results });
       } catch (err) {
         return messagingErrorResult(err);
@@ -114,33 +74,11 @@ export async function registerMessagingTools(server: McpServer, disabledTools: R
     },
     async ({ chatId, text }) => {
       try {
-        if (!isValidMessageLength(text, 4096)) {
-          throw new MessagingError("invalid_message", "text must be non-empty and at most 4096 characters");
+        const result = await sendTelegramTextMessage(chatId, text);
+        if (result.status === "failure") {
+          return messagingErrorResult(new MessagingError(result.errorCode, result.errorMessage));
         }
-
-        const config = readMessagingConfig();
-        validateTelegramConfig(config);
-
-        const targetChatId = chatId ?? config.telegramChatId;
-        if (!targetChatId) {
-          throw new MessagingError(
-            "missing_config",
-            "No chatId was provided and no default is configured (TELEGRAM_CHAT_ID)",
-          );
-        }
-
-        await checkAndRecordSend(config);
-
-        try {
-          await sendTelegramMessage(targetChatId, text, config);
-          await recordSendAttempt({ channel: "telegram", destination: targetChatId, status: "success" });
-          return ok({ chatId: targetChatId, status: "success" });
-        } catch (err) {
-          const errorCode: MessagingErrorCode = err instanceof MessagingError ? err.code : "delivery_failed";
-          const errorMessage = (err as Error)?.message ?? String(err);
-          await recordSendAttempt({ channel: "telegram", destination: targetChatId, status: "failure", errorCode, errorMessage });
-          throw err;
-        }
+        return ok({ chatId: result.chatId, status: "success" });
       } catch (err) {
         return messagingErrorResult(err);
       }

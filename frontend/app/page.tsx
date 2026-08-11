@@ -10,6 +10,7 @@ const DASHBOARD_LINKS: { href: string; labelKey: keyof Dictionary["dashboard"]["
   { href: "/tools", labelKey: "tools" },
   { href: "/settings/connected-apps", labelKey: "settingsConnectedApps" },
   { href: "/settings/personal-access-tokens", labelKey: "settingsPersonalAccessTokens" },
+  { href: "/settings/test-messaging", labelKey: "settingsTestMessaging" },
 ];
 
 /** Lands every visitor on a list of links to every existing top-level page (spec 026). */

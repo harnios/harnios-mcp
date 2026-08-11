@@ -75,6 +75,7 @@ export interface Dictionary {
       tools: string;
       settingsConnectedApps: string;
       settingsPersonalAccessTokens: string;
+      settingsTestMessaging: string;
     };
   };
   editor: {
@@ -171,6 +172,49 @@ export interface Dictionary {
       createdTitle: string;
       createdBody: string;
       backLink: string;
+    };
+    messagingTest: {
+      title: string;
+      description: string;
+      backLink: string;
+      signOut: string;
+      email: {
+        sectionTitle: string;
+        toLabel: string;
+        toPlaceholder: string;
+        subjectLabel: string;
+        subjectPlaceholder: string;
+        bodyLabel: string;
+        bodyPlaceholder: string;
+        submit: string;
+        sending: string;
+        invalidRecipient: string;
+        emptyFields: string;
+      };
+      telegram: {
+        sectionTitle: string;
+        chatIdLabel: string;
+        chatIdPlaceholder: string;
+        chatIdHint: string;
+        textLabel: string;
+        textPlaceholder: string;
+        charCount: (count: number, max: number) => string;
+        submit: string;
+        sending: string;
+        emptyText: string;
+      };
+      success: (destination: string) => string;
+      failure: (errorCode: string, errorMessage: string) => string;
+      recent: {
+        heading: string;
+        empty: string;
+        channel: string;
+        destination: string;
+        time: string;
+        outcome: string;
+        outcomeSuccess: string;
+        outcomeFailure: string;
+      };
     };
   };
   tools: {
