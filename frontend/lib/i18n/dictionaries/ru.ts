@@ -196,6 +196,7 @@ export const ru: Dictionary = {
         sending: "Отправка…",
         invalidRecipient: "Введите корректный адрес электронной почты.",
         emptyFields: "Тема и текст письма не должны быть пустыми.",
+        htmlToggle: "Отправить как HTML",
       },
       telegram: {
         sectionTitle: "Тест сообщения Telegram",

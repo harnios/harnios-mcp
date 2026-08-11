@@ -61,6 +61,7 @@ export function MessagingTestForm({ language }: { language: SupportedLanguage })
   const [to, setTo] = useState("");
   const [subject, setSubject] = useState("");
   const [emailBody, setEmailBody] = useState("");
+  const [emailIsHtml, setEmailIsHtml] = useState(false);
   const [emailPending, setEmailPending] = useState(false);
   const [emailResult, setEmailResult] = useState<TestResponse | null>(null);
   const [emailValidationError, setEmailValidationError] = useState<string | null>(null);
@@ -95,7 +96,7 @@ export function MessagingTestForm({ language }: { language: SupportedLanguage })
 
     setEmailPending(true);
     try {
-      const result = await postTest({ channel: "email", to: to.trim(), subject, body: emailBody });
+      const result = await postTest({ channel: "email", to: to.trim(), subject, body: emailBody, isHtml: emailIsHtml });
       setEmailResult(result);
       recordAttempt("email", to.trim(), result);
     } finally {
@@ -160,6 +161,10 @@ export function MessagingTestForm({ language }: { language: SupportedLanguage })
               style={fieldStyle}
               required
             />
+          </label>
+          <label style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.5rem" }}>
+            <input type="checkbox" checked={emailIsHtml} onChange={(e) => setEmailIsHtml(e.target.checked)} />
+            {dict.email.htmlToggle}
           </label>
           <button type="submit" disabled={emailPending}>
             {emailPending ? dict.email.sending : dict.email.submit}

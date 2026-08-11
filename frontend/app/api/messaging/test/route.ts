@@ -9,6 +9,7 @@ interface EmailTestRequest {
   to: string;
   subject: string;
   body: string;
+  isHtml?: boolean;
 }
 
 interface TelegramTestRequest {
@@ -53,13 +54,13 @@ export async function POST(request: NextRequest) {
   const { channel } = body as { channel: unknown };
 
   if (channel === "email") {
-    const { to, subject, body: emailBody } = body as Partial<EmailTestRequest>;
+    const { to, subject, body: emailBody, isHtml } = body as Partial<EmailTestRequest>;
     if (!to || !subject || emailBody === undefined) {
       return badRequest('to, subject, and body are required for channel "email"');
     }
 
     try {
-      const [result] = await sendEmailBatch([to], subject, emailBody);
+      const [result] = await sendEmailBatch([to], subject, emailBody, isHtml ?? false);
       const response: TestResponse = {
         channel: "email",
         status: result.status,

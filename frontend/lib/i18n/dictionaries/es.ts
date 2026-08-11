@@ -196,6 +196,7 @@ export const es: Dictionary = {
         sending: "Enviando…",
         invalidRecipient: "Introduce una dirección de correo válida.",
         emptyFields: "El asunto y el cuerpo no pueden estar vacíos.",
+        htmlToggle: "Enviar como HTML",
       },
       telegram: {
         sectionTitle: "Probar mensaje de Telegram",

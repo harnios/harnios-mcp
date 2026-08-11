@@ -190,6 +190,7 @@ export interface Dictionary {
         sending: string;
         invalidRecipient: string;
         emptyFields: string;
+        htmlToggle: string;
       };
       telegram: {
         sectionTitle: string;

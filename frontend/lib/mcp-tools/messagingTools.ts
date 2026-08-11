@@ -39,12 +39,19 @@ export async function registerMessagingTools(server: McpServer, disabledTools: R
       inputSchema: {
         to: z.array(z.string()).min(1).max(50).describe("1-50 recipient email addresses"),
         subject: z.string().describe("Email subject"),
-        body: z.string().describe("Email body (plain text)"),
+        body: z.string().describe("Email body (plain text, or HTML markup when isHtml is true)"),
+        isHtml: z
+          .boolean()
+          .optional()
+          .describe(
+            "Whether body is HTML instead of plain text. Defaults to false. When true, a plain-text " +
+              "alternative is generated automatically for non-HTML mail clients.",
+          ),
       },
     },
-    async ({ to, subject, body }) => {
+    async ({ to, subject, body, isHtml }) => {
       try {
-        const results = await sendEmailBatch(to, subject, body);
+        const results = await sendEmailBatch(to, subject, body, isHtml ?? false);
         return ok({ results });
       } catch (err) {
         return messagingErrorResult(err);

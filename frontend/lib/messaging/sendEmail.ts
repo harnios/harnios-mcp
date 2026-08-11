@@ -19,7 +19,12 @@ export interface EmailRecipientResult {
  * limit is checked once per call, not once per recipient — a batch of 50
  * recipients consumes one unit, same as a single-recipient call.
  */
-export async function sendEmailBatch(to: string[], subject: string, body: string): Promise<EmailRecipientResult[]> {
+export async function sendEmailBatch(
+  to: string[],
+  subject: string,
+  body: string,
+  isHtml: boolean,
+): Promise<EmailRecipientResult[]> {
   if (!subject.trim() || !body.trim()) {
     throw new MessagingError("invalid_message", "subject and body must not be empty");
   }
@@ -39,7 +44,7 @@ export async function sendEmailBatch(to: string[], subject: string, body: string
     }
 
     try {
-      await sendEmailToRecipient(address, subject, body, config);
+      await sendEmailToRecipient(address, subject, body, config, isHtml);
       await recordSendAttempt({ channel: "email", destination: address, status: "success" });
       results.push({ to: address, status: "success" });
     } catch (err) {
