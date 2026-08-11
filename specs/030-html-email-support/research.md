@@ -39,3 +39,15 @@
 **Rationale**: Nothing in spec 030's requirements asks for distinguishing HTML sends from plain-text sends in the audit trail or rate limit — FR-005 only requires the *capability* to be available through both entry points using the same underlying delivery behavior, not that the audit trail track which format was used. Keeping the audit record shape unchanged avoids a schema change for a distinction nothing downstream currently consumes.
 
 **Alternatives considered**: Adding an `isHtml` field to the Send Attempt Record — rejected as unrequested scope; easy to add later (research.md-documented reversible decision) if a future feature needs to filter/report on it.
+
+## §6. Post-ship finding: AI callers forgot to set `isHtml` (added after real-world testing)
+
+**Finding**: The owner's first real test — asking an AI assistant to send a formatted email — reproduced exactly the failure mode `isHtml` exists to distinguish: the assistant wrote an HTML `body` but never set `isHtml: true` (it's optional, default `false`), so Gmail correctly displayed the literal tags. This was not a code defect (§1's flag-is-the-source-of-truth design worked exactly as specified) — it was a tool-description clarity gap for LLM callers specifically, who don't have the web page's adjacent checkbox as a visual cue.
+
+**Decision**: Two additive fixes, both to `send_email`'s MCP tool definition only (`lib/mcp-tools/messagingTools.ts`) — no change to `sendEmailBatch`/`sendEmailToRecipient`, no change to delivered output for any given `isHtml` value:
+1. Strengthened the tool's `description` and the `body`/`isHtml` field descriptions with an explicit imperative ("if body contains HTML markup, you MUST set isHtml: true or tags are sent literally").
+2. Added a same-call advisory: when `isHtml` is falsy and `body` matches a simple HTML-tag-looking pattern (`/<[a-z][\s\S]*>/i`), the tool's success response includes a `warning` field telling the caller exactly what happened and how to fix it on a resend.
+
+**Rationale**: (1) addresses the failure *before* it happens — most callers reading tool descriptions won't make this mistake once it's stated this plainly. (2) is a safety net for when (1) still isn't enough — the warning is purely advisory text in the response payload; it never changes what was actually sent (§1's "flag is the source of truth, not content sniffing" principle is preserved exactly — this only *reports on* the mismatch after an unchanged send, never alters delivery based on content).
+
+**Alternatives considered**: Auto-detecting HTML content and silently treating it as `isHtml: true` when tags are present — rejected, this is precisely the content-sniffing approach §1 and the spec's own Assumptions already rejected, and it would break FR-004/User Story 2 (a plain-text body containing incidental `<`/`>` characters must still be delivered as literal plain text, unchanged).

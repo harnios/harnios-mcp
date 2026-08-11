@@ -35,24 +35,43 @@ export async function registerMessagingTools(server: McpServer, disabledTools: R
       description:
         "Sends an email via the pre-configured SMTP account to 1-50 recipients. Reports a " +
         "per-recipient outcome, so a mix of valid and invalid addresses doesn't fail the whole " +
-        "call. Uses the server's configured sender identity — no per-call credentials.",
+        "call. Uses the server's configured sender identity — no per-call credentials. " +
+        "IMPORTANT: if body contains HTML markup (e.g. <b>, <a href>, <h1>, <ul>), you MUST set " +
+        "isHtml: true or the tags are sent literally as plain text and will NOT render — " +
+        "recipients will see the raw markup instead of formatting.",
       inputSchema: {
         to: z.array(z.string()).min(1).max(50).describe("1-50 recipient email addresses"),
         subject: z.string().describe("Email subject"),
-        body: z.string().describe("Email body (plain text, or HTML markup when isHtml is true)"),
+        body: z
+          .string()
+          .describe(
+            "Email body. Plain text by default. If this contains HTML tags, isHtml MUST also be set " +
+              "to true, or the tags will be sent as literal text instead of being rendered.",
+          ),
         isHtml: z
           .boolean()
           .optional()
           .describe(
-            "Whether body is HTML instead of plain text. Defaults to false. When true, a plain-text " +
-              "alternative is generated automatically for non-HTML mail clients.",
+            "Set to true when body is HTML markup, so it renders as formatted content instead of " +
+              "showing raw tags. Defaults to false (plain text). Required whenever body contains any " +
+              "HTML (headings, bold, links, lists, etc.) — a plain-text alternative is generated " +
+              "automatically for non-HTML mail clients, so no extra field is needed for that.",
           ),
       },
     },
     async ({ to, subject, body, isHtml }) => {
       try {
         const results = await sendEmailBatch(to, subject, body, isHtml ?? false);
-        return ok({ results });
+        const looksLikeHtml = !isHtml && /<[a-z][\s\S]*>/i.test(body);
+        return ok({
+          results,
+          ...(looksLikeHtml && {
+            warning:
+              "body appears to contain HTML tags but isHtml was not set to true, so they were sent " +
+              "as literal text and will NOT render for the recipient. If formatted HTML was intended, " +
+              "resend with isHtml: true.",
+          }),
+        });
       } catch (err) {
         return messagingErrorResult(err);
       }
