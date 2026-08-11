@@ -1,8 +1,10 @@
-# harness-mcp
+# Harnios MCP
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/AntonSteshenko/harness-mcp&root-directory=frontend)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/harnios/harnios-mcp&root-directory=frontend)
 
-An autonomous, serverless system for running an AI-based Company OS. It can be deployed to serverless platforms like Vercel (or similar) or run locally on Node.js, and requires an external S3-compatible object storage backend — either your own, or a local self-hosted MinIO instance for development.
+Harnios is a self-hosted, MCP-based storage system that gives every AI assistant you use — Claude, ChatGPT, Cursor, or anything else — a shared, persistent memory of your business: knowledge base, skills, projects, operational tables, and reports, all in one place. Connect a new tool once, and it reads and writes through the same store instead of starting from zero.
+
+Under the hood, it's an autonomous, serverless system for running an AI-based Company OS. It can be deployed to serverless platforms like Vercel (or similar) or run locally on Node.js, and requires an external S3-compatible object storage backend — either your own, or a local self-hosted MinIO instance for development.
 
 This repo pairs that local MinIO setup with the Next.js app that uses it. See [specs/001-s3-self-hosted-storage/quickstart.md](specs/001-s3-self-hosted-storage/quickstart.md) for a full end-to-end validation walkthrough.
 
