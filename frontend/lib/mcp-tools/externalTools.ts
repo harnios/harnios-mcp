@@ -55,6 +55,19 @@ export function resolveExternalTools(
   return { registrations, collisions };
 }
 
+/**
+ * Prefixes a proxied tool's description with its source connection's label
+ * (e.g. `"[Alpi ERP] List every model reachable..."`), so the calling
+ * assistant knows what system a tool belongs to without having to call it
+ * first — the external server's own description rarely says so, since it
+ * wasn't written with multiple connected systems in mind. Only the
+ * description is touched; `name` is left alone (rate limiting, per-tool
+ * enable/disable, and collision detection are all keyed on it).
+ */
+function withConnectionContext(label: string, description: string | undefined): string {
+  return description ? `[${label}] ${description}` : `[${label}]`;
+}
+
 /** Mirrors lib/mcp-tools/result.ts's errorResult shape for proxy-specific failures (contracts/external-mcp-proxy-protocol.md). */
 function externalErrorResult(err: unknown): CallToolResult {
   const proxyError = err as ExternalProxyError;
@@ -102,7 +115,7 @@ export async function registerExternalTools(server: McpServer, disabledTools: Re
       tool.name,
       {
         title: tool.title,
-        description: tool.description,
+        description: withConnectionContext(connection.label, tool.description),
         inputSchema: convertJsonSchemaToZod(tool.inputSchema),
       },
       async (args) => {
