@@ -1,6 +1,7 @@
 import { DeleteObjectsCommand, ListObjectsV2Command, PutObjectCommand } from "@aws-sdk/client-s3";
 import { OAUTH_PREFIX } from "@/lib/oauth/store";
 import { TOOLS_PREFIX } from "@/lib/mcp-tools/store";
+import { EXTERNAL_CATALOG_PREFIX, EXTERNAL_SERVERS_PREFIX } from "@/lib/external-mcp/store";
 import { BUCKET, s3Client } from "./client";
 import { alreadyExists, notFound, typeMismatch, wrapStorageError } from "./errors";
 import { move } from "./move";
@@ -59,8 +60,10 @@ export async function listDirectory(path: string): Promise<{ path: string } & Di
           obj.Key &&
           obj.Key !== dirKey &&
           !obj.Key.startsWith(OAUTH_PREFIX) &&
-          !obj.Key.startsWith(TOOLS_PREFIX),
-      ) // exclude the directory's own marker object and reserved OAuth/tool-status state
+          !obj.Key.startsWith(TOOLS_PREFIX) &&
+          !obj.Key.startsWith(EXTERNAL_SERVERS_PREFIX) &&
+          !obj.Key.startsWith(EXTERNAL_CATALOG_PREFIX),
+      ) // exclude the directory's own marker object and reserved OAuth/tool-status/external-connection state
       .map((obj) => ({
         path: obj.Key as string,
         size: obj.Size ?? 0,
@@ -68,7 +71,14 @@ export async function listDirectory(path: string): Promise<{ path: string } & Di
       }));
 
     const directories = (result.CommonPrefixes ?? [])
-      .filter((p) => p.Prefix && p.Prefix !== OAUTH_PREFIX && p.Prefix !== TOOLS_PREFIX)
+      .filter(
+        (p) =>
+          p.Prefix &&
+          p.Prefix !== OAUTH_PREFIX &&
+          p.Prefix !== TOOLS_PREFIX &&
+          p.Prefix !== EXTERNAL_SERVERS_PREFIX &&
+          p.Prefix !== EXTERNAL_CATALOG_PREFIX,
+      )
       .map((p) => ({ path: p.Prefix as string }));
 
     return { path, files, directories };

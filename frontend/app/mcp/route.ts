@@ -1,6 +1,9 @@
 import { createMcpHandler, withMcpAuth } from "mcp-handler";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { EXTERNAL_PROXY_HOP_HEADER } from "@/lib/external-mcp/client";
 import { registerTools } from "@/lib/mcp-tools";
 import { registerEngineTools } from "@/lib/mcp-tools/engineTools";
+import { registerExternalTools } from "@/lib/mcp-tools/externalTools";
 import { registerInboxTools } from "@/lib/mcp-tools/inboxTools";
 import { registerMessagingTools } from "@/lib/mcp-tools/messagingTools";
 import { getDisabledTools } from "@/lib/mcp-tools/store";
@@ -17,22 +20,42 @@ const serverInfo = {
   description: "read assistant/AGENTS.md; call get_os_engine/get_os_upgrade/get_os_init to set up or repair it (spec 016)",
 };
 
-const handler = createMcpHandler(
+async function registerNativeTools(server: McpServer): Promise<ReadonlySet<string>> {
+  const disabledTools = await getDisabledTools();
+  await registerTools(server, disabledTools);
+  await registerEngineTools(server, disabledTools);
+  await registerMessagingTools(server, disabledTools);
+  await registerInboxTools(server, disabledTools);
+  await registerTreeTools(server, disabledTools);
+  return disabledTools;
+}
+
+/**
+ * Two handler variants, split on whether the inbound request itself carries
+ * `EXTERNAL_PROXY_HOP_HEADER` (spec 031, research.md's proxy-depth cap): a
+ * request that arrived *as* an outbound proxy call from this same app (or
+ * another Harnios instance) never registers external tools itself, capping
+ * any proxy chain — including a connection that points back at this very
+ * deployment, directly or through a cycle — at one hop. Without this, such
+ * a connection recurses without bound: registering external tools triggers
+ * an outbound catalog fetch, which is itself a fresh inbound `/mcp` request
+ * that would try to do the same thing again.
+ */
+const handlerWithExternal = createMcpHandler(
   async (server) => {
-    const disabledTools = await getDisabledTools();
-    await registerTools(server, disabledTools);
-    await registerEngineTools(server, disabledTools);
-    await registerMessagingTools(server, disabledTools);
-    await registerInboxTools(server, disabledTools);
-    await registerTreeTools(server, disabledTools);
+    const disabledTools = await registerNativeTools(server);
+    await registerExternalTools(server, disabledTools);
   },
-  {
-    serverInfo,
+  { serverInfo },
+  { maxDuration: 60, verboseLogs: true },
+);
+
+const handlerWithoutExternal = createMcpHandler(
+  async (server) => {
+    await registerNativeTools(server);
   },
-  {
-    maxDuration: 60,
-    verboseLogs: true,
-  },
+  { serverInfo },
+  { maxDuration: 60, verboseLogs: true },
 );
 
 // spec 008-mcp-oauth, FR-001: every tool request must carry a valid,
@@ -40,16 +63,26 @@ const handler = createMcpHandler(
 // spec 013-mcp-token-auth, FR-003/FR-004: a personal access token is an
 // additional, independent way to authenticate — tried as a fallback so OAuth
 // access tokens keep working exactly as before.
-const authHandler = withMcpAuth(
-  handler,
-  async (_req, bearerToken) => {
-    if (!bearerToken) return undefined;
-    return (await verifyAccessToken(bearerToken)) ?? (await verifyPersonalAccessToken(bearerToken));
-  },
-  {
-    required: true,
-    resourceMetadataPath: "/.well-known/oauth-protected-resource",
-  },
-);
+function withAuth(handler: typeof handlerWithExternal) {
+  return withMcpAuth(
+    handler,
+    async (_req, bearerToken) => {
+      if (!bearerToken) return undefined;
+      return (await verifyAccessToken(bearerToken)) ?? (await verifyPersonalAccessToken(bearerToken));
+    },
+    {
+      required: true,
+      resourceMetadataPath: "/.well-known/oauth-protected-resource",
+    },
+  );
+}
 
-export { authHandler as GET, authHandler as POST };
+const authHandlerWithExternal = withAuth(handlerWithExternal);
+const authHandlerWithoutExternal = withAuth(handlerWithoutExternal);
+
+function selectHandler(request: Request): typeof authHandlerWithExternal {
+  return request.headers.has(EXTERNAL_PROXY_HOP_HEADER) ? authHandlerWithoutExternal : authHandlerWithExternal;
+}
+
+export const GET: typeof authHandlerWithExternal = (request, ...rest) => selectHandler(request)(request, ...rest);
+export const POST: typeof authHandlerWithExternal = (request, ...rest) => selectHandler(request)(request, ...rest);

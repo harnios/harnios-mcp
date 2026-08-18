@@ -3,6 +3,9 @@ import { redirect } from "next/navigation";
 import { hasActiveOwnerSession } from "@/lib/oauth/session";
 import { TOOL_CATALOG } from "@/lib/mcp-tools/catalog";
 import { getDisabledTools } from "@/lib/mcp-tools/store";
+import { resolveExternalTools } from "@/lib/mcp-tools/externalTools";
+import { getCachedCatalog, listExternalServerConnections } from "@/lib/external-mcp/store";
+import type { CachedToolCatalog } from "@/lib/external-mcp/types";
 import { resolveLanguage } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 
@@ -22,7 +25,31 @@ export default async function ToolsPage({
   const { changed, to } = await searchParams;
   const disabledTools = await getDisabledTools();
 
-  const rows = TOOL_CATALOG.map((tool) => ({ ...tool, enabled: !disabledTools.has(tool.name) })).sort(
+  const nativeRows = TOOL_CATALOG.map((tool) => ({
+    name: tool.name,
+    group: tool.group,
+    enabled: !disabledTools.has(tool.name),
+    source: null as string | null,
+  }));
+
+  const connections = await listExternalServerConnections();
+  const catalogs = new Map<string, CachedToolCatalog>();
+  await Promise.all(
+    connections.map(async (connection) => {
+      const catalog = await getCachedCatalog(connection.id);
+      if (catalog) catalogs.set(connection.id, catalog);
+    }),
+  );
+  const connectionLabels = new Map(connections.map((c) => [c.id, c.label]));
+  const { registrations } = resolveExternalTools(connections, catalogs);
+  const externalRows = registrations.map(({ connectionId, tool }) => ({
+    name: tool.name,
+    group: connectionLabels.get(connectionId) ?? connectionId,
+    enabled: !disabledTools.has(tool.name),
+    source: connectionLabels.get(connectionId) ?? connectionId,
+  }));
+
+  const rows = [...nativeRows, ...externalRows].sort(
     (a, b) => a.group.localeCompare(b.group) || a.name.localeCompare(b.name),
   );
 
@@ -49,6 +76,7 @@ export default async function ToolsPage({
           <tr>
             <th style={cellStyle}>{dict.name}</th>
             <th style={cellStyle}>{dict.group}</th>
+            <th style={cellStyle}>{dict.sourceHeader}</th>
             <th style={cellStyle}>{dict.status}</th>
             <th style={cellStyle} />
           </tr>
@@ -60,6 +88,7 @@ export default async function ToolsPage({
                 <code>{tool.name}</code>
               </td>
               <td style={cellStyle}>{tool.group}</td>
+              <td style={cellStyle}>{tool.source ? dict.sourceExternal(tool.source) : dict.sourceNative}</td>
               <td style={cellStyle}>{tool.enabled ? dict.active : dict.disabled}</td>
               <td style={cellStyle}>
                 <a href={`/tools/${encodeURIComponent(tool.name)}/confirm?to=${tool.enabled ? "disabled" : "active"}`}>

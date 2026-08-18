@@ -243,6 +243,68 @@ export const es: Dictionary = {
       "Las sesiones de asistentes de IA que ya estaban conectadas antes de este cambio pueden seguir usando la lista de herramientas anterior hasta que se reconecten o la vuelvan a solicitar — para ellas el efecto no es instantáneo.",
     changedBanner: (name, to) => `"${name}" ahora está ${to}.`,
     changeFailed: (message) => `No se pudo aplicar el cambio: ${message}`,
+    sourceHeader: "Origen",
+    sourceNative: "Integrado",
+    sourceExternal: (label) => `Externo — ${label}`,
+  },
+  connections: {
+    title: "Servidores MCP externos",
+    description: "Servidores MCP remotos conectados a este, cuyas herramientas se ofrecen a cualquier asistente conectado aquí, junto con las integradas.",
+    newLink: "Conectar un nuevo servidor",
+    empty: "Todavía no hay servidores externos conectados.",
+    labelHeader: "Etiqueta",
+    urlHeader: "URL",
+    statusHeader: "Estado",
+    catalogHeader: "Herramientas",
+    enabledLabel: "habilitada",
+    disabledLabel: "deshabilitada",
+    toolCount: (n) => `${n} herramienta${n === 1 ? "" : "s"}`,
+    lastFetched: (when) => `última comprobación ${when}`,
+    neverFetched: "nunca alcanzado con éxito",
+    collisionNotice: (toolName, connectionLabel) =>
+      `"${toolName}" de "${connectionLabel}" no se registró — ya existe una herramienta con ese nombre.`,
+    errorCodeLabel: (code) => {
+      switch (code) {
+        case "external_unreachable":
+          return "No se pudo contactar con el servidor";
+        case "external_timeout":
+          return "El servidor no respondió a tiempo";
+        case "external_unauthorized":
+          return "El servidor rechazó el token guardado";
+        case "external_invalid_response":
+          return "El servidor devolvió una respuesta no válida";
+        default:
+          return code;
+      }
+    },
+    editAction: "Editar",
+    enableAction: "Habilitar",
+    disableAction: "Deshabilitar",
+    refreshAction: "Actualizar ahora",
+    removeAction: "Eliminar",
+    changedBanner: (label, status) => `"${label}" ahora está ${status}.`,
+    newTitle: "Conectar un servidor MCP externo",
+    editTitle: "Editar conexión",
+    labelFieldLabel: "Etiqueta",
+    labelPlaceholder: "p. ej. Gestión de pedidos",
+    urlFieldLabel: "URL del servidor",
+    urlPlaceholder: "https://ejemplo.com/mcp",
+    tokenFieldLabel: "Token bearer",
+    tokenPlaceholder: "Pega el token",
+    tokenWriteOnlyNotice: "El token actual nunca se vuelve a mostrar una vez guardado — deja este campo vacío para no cambiarlo, o introduce uno nuevo para sustituirlo.",
+    submitCreate: "Conectar",
+    submitEdit: "Guardar cambios",
+    invalidUrl: "Introduce una URL http(s):// válida.",
+    missingFields: "La etiqueta, la URL y el token son obligatorios.",
+    confirmTitle: "Confirmar cambio",
+    confirmEnable: (label) => `Estás a punto de habilitar "${label}" — sus herramientas volverán a estar disponibles.`,
+    confirmDisable: (label) => `Estás a punto de deshabilitar "${label}" — sus herramientas dejarán de ofrecerse, pero se conserva su configuración guardada.`,
+    confirmRemove: (label) => `Estás a punto de eliminar permanentemente "${label}", incluido su token guardado. Esto no se puede deshacer.`,
+    confirmButton: "Confirmar",
+    cancelButton: "Cancelar",
+    warningNotice: "Las sesiones de asistentes de IA que ya estaban conectadas antes de este cambio pueden seguir usando la lista de herramientas anterior hasta que se reconecten o la soliciten de nuevo — para ellas no es instantáneo.",
+    removeWarning: "Tendrás que volver a introducir la URL y el token para reconectar este servidor más adelante.",
+    changeFailed: (message) => `No se pudo aplicar el cambio: ${message}`,
   },
   oauth: {
     login: {

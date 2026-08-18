@@ -243,6 +243,68 @@ export const de: Dictionary = {
       "KI-Assistenten-Sitzungen, die schon vor dieser Änderung verbunden waren, verwenden möglicherweise weiterhin die vorherige Tool-Liste, bis sie sich erneut verbinden oder sie neu anfordern — für sie ist die Änderung nicht sofort wirksam.",
     changedBanner: (name, to) => `"${name}" ist jetzt ${to}.`,
     changeFailed: (message) => `Änderung konnte nicht angewendet werden: ${message}`,
+    sourceHeader: "Quelle",
+    sourceNative: "Integriert",
+    sourceExternal: (label) => `Extern — ${label}`,
+  },
+  connections: {
+    title: "Externe MCP-Server",
+    description: "Mit diesem verbundene externe MCP-Server, deren Tools jedem hier verbundenen Assistenten zusammen mit den integrierten angeboten werden.",
+    newLink: "Neuen Server verbinden",
+    empty: "Noch keine externen Server verbunden.",
+    labelHeader: "Bezeichnung",
+    urlHeader: "URL",
+    statusHeader: "Status",
+    catalogHeader: "Tools",
+    enabledLabel: "aktiviert",
+    disabledLabel: "deaktiviert",
+    toolCount: (n) => `${n} Tool${n === 1 ? "" : "s"}`,
+    lastFetched: (when) => `zuletzt geprüft ${when}`,
+    neverFetched: "nie erfolgreich erreicht",
+    collisionNotice: (toolName, connectionLabel) =>
+      `"${toolName}" von "${connectionLabel}" wurde nicht registriert — ein Tool mit diesem Namen existiert bereits.`,
+    errorCodeLabel: (code) => {
+      switch (code) {
+        case "external_unreachable":
+          return "Server konnte nicht erreicht werden";
+        case "external_timeout":
+          return "Der Server hat nicht rechtzeitig geantwortet";
+        case "external_unauthorized":
+          return "Der Server hat das gespeicherte Token abgelehnt";
+        case "external_invalid_response":
+          return "Der Server hat eine ungültige Antwort zurückgegeben";
+        default:
+          return code;
+      }
+    },
+    editAction: "Bearbeiten",
+    enableAction: "Aktivieren",
+    disableAction: "Deaktivieren",
+    refreshAction: "Jetzt aktualisieren",
+    removeAction: "Entfernen",
+    changedBanner: (label, status) => `"${label}" ist jetzt ${status}.`,
+    newTitle: "Externen MCP-Server verbinden",
+    editTitle: "Verbindung bearbeiten",
+    labelFieldLabel: "Bezeichnung",
+    labelPlaceholder: "z. B. Auftragsverwaltung",
+    urlFieldLabel: "Server-URL",
+    urlPlaceholder: "https://beispiel.de/mcp",
+    tokenFieldLabel: "Bearer-Token",
+    tokenPlaceholder: "Token einfügen",
+    tokenWriteOnlyNotice: "Das aktuelle Token wird nach dem Speichern nie wieder angezeigt — lassen Sie dieses Feld leer, um es unverändert zu lassen, oder geben Sie ein neues ein, um es zu ersetzen.",
+    submitCreate: "Verbinden",
+    submitEdit: "Änderungen speichern",
+    invalidUrl: "Geben Sie eine gültige http(s)://-URL ein.",
+    missingFields: "Bezeichnung, URL und Token sind alle erforderlich.",
+    confirmTitle: "Änderung bestätigen",
+    confirmEnable: (label) => `Sie sind dabei, "${label}" zu aktivieren — die Tools werden wieder verfügbar.`,
+    confirmDisable: (label) => `Sie sind dabei, "${label}" zu deaktivieren — die Tools werden nicht mehr angeboten, die gespeicherte Konfiguration bleibt jedoch erhalten.`,
+    confirmRemove: (label) => `Sie sind dabei, "${label}" endgültig zu entfernen, einschließlich des gespeicherten Tokens. Dies kann nicht rückgängig gemacht werden.`,
+    confirmButton: "Bestätigen",
+    cancelButton: "Abbrechen",
+    warningNotice: "KI-Assistenten-Sitzungen, die vor dieser Änderung bereits verbunden waren, verwenden möglicherweise weiterhin die vorherige Tool-Liste, bis sie sich erneut verbinden oder sie erneut abfragen — für sie ist das nicht sofort wirksam.",
+    removeWarning: "Um diesen Server später wieder zu verbinden, müssen Sie URL und Token erneut eingeben.",
+    changeFailed: (message) => `Änderung konnte nicht angewendet werden: ${message}`,
   },
   oauth: {
     login: {

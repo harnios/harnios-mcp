@@ -244,6 +244,68 @@ export const en: Dictionary = {
       "AI assistant sessions that were already connected before this change may keep using the previous tool list until they reconnect or ask for it again — this isn't instant for them.",
     changedBanner: (name, to) => `"${name}" is now ${to}.`,
     changeFailed: (message) => `Couldn't apply the change: ${message}`,
+    sourceHeader: "Source",
+    sourceNative: "Built-in",
+    sourceExternal: (label) => `External — ${label}`,
+  },
+  connections: {
+    title: "External MCP servers",
+    description: "Remote MCP servers connected to this one, whose tools are offered to any assistant connected here, alongside the built-in ones.",
+    newLink: "Connect a new server",
+    empty: "No external servers connected yet.",
+    labelHeader: "Label",
+    urlHeader: "URL",
+    statusHeader: "Status",
+    catalogHeader: "Tools",
+    enabledLabel: "enabled",
+    disabledLabel: "disabled",
+    toolCount: (n) => `${n} tool${n === 1 ? "" : "s"}`,
+    lastFetched: (when) => `last checked ${when}`,
+    neverFetched: "never successfully reached",
+    collisionNotice: (toolName, connectionLabel) =>
+      `"${toolName}" from "${connectionLabel}" wasn't registered — a tool with that name already exists.`,
+    errorCodeLabel: (code) => {
+      switch (code) {
+        case "external_unreachable":
+          return "Could not reach the server";
+        case "external_timeout":
+          return "The server didn't respond in time";
+        case "external_unauthorized":
+          return "The server rejected the stored token";
+        case "external_invalid_response":
+          return "The server returned an invalid response";
+        default:
+          return code;
+      }
+    },
+    editAction: "Edit",
+    enableAction: "Enable",
+    disableAction: "Disable",
+    refreshAction: "Refresh now",
+    removeAction: "Remove",
+    changedBanner: (label, status) => `"${label}" is now ${status}.`,
+    newTitle: "Connect an external MCP server",
+    editTitle: "Edit connection",
+    labelFieldLabel: "Label",
+    labelPlaceholder: "e.g. Order Management",
+    urlFieldLabel: "Server URL",
+    urlPlaceholder: "https://example.com/mcp",
+    tokenFieldLabel: "Bearer token",
+    tokenPlaceholder: "Paste the token",
+    tokenWriteOnlyNotice: "The current token is never shown again once saved — leave this blank to keep it unchanged, or enter a new one to replace it.",
+    submitCreate: "Connect",
+    submitEdit: "Save changes",
+    invalidUrl: "Enter a valid http(s):// URL.",
+    missingFields: "Label, URL, and token are all required.",
+    confirmTitle: "Confirm change",
+    confirmEnable: (label) => `You're about to enable "${label}" — its tools will become available again.`,
+    confirmDisable: (label) => `You're about to disable "${label}" — its tools will stop being offered, but its saved configuration is kept.`,
+    confirmRemove: (label) => `You're about to permanently remove "${label}", including its saved token. This can't be undone.`,
+    confirmButton: "Confirm",
+    cancelButton: "Cancel",
+    warningNotice: "AI assistant sessions that were already connected before this change may keep using the previous tool list until they reconnect or ask for it again — this isn't instant for them.",
+    removeWarning: "You'll need to re-enter the URL and token to reconnect this server later.",
+    changeFailed: (message) => `Couldn't apply the change: ${message}`,
   },
   oauth: {
     login: {

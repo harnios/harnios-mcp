@@ -243,6 +243,68 @@ export const ru: Dictionary = {
       "Сессии ИИ-ассистентов, уже подключённые до этого изменения, могут продолжать использовать прежний список инструментов, пока не переподключатся или не запросят его заново — для них изменение вступает в силу не сразу.",
     changedBanner: (name, to) => `«${name}» теперь ${to}.`,
     changeFailed: (message) => `Не удалось применить изменение: ${message}`,
+    sourceHeader: "Источник",
+    sourceNative: "Встроенный",
+    sourceExternal: (label) => `Внешний — ${label}`,
+  },
+  connections: {
+    title: "Внешние MCP-серверы",
+    description: "Удалённые MCP-серверы, подключённые к этому, чьи инструменты предлагаются любому подключённому здесь ассистенту наряду со встроенными.",
+    newLink: "Подключить новый сервер",
+    empty: "Внешние серверы ещё не подключены.",
+    labelHeader: "Метка",
+    urlHeader: "URL",
+    statusHeader: "Статус",
+    catalogHeader: "Инструменты",
+    enabledLabel: "включено",
+    disabledLabel: "отключено",
+    toolCount: (n) => `${n} инструмент${n === 1 ? "" : "ов"}`,
+    lastFetched: (when) => `последняя проверка ${when}`,
+    neverFetched: "ни разу не удалось подключиться",
+    collisionNotice: (toolName, connectionLabel) =>
+      `«${toolName}» из «${connectionLabel}» не был зарегистрирован — инструмент с таким именем уже существует.`,
+    errorCodeLabel: (code) => {
+      switch (code) {
+        case "external_unreachable":
+          return "Не удалось связаться с сервером";
+        case "external_timeout":
+          return "Сервер не ответил вовремя";
+        case "external_unauthorized":
+          return "Сервер отклонил сохранённый токен";
+        case "external_invalid_response":
+          return "Сервер вернул недействительный ответ";
+        default:
+          return code;
+      }
+    },
+    editAction: "Изменить",
+    enableAction: "Включить",
+    disableAction: "Отключить",
+    refreshAction: "Обновить сейчас",
+    removeAction: "Удалить",
+    changedBanner: (label, status) => `«${label}» теперь ${status}.`,
+    newTitle: "Подключить внешний MCP-сервер",
+    editTitle: "Изменить подключение",
+    labelFieldLabel: "Метка",
+    labelPlaceholder: "например, Управление заказами",
+    urlFieldLabel: "URL сервера",
+    urlPlaceholder: "https://example.com/mcp",
+    tokenFieldLabel: "Bearer-токен",
+    tokenPlaceholder: "Вставьте токен",
+    tokenWriteOnlyNotice: "Текущий токен больше никогда не отображается после сохранения — оставьте это поле пустым, чтобы не менять его, или введите новый, чтобы заменить.",
+    submitCreate: "Подключить",
+    submitEdit: "Сохранить изменения",
+    invalidUrl: "Введите корректный URL http(s)://.",
+    missingFields: "Метка, URL и токен обязательны.",
+    confirmTitle: "Подтвердите изменение",
+    confirmEnable: (label) => `Вы собираетесь включить «${label}» — её инструменты снова станут доступны.`,
+    confirmDisable: (label) => `Вы собираетесь отключить «${label}» — её инструменты перестанут предлагаться, но сохранённая конфигурация останется.`,
+    confirmRemove: (label) => `Вы собираетесь навсегда удалить «${label}», включая сохранённый токен. Это действие нельзя отменить.`,
+    confirmButton: "Подтвердить",
+    cancelButton: "Отмена",
+    warningNotice: "Сессии ИИ-ассистентов, уже подключённые до этого изменения, могут продолжать использовать прежний список инструментов, пока не переподключатся или не запросят его снова — для них это не мгновенно.",
+    removeWarning: "Чтобы позже снова подключить этот сервер, вам нужно будет заново ввести URL и токен.",
+    changeFailed: (message) => `Не удалось применить изменение: ${message}`,
   },
   oauth: {
     login: {

@@ -243,6 +243,68 @@ export const fr: Dictionary = {
       "Les sessions d'assistants IA déjà connectées avant cette modification peuvent continuer à utiliser l'ancienne liste d'outils jusqu'à ce qu'elles se reconnectent ou la redemandent — pour elles, l'effet n'est pas instantané.",
     changedBanner: (name, to) => `"${name}" est maintenant ${to}.`,
     changeFailed: (message) => `Impossible d'appliquer la modification : ${message}`,
+    sourceHeader: "Source",
+    sourceNative: "Intégré",
+    sourceExternal: (label) => `Externe — ${label}`,
+  },
+  connections: {
+    title: "Serveurs MCP externes",
+    description: "Serveurs MCP distants connectés à celui-ci, dont les outils sont proposés à tout assistant connecté ici, aux côtés des outils intégrés.",
+    newLink: "Connecter un nouveau serveur",
+    empty: "Aucun serveur externe connecté pour l'instant.",
+    labelHeader: "Libellé",
+    urlHeader: "URL",
+    statusHeader: "Statut",
+    catalogHeader: "Outils",
+    enabledLabel: "activée",
+    disabledLabel: "désactivée",
+    toolCount: (n) => `${n} outil${n === 1 ? "" : "s"}`,
+    lastFetched: (when) => `dernière vérification ${when}`,
+    neverFetched: "jamais atteint avec succès",
+    collisionNotice: (toolName, connectionLabel) =>
+      `« ${toolName} » de « ${connectionLabel} » n'a pas été enregistré — un outil portant ce nom existe déjà.`,
+    errorCodeLabel: (code) => {
+      switch (code) {
+        case "external_unreachable":
+          return "Impossible de joindre le serveur";
+        case "external_timeout":
+          return "Le serveur n'a pas répondu à temps";
+        case "external_unauthorized":
+          return "Le serveur a rejeté le token enregistré";
+        case "external_invalid_response":
+          return "Le serveur a renvoyé une réponse invalide";
+        default:
+          return code;
+      }
+    },
+    editAction: "Modifier",
+    enableAction: "Activer",
+    disableAction: "Désactiver",
+    refreshAction: "Actualiser maintenant",
+    removeAction: "Supprimer",
+    changedBanner: (label, status) => `"${label}" est maintenant ${status}.`,
+    newTitle: "Connecter un serveur MCP externe",
+    editTitle: "Modifier la connexion",
+    labelFieldLabel: "Libellé",
+    labelPlaceholder: "ex. Gestion des commandes",
+    urlFieldLabel: "URL du serveur",
+    urlPlaceholder: "https://exemple.com/mcp",
+    tokenFieldLabel: "Jeton bearer",
+    tokenPlaceholder: "Collez le jeton",
+    tokenWriteOnlyNotice: "Le jeton actuel n'est plus jamais affiché une fois enregistré — laissez ce champ vide pour ne pas le modifier, ou saisissez-en un nouveau pour le remplacer.",
+    submitCreate: "Connecter",
+    submitEdit: "Enregistrer les modifications",
+    invalidUrl: "Saisissez une URL http(s):// valide.",
+    missingFields: "Le libellé, l'URL et le jeton sont tous obligatoires.",
+    confirmTitle: "Confirmer la modification",
+    confirmEnable: (label) => `Vous êtes sur le point d'activer « ${label} » — ses outils redeviendront disponibles.`,
+    confirmDisable: (label) => `Vous êtes sur le point de désactiver « ${label} » — ses outils ne seront plus proposés, mais sa configuration enregistrée est conservée.`,
+    confirmRemove: (label) => `Vous êtes sur le point de supprimer définitivement « ${label} », y compris son jeton enregistré. Cette action est irréversible.`,
+    confirmButton: "Confirmer",
+    cancelButton: "Annuler",
+    warningNotice: "Les sessions d'assistants IA déjà connectées avant ce changement peuvent continuer à utiliser l'ancienne liste d'outils jusqu'à ce qu'elles se reconnectent ou la redemandent — ce n'est pas instantané pour elles.",
+    removeWarning: "Vous devrez ressaisir l'URL et le jeton pour reconnecter ce serveur plus tard.",
+    changeFailed: (message) => `Impossible d'appliquer la modification : ${message}`,
   },
   oauth: {
     login: {
