@@ -74,6 +74,7 @@ As the owner, I want to see which AI assistants are currently connected and revo
 - What happens when a client's access token expires mid-session? The next tool call must fail with an authorization error, and the client should be able to obtain a new token via its refresh token without the owner re-approving from scratch (unless the refresh token has also expired or been revoked).
 - What happens when the MCP server or its host application restarts (e.g. deploy, crash recovery)? Previously connected assistants must remain connected — their tokens and connected-client records must survive the restart rather than forcing every assistant to be re-authorized from scratch.
 - What happens when someone repeatedly enters the wrong owner credential on the sign-in screen? After enough failed attempts, further attempts must be temporarily locked out or delayed rather than allowed to keep guessing.
+- What happens when the owner credential itself was never configured (e.g. a fresh deploy where `OAUTH_OWNER_USERNAME`/`OAUTH_OWNER_PASSWORD` were left unset)? Sign-in must fail closed for every attempt, including one submitted with a blank username and blank password — an unconfigured credential must never be treated as "any value, including empty, matches."
 
 ## Requirements *(mandatory)*
 
@@ -92,6 +93,7 @@ As the owner, I want to see which AI assistants are currently connected and revo
 - **FR-011**: The system MUST record authorization grants, denials, and revocations so the owner can audit who was given access and when.
 - **FR-012**: The system MUST persist connected-client records and issued tokens durably, so that an application restart does not disconnect previously authorized assistants or require the owner to re-approve them.
 - **FR-013**: The system MUST apply standard lockout/rate-limiting to the owner sign-in screen after repeated failed attempts, to protect the single owner credential against brute-force guessing.
+- **FR-014**: The system MUST reject every owner sign-in attempt — regardless of the username/password submitted, including both left blank — whenever the owner credential (`OAUTH_OWNER_USERNAME`/`OAUTH_OWNER_PASSWORD`) has not been configured; an unconfigured credential MUST NOT be treated as a valid empty credential that a blank submission can match.
 
 ## Key Entities *(include if feature involves data)*
 
@@ -108,6 +110,7 @@ As the owner, I want to see which AI assistants are currently connected and revo
 - **SC-003**: After the owner revokes a connected client, that client's subsequent requests are rejected starting with its very next request.
 - **SC-004**: The owner can, at any time, see a complete and accurate list of every currently connected client and when it was last used.
 - **SC-005**: Revoking or losing access for one connected client never disrupts the other connected clients' ongoing access.
+- **SC-006**: When the owner credential is unconfigured, 100% of sign-in attempts are rejected, including a blank-username/blank-password submission — no owner session can be established without a configured credential.
 
 ## Assumptions
 

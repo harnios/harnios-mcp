@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readOwnerCredentialConfig, verifyOwnerPassword } from "@/lib/oauth/config";
+import { isOwnerCredentialConfigured, readOwnerCredentialConfig, verifyOwnerPassword } from "@/lib/oauth/config";
 import { checkLoginLockout, recordLoginFailure, recordLoginSuccess } from "@/lib/oauth/rateLimit";
 import { createOwnerSession } from "@/lib/oauth/session";
 
@@ -25,7 +25,10 @@ export async function POST(request: NextRequest) {
   }
 
   const config = readOwnerCredentialConfig();
-  const valid = username === config.username && verifyOwnerPassword(password, config.password);
+  const valid =
+    isOwnerCredentialConfigured(config) &&
+    username === config.username &&
+    verifyOwnerPassword(password, config.password);
 
   if (!valid) {
     await recordLoginFailure();

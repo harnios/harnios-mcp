@@ -46,6 +46,16 @@ export function verifyOwnerCredentialConfig(): void {
   validateOwnerCredentialConfig(readOwnerCredentialConfig());
 }
 
+/**
+ * True only if both fields are non-empty. Sign-in (app/oauth/login/submit/route.ts)
+ * MUST check this before comparing credentials — otherwise an unconfigured
+ * (all-empty) config is matched by a blank username/password submission,
+ * granting a real owner session with no actual credential (spec.md FR-014).
+ */
+export function isOwnerCredentialConfigured(config: OwnerCredentialConfig): boolean {
+  return config.username.length > 0 && config.password.length > 0;
+}
+
 /** Verifies `password` against the configured plain-text password, using a timing-safe comparison. */
 export function verifyOwnerPassword(password: string, configuredPassword: string): boolean {
   const actual = Buffer.from(password);
