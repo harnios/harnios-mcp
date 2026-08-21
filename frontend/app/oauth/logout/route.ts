@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hasActiveOwnerSession } from "@/lib/oauth/session";
 import { bumpGeneration } from "@/lib/oauth/sessionSecret";
+import { requestOrigin } from "@/lib/http";
 
 const COOKIE_NAME = "oauth_owner_session";
 
@@ -15,7 +16,7 @@ export async function POST(request: NextRequest) {
     await bumpGeneration();
   }
 
-  const response = NextResponse.redirect(new URL("/oauth/login", request.url), { status: 303 });
+  const response = NextResponse.redirect(new URL("/oauth/login", requestOrigin(request)), { status: 303 });
   response.cookies.delete(COOKIE_NAME);
   return response;
 }

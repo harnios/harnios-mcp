@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { isOwnerCredentialConfigured, readOwnerCredentialConfig, verifyOwnerPassword } from "@/lib/oauth/config";
 import { checkLoginLockout, recordLoginFailure, recordLoginSuccess } from "@/lib/oauth/rateLimit";
 import { createOwnerSession } from "@/lib/oauth/session";
+import { requestOrigin } from "@/lib/http";
 
 /**
  * Owner sign-in (FR-009), guarded by rate limiting (FR-013). Lives at
@@ -15,7 +16,7 @@ export async function POST(request: NextRequest) {
   const password = form.get("password")?.toString() ?? "";
   const continueUrl = form.get("continue")?.toString() || "/";
 
-  const loginUrl = new URL("/oauth/login", request.url);
+  const loginUrl = new URL("/oauth/login", requestOrigin(request));
   loginUrl.searchParams.set("continue", continueUrl);
 
   const lockedUntil = await checkLoginLockout();
@@ -39,5 +40,5 @@ export async function POST(request: NextRequest) {
   await recordLoginSuccess();
   await createOwnerSession();
 
-  return NextResponse.redirect(new URL(continueUrl, request.url), { status: 303 });
+  return NextResponse.redirect(new URL(continueUrl, requestOrigin(request)), { status: 303 });
 }
