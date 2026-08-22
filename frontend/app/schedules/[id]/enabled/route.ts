@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requestOrigin } from "@/lib/http";
 import { hasActiveOwnerSession } from "@/lib/oauth/session";
 import { updateFile } from "@/lib/storage/files";
 import { getSchedule, pathForSlug, serializeScheduleFile } from "@/lib/scheduler/parseSchedule";
@@ -30,7 +31,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   await updateFile(pathForSlug(id), Buffer.from(content, "utf-8"), "text/markdown");
 
   return NextResponse.redirect(
-    new URL(`/schedules?changed=${encodeURIComponent(schedule.name)}&to=${enabled ? "enabled" : "disabled"}`, request.url),
+    new URL(
+      `/schedules?changed=${encodeURIComponent(schedule.name)}&to=${enabled ? "enabled" : "disabled"}`,
+      requestOrigin(request),
+    ),
     { status: 303 },
   );
 }

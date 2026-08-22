@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requestOrigin } from "@/lib/http";
 import { hasActiveOwnerSession } from "@/lib/oauth/session";
 import { createFile } from "@/lib/storage/files";
 import { listSchedules, pathForSlug, serializeScheduleFile } from "@/lib/scheduler/parseSchedule";
@@ -21,7 +22,9 @@ export async function POST(request: NextRequest) {
 
   const error = validateTaskInput({ name, cron, model, timezone, prompt });
   if (error) {
-    return NextResponse.redirect(new URL(`/schedules/new?error=${encodeURIComponent(error)}`, request.url), { status: 303 });
+    return NextResponse.redirect(new URL(`/schedules/new?error=${encodeURIComponent(error)}`, requestOrigin(request)), {
+      status: 303,
+    });
   }
 
   const existingIds = new Set((await listSchedules()).map((schedule) => schedule.id));
@@ -35,5 +38,5 @@ export async function POST(request: NextRequest) {
   const content = serializeScheduleFile({ name, cron, enabled, model, timezone, body: prompt });
   await createFile(pathForSlug(slug), Buffer.from(content, "utf-8"), "text/markdown");
 
-  return NextResponse.redirect(new URL("/schedules", request.url), { status: 303 });
+  return NextResponse.redirect(new URL("/schedules", requestOrigin(request)), { status: 303 });
 }

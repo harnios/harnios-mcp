@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requestOrigin } from "@/lib/http";
 import { hasActiveOwnerSession } from "@/lib/oauth/session";
 import { getSchedule } from "@/lib/scheduler/parseSchedule";
 import { beginRun, endRun, isRunning } from "@/lib/scheduler/runGuard";
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 
   if (isRunning(id) || !beginRun(id)) {
-    return NextResponse.redirect(new URL(`/schedules/${id}?alreadyRunning=true`, request.url), { status: 303 });
+    return NextResponse.redirect(new URL(`/schedules/${id}?alreadyRunning=true`, requestOrigin(request)), { status: 303 });
   }
 
   try {
@@ -32,5 +33,5 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     endRun(id);
   }
 
-  return NextResponse.redirect(new URL(`/schedules/${id}`, request.url), { status: 303 });
+  return NextResponse.redirect(new URL(`/schedules/${id}`, requestOrigin(request)), { status: 303 });
 }
