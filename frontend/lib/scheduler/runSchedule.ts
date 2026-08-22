@@ -4,6 +4,7 @@ import { readSchedulerConfig, validateSchedulerConfig } from "./config";
 import { SchedulerError, type SchedulerErrorCode } from "./errors";
 import { completeChat } from "./mistralClient";
 import { putRecord } from "./store";
+import { resolveTimezone } from "./timezone";
 import { callTool, listMistralTools, withInProcessMcpClient } from "./toolRuntime";
 import type {
   LastRunRecord,
@@ -16,11 +17,38 @@ import type {
 const MAX_ITERATIONS = 8;
 const RUN_TIMEOUT_MS = 5 * 60 * 1000;
 
-const SYSTEM_PROMPT =
-  "You are Harnios's unattended task scheduler. You are executing a Scheduled Task with no " +
-  "human present to answer questions — act directly using the tools available to you rather " +
-  "than asking for clarification. When you are done, or if you cannot complete the task, " +
-  "respond with a short plain-text summary of what you did (or why you could not).";
+/** "YYYY-MM-DD HH:mm:ss" in the given IANA timezone, for a human/model-readable local timestamp. */
+function formatLocal(now: Date, timezone: string): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: timezone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).formatToParts(now);
+  const get = (type: string) => parts.find((part) => part.type === type)?.value ?? "";
+  return `${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get("minute")}:${get("second")}`;
+}
+
+/**
+ * The model has no other way to know what time it is — without this, a
+ * prompt like "for every row whose next-run date has passed" has no
+ * reliable way to determine what "passed" means (spec 032 follow-up:
+ * scheduled tasks that themselves interpret a schedule table need to
+ * compare dates against "now").
+ */
+function buildSystemPrompt(now: Date, timezone: string): string {
+  return (
+    "You are Harnios's unattended task scheduler. You are executing a Scheduled Task with no " +
+    "human present to answer questions — act directly using the tools available to you rather " +
+    "than asking for clarification. When you are done, or if you cannot complete the task, " +
+    "respond with a short plain-text summary of what you did (or why you could not).\n\n" +
+    `Current date and time: ${now.toISOString()} (UTC), ${formatLocal(now, timezone)} (${timezone}).`
+  );
+}
 
 type RunOutcome =
   | { ok: true; summary: string }
@@ -44,7 +72,7 @@ function timeoutOutcome(ms: number): Promise<RunOutcome> {
   });
 }
 
-async function executeRun(task: ScheduleDefinition, toolCalls: ScheduleRunToolCall[]): Promise<RunOutcome> {
+async function executeRun(task: ScheduleDefinition, now: Date, toolCalls: ScheduleRunToolCall[]): Promise<RunOutcome> {
   const config = readSchedulerConfig();
   try {
     validateSchedulerConfig(config);
@@ -57,7 +85,7 @@ async function executeRun(task: ScheduleDefinition, toolCalls: ScheduleRunToolCa
     return await withInProcessMcpClient(async (client) => {
       const tools = await listMistralTools(client);
       const messages: ChatCompletionRequestMessage[] = [
-        { role: "system", content: SYSTEM_PROMPT },
+        { role: "system", content: buildSystemPrompt(now, resolveTimezone(task)) },
         { role: "user", content: task.body },
       ];
 
@@ -116,10 +144,11 @@ async function executeRun(task: ScheduleDefinition, toolCalls: ScheduleRunToolCa
  */
 export async function runSchedule(task: ScheduleDefinition, trigger: ScheduleTrigger): Promise<ScheduleRunRecord> {
   const runId = randomBytes(16).toString("hex");
-  const startedAt = new Date().toISOString();
+  const startedAtDate = new Date();
+  const startedAt = startedAtDate.toISOString();
   const toolCalls: ScheduleRunToolCall[] = [];
 
-  const result = await Promise.race([executeRun(task, toolCalls), timeoutOutcome(RUN_TIMEOUT_MS)]);
+  const result = await Promise.race([executeRun(task, startedAtDate, toolCalls), timeoutOutcome(RUN_TIMEOUT_MS)]);
   const finishedAt = new Date().toISOString();
 
   const record: ScheduleRunRecord = result.ok

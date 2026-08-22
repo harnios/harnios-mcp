@@ -1,4 +1,5 @@
 import { CronExpressionParser } from "cron-parser";
+import { resolveTimezone } from "./timezone";
 import type { LastRunRecord, ScheduleDefinition } from "./types";
 
 /**
@@ -20,7 +21,7 @@ export function isDue(schedule: ScheduleDefinition, lastRun: LastRunRecord | und
   try {
     const interval = CronExpressionParser.parse(schedule.cron, {
       currentDate: referenceDate,
-      tz: schedule.timezone,
+      tz: resolveTimezone(schedule),
     });
     next = interval.next().toDate();
   } catch {

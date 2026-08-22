@@ -25,7 +25,10 @@ and how they report back to the caller (fire-and-forget vs. awaited HTTP respons
 2. **Seed the conversation**:
    - `system`: a fixed instruction identifying this as Harnios's unattended scheduler — act
      directly, never ask a clarifying question (there is no one to answer), and finish with a
-     short plain-text summary of what was done.
+     short plain-text summary of what was done — followed by the current date and time, both in
+     UTC and in the task's effective timezone (its own `timezone` front-matter field, falling
+     back to `SCHEDULER_TIMEZONE`). Without this, a prompt that itself reasons about dates (e.g.
+     "for every row whose next-run date has passed") has no reliable way to know what "now" is.
    - `user`: the task's prompt (its file body, verbatim).
 3. **Loop**, up to a fixed `MAX_ITERATIONS` (8):
    a. Call Mistral's chat-completion endpoint with the accumulated `messages` and the tool list
