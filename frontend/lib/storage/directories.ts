@@ -2,6 +2,7 @@ import { DeleteObjectsCommand, ListObjectsV2Command, PutObjectCommand } from "@a
 import { OAUTH_PREFIX } from "@/lib/oauth/store";
 import { TOOLS_PREFIX } from "@/lib/mcp-tools/store";
 import { EXTERNAL_CATALOG_PREFIX, EXTERNAL_SERVERS_PREFIX } from "@/lib/external-mcp/store";
+import { SCHEDULER_PREFIX } from "@/lib/scheduler/store";
 import { BUCKET, s3Client } from "./client";
 import { alreadyExists, notFound, typeMismatch, wrapStorageError } from "./errors";
 import { move } from "./move";
@@ -62,8 +63,9 @@ export async function listDirectory(path: string): Promise<{ path: string } & Di
           !obj.Key.startsWith(OAUTH_PREFIX) &&
           !obj.Key.startsWith(TOOLS_PREFIX) &&
           !obj.Key.startsWith(EXTERNAL_SERVERS_PREFIX) &&
-          !obj.Key.startsWith(EXTERNAL_CATALOG_PREFIX),
-      ) // exclude the directory's own marker object and reserved OAuth/tool-status/external-connection state
+          !obj.Key.startsWith(EXTERNAL_CATALOG_PREFIX) &&
+          !obj.Key.startsWith(SCHEDULER_PREFIX),
+      ) // exclude the directory's own marker object and reserved OAuth/tool-status/external-connection/scheduler state
       .map((obj) => ({
         path: obj.Key as string,
         size: obj.Size ?? 0,
@@ -77,7 +79,8 @@ export async function listDirectory(path: string): Promise<{ path: string } & Di
           p.Prefix !== OAUTH_PREFIX &&
           p.Prefix !== TOOLS_PREFIX &&
           p.Prefix !== EXTERNAL_SERVERS_PREFIX &&
-          p.Prefix !== EXTERNAL_CATALOG_PREFIX,
+          p.Prefix !== EXTERNAL_CATALOG_PREFIX &&
+          p.Prefix !== SCHEDULER_PREFIX,
       )
       .map((p) => ({ path: p.Prefix as string }));
 

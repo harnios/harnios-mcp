@@ -1,13 +1,7 @@
 import { createMcpHandler, withMcpAuth } from "mcp-handler";
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { EXTERNAL_PROXY_HOP_HEADER } from "@/lib/external-mcp/client";
-import { registerTools } from "@/lib/mcp-tools";
-import { registerEngineTools } from "@/lib/mcp-tools/engineTools";
 import { registerExternalTools } from "@/lib/mcp-tools/externalTools";
-import { registerInboxTools } from "@/lib/mcp-tools/inboxTools";
-import { registerMessagingTools } from "@/lib/mcp-tools/messagingTools";
-import { getDisabledTools } from "@/lib/mcp-tools/store";
-import { registerTreeTools } from "@/lib/mcp-tools/treeTools";
+import { registerNativeTools } from "@/lib/mcp-tools/register";
 import { verifyPersonalAccessToken } from "@/lib/oauth/personalAccessTokens";
 import { verifyAccessToken } from "@/lib/oauth/tokens";
 
@@ -19,16 +13,6 @@ const serverInfo = {
   version: "0.1.0",
   description: "read assistant/AGENTS.md; call get_os_engine/get_os_upgrade/get_os_init to set up or repair it (spec 016)",
 };
-
-async function registerNativeTools(server: McpServer): Promise<ReadonlySet<string>> {
-  const disabledTools = await getDisabledTools();
-  await registerTools(server, disabledTools);
-  await registerEngineTools(server, disabledTools);
-  await registerMessagingTools(server, disabledTools);
-  await registerInboxTools(server, disabledTools);
-  await registerTreeTools(server, disabledTools);
-  return disabledTools;
-}
 
 /**
  * Two handler variants, split on whether the inbound request itself carries

@@ -76,6 +76,7 @@ export interface Dictionary {
       settingsConnectedApps: string;
       settingsPersonalAccessTokens: string;
       settingsTestMessaging: string;
+      scheduledTasks: string;
     };
   };
   editor: {
@@ -284,6 +285,51 @@ export interface Dictionary {
     warningNotice: string;
     removeWarning: string;
     changeFailed: (message: string) => string;
+  };
+  schedules: {
+    title: string;
+    description: string;
+    newLink: string;
+    empty: string;
+    nameHeader: string;
+    cronHeader: string;
+    modelHeader: string;
+    statusHeader: string;
+    lastRunHeader: string;
+    enabledLabel: string;
+    disabledLabel: string;
+    neverRun: string;
+    editAction: string;
+    enableAction: string;
+    disableAction: string;
+    changedBanner: (name: string, to: string) => string;
+    newTitle: string;
+    editTitle: string;
+    nameFieldLabel: string;
+    namePlaceholder: string;
+    cronFieldLabel: string;
+    cronPlaceholder: string;
+    timezoneFieldLabel: string;
+    timezonePlaceholder: string;
+    modelFieldLabel: string;
+    promptFieldLabel: string;
+    promptPlaceholder: string;
+    enabledFieldLabel: string;
+    submitCreate: string;
+    submitEdit: string;
+    validationError: (message: string) => string;
+    historyTitle: string;
+    historyEmpty: string;
+    historyLink: string;
+    backLink: string;
+    triggerScheduled: string;
+    triggerManual: string;
+    statusSuccess: string;
+    statusFailure: string;
+    startedAtHeader: string;
+    summaryHeader: string;
+    runNowAction: string;
+    runNowAlreadyRunning: string;
   };
   oauth: {
     login: {

@@ -1,5 +1,5 @@
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan
-at specs/031-external-mcp-proxy/plan.md
+at specs/032-scheduled-tasks/plan.md
 <!-- SPECKIT END -->

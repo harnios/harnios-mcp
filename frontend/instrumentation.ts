@@ -42,5 +42,22 @@ export async function register() {
     } catch (err) {
       console.error(`\nWarning: Telegram bot token is misconfigured — send_telegram_message will fail until it's set.\n${(err as Error).message}\n`);
     }
+
+    // spec 032-scheduled-tasks: same relaxed pattern — starts the in-process
+    // polling heartbeat for Scheduled Tasks (os/schedules/*.md). Never
+    // blocks startup; a missing MISTRAL_API_KEY simply makes each due task
+    // fail with a "missing_config" run record until it's set.
+    const { readSchedulerConfig, validateSchedulerConfig } = await import("./lib/scheduler/config");
+    try {
+      validateSchedulerConfig(readSchedulerConfig());
+    } catch (err) {
+      console.error(`\nWarning: scheduler is misconfigured — scheduled tasks will fail until it's set.\n${(err as Error).message}\n`);
+    }
+    const { startScheduler } = await import("./lib/scheduler/cronRuntime");
+    try {
+      startScheduler();
+    } catch (err) {
+      console.error(`\nWarning: scheduler failed to start — scheduled tasks will not run.\n${(err as Error).message}\n`);
+    }
   }
 }
