@@ -108,6 +108,7 @@
 - [ ] T029 [P] Run quickstart.md Scenarios 1–5 end-to-end against local MinIO + a real Mistral API key; fix any deviations found
 - [ ] T030 [P] Verify SC-006: create 20+ schedule files with staggered cron expressions and confirm, across several ticks, no executions are dropped, duplicated, or misattributed to the wrong task
 - [ ] T031 Verify SC-004/FR-010 in combination: deliberately break one task (e.g. an unsupported tool request in its prompt, or temporarily unset `MISTRAL_API_KEY`) and confirm every other task keeps running on schedule unaffected
+- [X] T032 [US2] Add delete-task capability: `frontend/lib/scheduler/store.ts` `deleteRecord()`, `frontend/app/schedules/[id]/confirm/page.tsx` (confirm-then-apply, mirroring spec 031's connection removal) and `frontend/app/schedules/[id]/remove/route.ts` (soft-deletes the task file to Trash, removes its Last-Run Bookkeeping record, keeps its Task Execution Records), wired from both the list and detail pages (requested post-implementation, added 2026-08-22)
 
 ---
 

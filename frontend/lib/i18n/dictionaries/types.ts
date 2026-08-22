@@ -302,7 +302,15 @@ export interface Dictionary {
     editAction: string;
     enableAction: string;
     disableAction: string;
+    removeAction: string;
     changedBanner: (name: string, to: string) => string;
+    removedLabel: string;
+    confirmTitle: string;
+    confirmRemove: (name: string) => string;
+    removeWarning: string;
+    confirmButton: string;
+    cancelButton: string;
+    changeFailed: (message: string) => string;
     newTitle: string;
     editTitle: string;
     nameFieldLabel: string;

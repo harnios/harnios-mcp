@@ -1,4 +1,4 @@
-import { GetObjectCommand, ListObjectsV2Command, PutObjectCommand } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, GetObjectCommand, ListObjectsV2Command, PutObjectCommand } from "@aws-sdk/client-s3";
 import { BUCKET, s3Client } from "@/lib/storage/client";
 import { isNotFoundError } from "@/lib/storage/paths";
 
@@ -39,6 +39,15 @@ export async function putRecord<T>(relativeKey: string, value: T): Promise<void>
       ContentType: "application/json",
     }),
   );
+}
+
+/** Deletes a JSON record, if it exists — a no-op (not an error) if it doesn't. */
+export async function deleteRecord(relativeKey: string): Promise<void> {
+  try {
+    await s3Client.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: keyFor(relativeKey) }));
+  } catch (err) {
+    if (!isNotFoundError(err)) throw err;
+  }
 }
 
 /** Lists and parses every JSON record directly under `relativePrefix`. */

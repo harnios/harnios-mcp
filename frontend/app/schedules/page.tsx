@@ -27,7 +27,8 @@ export default async function SchedulesPage({
 
   const { changed, to } = await searchParams;
   const dict = getDictionary(await resolveLanguage()).schedules;
-  const changedStatusLabel = to === "enabled" ? dict.enabledLabel : to === "disabled" ? dict.disabledLabel : undefined;
+  const changedStatusLabel =
+    to === "enabled" ? dict.enabledLabel : to === "disabled" ? dict.disabledLabel : to === "removed" ? dict.removedLabel : undefined;
 
   const schedules = await listSchedules();
   const lastRuns = new Map<string, LastRunRecord>();
@@ -97,6 +98,7 @@ export default async function SchedulesPage({
                           <button type="submit">{dict.runNowAction}</button>
                         </form>
                         <a href={`/schedules/${schedule.id}`}>{dict.historyLink}</a>
+                        <a href={`/schedules/${schedule.id}/confirm?to=removed`}>{dict.removeAction}</a>
                       </div>
                     </td>
                   </tr>

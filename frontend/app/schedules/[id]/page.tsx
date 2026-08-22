@@ -56,6 +56,7 @@ export default async function ScheduleDetailPage({
         <form method="POST" action={`/schedules/${schedule.id}/run`}>
           <button type="submit">{dict.runNowAction}</button>
         </form>
+        <a href={`/schedules/${schedule.id}/confirm?to=removed`}>{dict.removeAction}</a>
         <a href="/schedules">{dict.backLink}</a>
       </div>
 

@@ -61,6 +61,16 @@ and a "Run now" action — both available regardless of the task's current enabl
 | `id` valid, task already executing (scheduled or another manual trigger) | Rejected — no second overlapping execution is started for the same task (FR-012). Returns a JSON/redirect response indicating the task is already running, without creating a new Task Execution Record. |
 | `id` valid, not currently executing (any `enabled` state) | Executes immediately, bypassing the due-check entirely (FR-015, SC-007). Bound by the same 5-minute timeout and anti-overlap guard as a scheduled run (research.md §5). Redirects to `/schedules/[id]` (or back to `/schedules`) once the run completes or times out, where its outcome is visible. |
 
+## `GET /schedules/[id]/confirm?to=removed` / `POST /schedules/[id]/remove`
+
+Confirm-then-apply, mirroring `specs/031-external-mcp-proxy/contracts/connection-management-routes.md`'s connection removal — deletion is destructive, so it isn't a one-click action from the list/detail page.
+
+| Step | Behavior |
+|---|---|
+| `GET /schedules/[id]/confirm?to=removed` | Confirmation screen naming the task, with a warning that the task definition is deleted (soft-deleted to Trash, per the existing file-storage convention) while its past execution history is kept. No side effect. |
+| `POST /schedules/[id]/remove`, `id` doesn't match any task | `404`-equivalent JSON error, no deletion. |
+| `POST /schedules/[id]/remove`, `id` valid | The task's `os/schedules/{id}.md` file is deleted (soft-delete to Trash) and its Last-Run Bookkeeping record (`.scheduler/last-run/{id}.json`) is removed. Its Task Execution Records under `.scheduler/runs/` are deliberately **not** deleted — they're denormalized with `taskName` precisely so history remains readable after the task itself is gone (data-model.md). Redirects to `/schedules?changed=<name>&to=removed`. |
+
 ## `GET /schedules/[id]`
 
 Shows one task's current definition (read-only summary — editing happens via `/schedules/[id]/edit`) plus its execution history: every matching Task Execution Record (data-model.md), newest first, each showing `trigger` (scheduled/manual), `startedAt`, `status`, and `summary` (FR-016).
