@@ -28,6 +28,7 @@ export interface Dictionary {
     envSetup: {
       title: string;
       description: string;
+      connectionErrorHeading: string;
       storageHeading: string;
       endpoint: string;
       region: string;

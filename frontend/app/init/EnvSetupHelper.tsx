@@ -19,6 +19,14 @@ const PRE_STYLE: CSSProperties = {
   whiteSpace: "pre-wrap",
 };
 
+const ERROR_BOX_STYLE: CSSProperties = {
+  background: "#fdeceb",
+  border: "1px solid #b00020",
+  borderRadius: 4,
+  padding: "0.75rem 1rem",
+  marginBottom: "1.5rem",
+};
+
 interface Fields {
   endpoint: string;
   region: string;
@@ -113,7 +121,21 @@ function CopyButton({ text, dict }: { text: string; dict: Dictionary["init"]["en
  * serializable, so this looks up its own slice via `getDictionary()`
  * instead (spec 015, same fix as `EditorApp`).
  */
-export function EnvSetupHelper({ language }: { language: SupportedLanguage }) {
+export function EnvSetupHelper({
+  language,
+  connectionErrorMessage,
+}: {
+  language: SupportedLanguage;
+  /**
+   * The reason verifyStorageConnection() actually failed (e.g. "Could not
+   * reach the storage endpoint configured in S3_ENDPOINT (...)") — shown
+   * verbatim so a *misconfigured* connection (wrong endpoint/region/bucket)
+   * is diagnosable here directly, instead of looking identical to a
+   * never-configured one. Omitted only on a genuinely fresh install, where
+   * S3_ENDPOINT etc. are simply unset.
+   */
+  connectionErrorMessage?: string;
+}) {
   const dict = getDictionary(language).init.envSetup;
   const [fields, setFields] = useState<Fields>({
     endpoint: "",
@@ -147,6 +169,15 @@ export function EnvSetupHelper({ language }: { language: SupportedLanguage }) {
     <>
       <h1>{dict.title}</h1>
       <p>{dict.description}</p>
+
+      {connectionErrorMessage && (
+        <div style={ERROR_BOX_STYLE}>
+          <strong>{dict.connectionErrorHeading}</strong>
+          <pre style={{ ...PRE_STYLE, background: "transparent", padding: 0, marginTop: "0.5rem" }}>
+            {connectionErrorMessage}
+          </pre>
+        </div>
+      )}
 
       <h2>{dict.storageHeading}</h2>
 

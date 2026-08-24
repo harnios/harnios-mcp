@@ -29,6 +29,7 @@ export const en: Dictionary = {
       title: "Set up your environment",
       description:
         "This app needs a storage connection and an owner sign-in credential to work. Fill in the fields below to generate a ready-to-use configuration snippet — nothing you type here is ever sent anywhere; it only stays in this browser tab.",
+      connectionErrorHeading: "Storage connection failed",
       storageHeading: "Storage connection",
       endpoint: "Endpoint",
       region: "Region",

@@ -38,7 +38,7 @@ export default async function InitPage({
 
     return (
       <main style={PAGE_STYLE}>
-        <EnvSetupHelper language={language} />
+        <EnvSetupHelper language={language} connectionErrorMessage={err.message} />
       </main>
     );
   }

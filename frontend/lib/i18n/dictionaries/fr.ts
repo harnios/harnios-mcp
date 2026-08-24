@@ -28,6 +28,7 @@ export const fr: Dictionary = {
       title: "Configurez votre environnement",
       description:
         "Cette application a besoin d'une connexion au stockage et d'un identifiant de connexion propriétaire pour fonctionner. Remplissez les champs ci-dessous pour générer un extrait de configuration prêt à l'emploi — rien de ce que vous saisissez ici n'est jamais envoyé où que ce soit ; cela reste uniquement dans cet onglet du navigateur.",
+      connectionErrorHeading: "Échec de la connexion au stockage",
       storageHeading: "Connexion au stockage",
       endpoint: "Point de terminaison (endpoint)",
       region: "Région",

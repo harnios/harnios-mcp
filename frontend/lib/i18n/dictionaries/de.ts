@@ -28,6 +28,7 @@ export const de: Dictionary = {
       title: "Richten Sie Ihre Umgebung ein",
       description:
         "Diese App benötigt eine Speicherverbindung und eine Inhaber-Anmeldeinformation, um zu funktionieren. Füllen Sie die untenstehenden Felder aus, um einen einsatzbereiten Konfigurationsausschnitt zu erzeugen — nichts, was Sie hier eingeben, wird jemals irgendwohin gesendet; es bleibt nur in diesem Browser-Tab.",
+      connectionErrorHeading: "Speicherverbindung fehlgeschlagen",
       storageHeading: "Speicherverbindung",
       endpoint: "Endpunkt",
       region: "Region",

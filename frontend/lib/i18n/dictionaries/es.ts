@@ -28,6 +28,7 @@ export const es: Dictionary = {
       title: "Configura tu entorno",
       description:
         "Esta aplicación necesita una conexión de almacenamiento y una credencial de inicio de sesión de propietario para funcionar. Completa los campos de abajo para generar un fragmento de configuración listo para usar — nada de lo que escribas aquí se envía a ningún sitio; solo permanece en esta pestaña del navegador.",
+      connectionErrorHeading: "Fallo en la conexión de almacenamiento",
       storageHeading: "Conexión de almacenamiento",
       endpoint: "Endpoint",
       region: "Región",

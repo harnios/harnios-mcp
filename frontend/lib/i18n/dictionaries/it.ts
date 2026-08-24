@@ -28,6 +28,7 @@ export const it: Dictionary = {
       title: "Configura il tuo ambiente",
       description:
         "Questa app ha bisogno di una connessione allo storage e di una credenziale di accesso da proprietario per funzionare. Compila i campi qui sotto per generare uno snippet di configurazione pronto all'uso — nulla di ciò che scrivi qui viene mai inviato altrove; resta solo in questa scheda del browser.",
+      connectionErrorHeading: "Connessione allo storage non riuscita",
       storageHeading: "Connessione allo storage",
       endpoint: "Endpoint",
       region: "Regione",
