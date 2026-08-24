@@ -35,6 +35,18 @@ export default function EditorApp({ osName, language }: { osName: string; langua
     setSidebarOpen(false);
   }
 
+  /** Folder rows also sync the URL (spec 018 FR-004), but unlike a file
+   * selection this doesn't close the mobile sidebar — the tree itself is
+   * what the user is browsing, so closing it here would hide the very
+   * folder they just expanded (previously reproduced: tapping a folder on
+   * mobile snapped the drawer shut immediately). */
+  function handleSelectFolder(path: string) {
+    if (isDirty && !window.confirm(dict.file.discardConfirm)) {
+      return;
+    }
+    router.push(`/files/${path.split("/").map(encodeURIComponent).join("/")}`);
+  }
+
   /** Closes the editor when the file it has open is deleted from the tree (FR-003). */
   function handleFileDeleted(path: string) {
     if (selectedPath === path) router.replace("/files");
@@ -54,7 +66,7 @@ export default function EditorApp({ osName, language }: { osName: string; langua
         <div className={`sidebar${sidebarOpen ? " sidebar-open" : ""}`}>
           <FileTree
             onSelectFile={handleSelectFile}
-            onSelectFolder={handleSelectFile}
+            onSelectFolder={handleSelectFolder}
             onFileDeleted={handleFileDeleted}
             onFolderDeleted={handleFolderDeleted}
             expandToPath={selectedPath}
