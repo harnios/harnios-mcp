@@ -6,6 +6,7 @@ import type { CachedToolCatalog } from "@/lib/external-mcp/types";
 import { resolveExternalTools } from "@/lib/mcp-tools/externalTools";
 import { resolveLanguage } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { HomeLink } from "@/app/HomeLink";
 
 const cellStyle: CSSProperties = { textAlign: "left", padding: "0.5rem", borderBottom: "1px solid #ddd" };
 
@@ -32,12 +33,14 @@ export default async function ExternalConnectionsPage({
 
   const { collisions } = resolveExternalTools(connections, catalogs);
 
-  const dict = getDictionary(await resolveLanguage()).connections;
+  const fullDict = getDictionary(await resolveLanguage());
+  const dict = fullDict.connections;
   const changedStatusLabel =
     to === "enabled" ? dict.enabledLabel : to === "disabled" ? dict.disabledLabel : to === "removed" ? dict.removeAction : undefined;
 
   return (
     <main style={{ maxWidth: 900, margin: "2rem auto", fontFamily: "system-ui, sans-serif" }}>
+      <HomeLink label={fullDict.common.homeLink} />
       <h1>{dict.title}</h1>
       <p>{dict.description}</p>
 

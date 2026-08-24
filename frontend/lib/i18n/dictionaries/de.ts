@@ -71,6 +71,9 @@ export const de: Dictionary = {
       reloadNote: "Laden Sie diese Seite nach dem Anwenden neu.",
     },
   },
+  common: {
+    homeLink: "Zurück zum Dashboard",
+  },
   dashboard: {
     title: "Dashboard",
     description: "Alles, was dieser MCP-Server bietet, an einem Ort.",
@@ -184,7 +187,6 @@ export const de: Dictionary = {
       title: "Messaging-Tools testen",
       description:
         "Senden Sie eine echte Test-E-Mail oder Telegram-Nachricht über die auf dem Server konfigurierten Konten und sehen Sie im Fehlerfall genau, was der zugrunde liegende Dienst zurückmeldet.",
-      backLink: "Zurück zum Dashboard",
       signOut: "Abmelden",
       email: {
         sectionTitle: "E-Mail testen",

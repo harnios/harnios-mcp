@@ -8,6 +8,7 @@ import { getCachedCatalog, listExternalServerConnections } from "@/lib/external-
 import type { CachedToolCatalog } from "@/lib/external-mcp/types";
 import { resolveLanguage } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { HomeLink } from "@/app/HomeLink";
 
 const cellStyle: CSSProperties = { textAlign: "left", padding: "0.5rem", borderBottom: "1px solid #ddd" };
 
@@ -53,11 +54,13 @@ export default async function ToolsPage({
     (a, b) => a.group.localeCompare(b.group) || a.name.localeCompare(b.name),
   );
 
-  const dict = getDictionary(await resolveLanguage()).tools;
+  const fullDict = getDictionary(await resolveLanguage());
+  const dict = fullDict.tools;
   const changedStatusLabel = to === "active" ? dict.active : to === "disabled" ? dict.disabled : undefined;
 
   return (
     <main style={{ maxWidth: 720, margin: "2rem auto", fontFamily: "system-ui, sans-serif" }}>
+      <HomeLink label={fullDict.common.homeLink} />
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <h1>{dict.title}</h1>
         <form method="POST" action="/oauth/logout">

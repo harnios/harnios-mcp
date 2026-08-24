@@ -5,6 +5,7 @@ import { getRecord, listRecords } from "@/lib/oauth/store";
 import type { AuthorizationGrant, RegisteredClient } from "@/lib/oauth/types";
 import { resolveLanguage } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { HomeLink } from "@/app/HomeLink";
 
 const cellStyle: CSSProperties = { textAlign: "left", padding: "0.5rem", borderBottom: "1px solid #ddd" };
 
@@ -25,10 +26,12 @@ export default async function ConnectedAppsPage() {
       })),
   );
 
-  const dict = getDictionary(await resolveLanguage()).settings.connectedApps;
+  const fullDict = getDictionary(await resolveLanguage());
+  const dict = fullDict.settings.connectedApps;
 
   return (
     <main style={{ maxWidth: 720, margin: "2rem auto", fontFamily: "system-ui, sans-serif" }}>
+      <HomeLink label={fullDict.common.homeLink} />
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <h1>{dict.title}</h1>
         <form method="POST" action="/oauth/logout">

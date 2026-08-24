@@ -3,6 +3,7 @@ import { hasActiveOwnerSession } from "@/lib/oauth/session";
 import { getExternalServerConnection } from "@/lib/external-mcp/store";
 import { resolveLanguage } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { HomeLink } from "@/app/HomeLink";
 
 /** Owner-gated edit form for one External Server Connection — token field is always blank (write-only, FR-015). */
 export default async function EditExternalConnectionPage({ params }: { params: Promise<{ id: string }> }) {
@@ -14,12 +15,14 @@ export default async function EditExternalConnectionPage({ params }: { params: P
     redirect(`/oauth/login?continue=${encodeURIComponent(currentUrl)}`);
   }
 
-  const dict = getDictionary(await resolveLanguage()).connections;
+  const fullDict = getDictionary(await resolveLanguage());
+  const dict = fullDict.connections;
   const connection = await getExternalServerConnection(id);
 
   if (!connection) {
     return (
       <main style={{ maxWidth: 640, margin: "2rem auto", fontFamily: "system-ui, sans-serif" }}>
+        <HomeLink label={fullDict.common.homeLink} />
         <h1>{dict.editTitle}</h1>
         <p>{dict.changeFailed(`unknown connection "${id}"`)}</p>
         <p>
@@ -31,6 +34,7 @@ export default async function EditExternalConnectionPage({ params }: { params: P
 
   return (
     <main style={{ maxWidth: 640, margin: "2rem auto", fontFamily: "system-ui, sans-serif" }}>
+      <HomeLink label={fullDict.common.homeLink} />
       <h1>{dict.editTitle}</h1>
       <form
         method="POST"

@@ -71,6 +71,9 @@ export const es: Dictionary = {
       reloadNote: "Una vez aplicado, recarga esta página.",
     },
   },
+  common: {
+    homeLink: "Volver al panel",
+  },
   dashboard: {
     title: "Panel",
     description: "Todo lo que ofrece este servidor MCP, en un solo lugar.",
@@ -184,7 +187,6 @@ export const es: Dictionary = {
       title: "Probar herramientas de mensajería",
       description:
         "Envía un correo o mensaje de Telegram de prueba real a través de las cuentas configuradas en el servidor, y ve exactamente lo que responde el servicio en caso de error.",
-      backLink: "Volver al panel",
       signOut: "Cerrar sesión",
       email: {
         sectionTitle: "Probar correo",

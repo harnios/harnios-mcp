@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { hasActiveOwnerSession } from "@/lib/oauth/session";
 import { resolveLanguage } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { HomeLink } from "@/app/HomeLink";
 
 /** Owner-gated form to connect a new External Server Connection (spec 031, US3, FR-001). */
 export default async function NewExternalConnectionPage() {
@@ -10,10 +11,12 @@ export default async function NewExternalConnectionPage() {
     redirect(`/oauth/login?continue=${encodeURIComponent("/tools/connections/new")}`);
   }
 
-  const dict = getDictionary(await resolveLanguage()).connections;
+  const fullDict = getDictionary(await resolveLanguage());
+  const dict = fullDict.connections;
 
   return (
     <main style={{ maxWidth: 640, margin: "2rem auto", fontFamily: "system-ui, sans-serif" }}>
+      <HomeLink label={fullDict.common.homeLink} />
       <h1>{dict.newTitle}</h1>
       <form method="POST" action="/tools/connections/create" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <label>

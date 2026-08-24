@@ -68,6 +68,12 @@ export interface Dictionary {
       reloadNote: string;
     };
   };
+  common: {
+    /** Link back to the root dashboard shown at the top of every top-level
+     * page (spec 026) — otherwise a user who leaves "/" has no way back
+     * without editing the URL by hand. */
+    homeLink: string;
+  };
   dashboard: {
     title: string;
     description: string;
@@ -178,7 +184,6 @@ export interface Dictionary {
     messagingTest: {
       title: string;
       description: string;
-      backLink: string;
       signOut: string;
       email: {
         sectionTitle: string;

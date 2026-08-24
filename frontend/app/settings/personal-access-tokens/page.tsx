@@ -4,6 +4,7 @@ import { hasActiveOwnerSession } from "@/lib/oauth/session";
 import { listPersonalAccessTokens } from "@/lib/oauth/personalAccessTokens";
 import { resolveLanguage } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { HomeLink } from "@/app/HomeLink";
 
 const cellStyle: CSSProperties = { textAlign: "left", padding: "0.5rem", borderBottom: "1px solid #ddd" };
 
@@ -15,10 +16,12 @@ export default async function PersonalAccessTokensPage() {
   }
 
   const tokens = await listPersonalAccessTokens();
-  const dict = getDictionary(await resolveLanguage()).settings.pat;
+  const fullDict = getDictionary(await resolveLanguage());
+  const dict = fullDict.settings.pat;
 
   return (
     <main style={{ maxWidth: 720, margin: "2rem auto", fontFamily: "system-ui, sans-serif" }}>
+      <HomeLink label={fullDict.common.homeLink} />
       <h1>{dict.title}</h1>
       <p>{dict.description}</p>
 

@@ -71,6 +71,9 @@ export const fr: Dictionary = {
       reloadNote: "Une fois appliqué, rechargez cette page.",
     },
   },
+  common: {
+    homeLink: "Retour au tableau de bord",
+  },
   dashboard: {
     title: "Tableau de bord",
     description: "Tout ce que propose ce serveur MCP, au même endroit.",
@@ -184,7 +187,6 @@ export const fr: Dictionary = {
       title: "Tester les outils de messagerie",
       description:
         "Envoyez un véritable e-mail ou message Telegram de test via les comptes configurés sur le serveur, et voyez exactement ce que le service renvoie en cas d'échec.",
-      backLink: "Retour au tableau de bord",
       signOut: "Se déconnecter",
       email: {
         sectionTitle: "Tester l'e-mail",

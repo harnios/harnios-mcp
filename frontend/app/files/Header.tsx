@@ -7,10 +7,12 @@ export function Header({
   osName,
   onToggleSidebar,
   dict,
+  homeLinkLabel,
 }: {
   osName: string;
   onToggleSidebar: () => void;
   dict: Dictionary["editor"]["header"];
+  homeLinkLabel: string;
 }) {
   return (
     <header className="app-header">
@@ -22,10 +24,12 @@ export function Header({
       >
         <MenuIcon />
       </button>
-      <span className="logo-mark" aria-hidden="true">
-        {osName.charAt(0).toUpperCase()}
-      </span>
-      <span className="app-name">{osName}</span>
+      <a href="/" className="home-link" title={homeLinkLabel} aria-label={homeLinkLabel}>
+        <span className="logo-mark" aria-hidden="true">
+          {osName.charAt(0).toUpperCase()}
+        </span>
+        <span className="app-name">{osName}</span>
+      </a>
       <style jsx>{`
         .app-header {
           display: flex;
@@ -39,6 +43,12 @@ export function Header({
         }
         .sidebar-toggle {
           display: none;
+        }
+        .home-link {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          text-decoration: none;
         }
         .logo-mark {
           display: inline-flex;

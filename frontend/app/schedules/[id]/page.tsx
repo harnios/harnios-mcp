@@ -7,6 +7,7 @@ import type { ScheduleRunRecord } from "@/lib/scheduler/types";
 import { SUPPORTED_MODELS } from "@/lib/scheduler/models";
 import { resolveLanguage } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { HomeLink } from "@/app/HomeLink";
 
 const cellStyle: CSSProperties = { textAlign: "left", padding: "0.5rem", borderBottom: "1px solid #ddd" };
 
@@ -28,7 +29,8 @@ export default async function ScheduleDetailPage({
   if (!schedule) notFound();
 
   const { alreadyRunning } = await searchParams;
-  const dict = getDictionary(await resolveLanguage()).schedules;
+  const fullDict = getDictionary(await resolveLanguage());
+  const dict = fullDict.schedules;
   const modelLabel = SUPPORTED_MODELS.find((model) => model.id === schedule.model)?.label ?? schedule.model;
 
   const allRuns = await listRecords<ScheduleRunRecord>("runs/");
@@ -38,6 +40,7 @@ export default async function ScheduleDetailPage({
 
   return (
     <main style={{ maxWidth: 900, margin: "2rem auto", fontFamily: "system-ui, sans-serif" }}>
+      <HomeLink label={fullDict.common.homeLink} />
       <h1>{schedule.name}</h1>
       {alreadyRunning === "true" && (
         <div style={{ border: "1px solid #ddd", borderRadius: 6, padding: "0.75rem 1rem", marginBottom: "1rem" }}>

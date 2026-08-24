@@ -16,7 +16,8 @@ import { Header } from "./Header";
  * which is just a plain synchronous object lookup, safe to run client-side.
  */
 export default function EditorApp({ osName, language }: { osName: string; language: SupportedLanguage }) {
-  const dict = getDictionary(language).editor;
+  const fullDict = getDictionary(language);
+  const dict = fullDict.editor;
   const router = useRouter();
   const pathname = usePathname();
   // The open file's path is the URL's own path (spec 018 FR-012), not local
@@ -61,7 +62,12 @@ export default function EditorApp({ osName, language }: { osName: string; langua
 
   return (
     <div className="app-shell">
-      <Header osName={osName} onToggleSidebar={() => setSidebarOpen((open) => !open)} dict={dict.header} />
+      <Header
+        osName={osName}
+        onToggleSidebar={() => setSidebarOpen((open) => !open)}
+        dict={dict.header}
+        homeLinkLabel={fullDict.common.homeLink}
+      />
       <div className="body-row">
         <div className={`sidebar${sidebarOpen ? " sidebar-open" : ""}`}>
           <FileTree

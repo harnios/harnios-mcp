@@ -4,6 +4,7 @@ import { getSchedule } from "@/lib/scheduler/parseSchedule";
 import { SUPPORTED_MODELS } from "@/lib/scheduler/models";
 import { resolveLanguage } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { HomeLink } from "@/app/HomeLink";
 
 /** Owner-gated form to edit an existing Scheduled Task's schedule, model, and prompt (spec 032, US2, FR-014). */
 export default async function EditSchedulePage({
@@ -23,10 +24,12 @@ export default async function EditSchedulePage({
   if (!schedule) notFound();
 
   const { error } = await searchParams;
-  const dict = getDictionary(await resolveLanguage()).schedules;
+  const fullDict = getDictionary(await resolveLanguage());
+  const dict = fullDict.schedules;
 
   return (
     <main style={{ maxWidth: 640, margin: "2rem auto", fontFamily: "system-ui, sans-serif" }}>
+      <HomeLink label={fullDict.common.homeLink} />
       <h1>{dict.editTitle}</h1>
       {error && (
         <div style={{ border: "1px solid #b00", borderRadius: 6, padding: "0.75rem 1rem", marginBottom: "1rem", color: "#b00" }}>
