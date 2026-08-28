@@ -3,6 +3,7 @@ import { revokePersonalAccessToken } from "@/lib/oauth/personalAccessTokens";
 import { hasActiveOwnerSession } from "@/lib/oauth/session";
 import { appendAuditLine, getRecord } from "@/lib/oauth/store";
 import type { AuditLogEntry, PersonalAccessToken } from "@/lib/oauth/types";
+import { requestOrigin } from "@/lib/http";
 
 /** Owner-initiated revocation of one personal access token (FR-006, FR-007, FR-009). */
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -30,5 +31,5 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     );
   }
 
-  return NextResponse.redirect(new URL("/settings/personal-access-tokens", request.url), { status: 303 });
+  return NextResponse.redirect(new URL("/settings/personal-access-tokens", requestOrigin(request)), { status: 303 });
 }

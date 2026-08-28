@@ -3,6 +3,7 @@ import { hasActiveOwnerSession } from "@/lib/oauth/session";
 import { TOOL_CATALOG } from "@/lib/mcp-tools/catalog";
 import { setToolDisabled } from "@/lib/mcp-tools/store";
 import { getCachedCatalog, listExternalServerConnections } from "@/lib/external-mcp/store";
+import { requestOrigin } from "@/lib/http";
 
 /** True if `name` is a tool from any connected external server's cached catalog (spec 031, FR-008). */
 async function isKnownExternalTool(name: string): Promise<boolean> {
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   await setToolDisabled(name, to === "disabled");
 
   return NextResponse.redirect(
-    new URL(`/tools?changed=${encodeURIComponent(name)}&to=${encodeURIComponent(to)}`, request.url),
+    new URL(`/tools?changed=${encodeURIComponent(name)}&to=${encodeURIComponent(to)}`, requestOrigin(request)),
     { status: 303 },
   );
 }

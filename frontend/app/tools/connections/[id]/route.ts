@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { hasActiveOwnerSession } from "@/lib/oauth/session";
 import { getOrRefreshCatalog } from "@/lib/external-mcp/catalog";
 import { getExternalServerConnection, updateExternalServerConnection } from "@/lib/external-mcp/store";
+import { requestOrigin } from "@/lib/http";
 
 function isValidHttpUrl(value: string): boolean {
   try {
@@ -57,5 +58,5 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     await getOrRefreshCatalog(full, { force: true }).catch(() => undefined);
   }
 
-  return NextResponse.redirect(new URL("/tools/connections", request.url), { status: 303 });
+  return NextResponse.redirect(new URL("/tools/connections", requestOrigin(request)), { status: 303 });
 }

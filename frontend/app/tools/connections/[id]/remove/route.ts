@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hasActiveOwnerSession } from "@/lib/oauth/session";
 import { deleteExternalServerConnection, getExternalServerConnection } from "@/lib/external-mcp/store";
+import { requestOrigin } from "@/lib/http";
 
 /** Permanently removes an External Server Connection and its cached catalog/rate-limit records (spec 031, US2, FR-009). */
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -24,7 +25,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   await deleteExternalServerConnection(id);
 
   return NextResponse.redirect(
-    new URL(`/tools/connections?changed=${encodeURIComponent(id)}&to=removed`, request.url),
+    new URL(`/tools/connections?changed=${encodeURIComponent(id)}&to=removed`, requestOrigin(request)),
     { status: 303 },
   );
 }

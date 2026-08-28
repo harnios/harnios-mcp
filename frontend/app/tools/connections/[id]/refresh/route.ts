@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { hasActiveOwnerSession } from "@/lib/oauth/session";
 import { getOrRefreshCatalog } from "@/lib/external-mcp/catalog";
 import { getExternalServerConnection } from "@/lib/external-mcp/store";
+import { requestOrigin } from "@/lib/http";
 
 /** Owner-initiated manual "refresh now", bypassing the catalog TTL (spec 031, US2, FR-014). */
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -24,5 +25,5 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
   await getOrRefreshCatalog(connection, { force: true });
 
-  return NextResponse.redirect(new URL("/tools/connections", request.url), { status: 303 });
+  return NextResponse.redirect(new URL("/tools/connections", requestOrigin(request)), { status: 303 });
 }

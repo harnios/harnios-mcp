@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { hasActiveOwnerSession } from "@/lib/oauth/session";
 import { appendAuditLine, getRecord, putRecord } from "@/lib/oauth/store";
 import type { AuditLogEntry, AuthorizationGrant, RegisteredClient } from "@/lib/oauth/types";
+import { requestOrigin } from "@/lib/http";
 
 /** Owner-initiated revocation of one connected client's grant (FR-007, FR-008, FR-011). */
 export async function POST(request: NextRequest, { params }: { params: Promise<{ grantId: string }> }) {
@@ -34,5 +35,5 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     );
   }
 
-  return NextResponse.redirect(new URL("/settings/connected-apps", request.url), { status: 303 });
+  return NextResponse.redirect(new URL("/settings/connected-apps", requestOrigin(request)), { status: 303 });
 }

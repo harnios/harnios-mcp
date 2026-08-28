@@ -8,6 +8,7 @@ import { StorageConfigError } from "@/lib/storage/errors";
 import { detectBrowserLanguage } from "@/lib/i18n/detect";
 import { resolveLanguage } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { requestOrigin } from "@/lib/http";
 import { EnvSetupHelper } from "./EnvSetupHelper";
 import { LanguageConfirm } from "./LanguageConfirm";
 import { McpConnectManual } from "./McpConnectManual";
@@ -64,9 +65,7 @@ export default async function InitPage({
 
   if (status === "already_initialized") {
     const hdrs = await headers();
-    const host = hdrs.get("host") ?? "localhost:3000";
-    const proto = hdrs.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-    const mcpUrl = `${proto}://${host}/mcp`;
+    const mcpUrl = `${requestOrigin({ headers: hdrs })}/mcp`;
 
     return (
       <main style={PAGE_STYLE}>

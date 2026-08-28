@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hasActiveOwnerSession } from "@/lib/oauth/session";
 import { setConnectionEnabled } from "@/lib/external-mcp/store";
+import { requestOrigin } from "@/lib/http";
 
 /** Pauses/resumes a whole External Server Connection without touching its saved config (spec 031, US2, FR-017). */
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 
   return NextResponse.redirect(
-    new URL(`/tools/connections?changed=${encodeURIComponent(id)}&to=${encodeURIComponent(to)}`, request.url),
+    new URL(`/tools/connections?changed=${encodeURIComponent(id)}&to=${encodeURIComponent(to)}`, requestOrigin(request)),
     { status: 303 },
   );
 }

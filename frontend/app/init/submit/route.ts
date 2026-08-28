@@ -4,6 +4,7 @@ import { hasActiveOwnerSession } from "@/lib/oauth/session";
 import { isSupportedLanguage } from "@/lib/i18n/languages";
 import { resolveLanguage } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { requestOrigin } from "@/lib/http";
 
 /**
  * Creates the initial Company OS skeleton in the confirmed language (spec 015
@@ -26,7 +27,7 @@ export async function POST(request: NextRequest) {
 
   await initializeCompanyOs(lang);
 
-  const initUrl = new URL("/init", request.url);
+  const initUrl = new URL("/init", requestOrigin(request));
   initUrl.searchParams.set("created", "1");
   return NextResponse.redirect(initUrl, { status: 303 });
 }
