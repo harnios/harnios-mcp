@@ -26,6 +26,7 @@ const ENGINE_CONTENT = {
   engine: readFileSync(join(ENGINE_DIR, "engine.md"), "utf-8"),
   "os-upgrade": readFileSync(join(ENGINE_DIR, "os-upgrade.md"), "utf-8"),
   init: readFileSync(join(ENGINE_DIR, "init.md"), "utf-8"),
+  "change-process": readFileSync(join(ENGINE_DIR, "change-process.md"), "utf-8"),
 } as const;
 
 function textResult(text: string): CallToolResult {
@@ -64,10 +65,22 @@ const ENGINE_TOOLS: EngineToolDefinition[] = [
     content: "init",
     title: "Get Company OS Business Setup",
     description:
-      "Returns the business-setup interview, activity-type decision table, and write instructions " +
-      "for data/*, os/identity.md, os/policies/*, domain skills, and os/routing.md. Call this for " +
+      "Returns the business-setup interview and write instructions for os/identity.md, " +
+      "os/routing.md, data/index.md, and data/inbox.md. Call this for " +
       "\"init\"/\"initialize\"/\"setup os\"/\"create the structure\", or whenever data/ turns out to " +
       "be missing or empty.",
+  },
+  {
+    name: "get_change_process",
+    content: "change-process",
+    title: "Get OS Change Process",
+    description:
+      "Returns the propose-confirm-implement procedure for a structural change: creating or " +
+      "modifying a skill, a schedule, os/routing.md, a policy, requesting a new external " +
+      "connection, or establishing a place and shape for a kind of business content that has " +
+      "never been tracked before. Call this before making any such change — using something that " +
+      "already exists, or reading/writing within an already-established kind of content, never " +
+      "needs it.",
   },
 ];
 

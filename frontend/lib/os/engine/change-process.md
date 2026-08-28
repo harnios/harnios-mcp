@@ -1,0 +1,128 @@
+---
+type: engine
+tool: get_change_process
+---
+
+# Change process — proposing, confirming, and implementing structural change
+
+Self-contained instructions for the only thing the `get_change_process` tool is responsible for:
+deciding whether something the owner asked for is a **structural change**, and if so, walking it
+through description → plan → confirmation → implementation before anything is written. It never
+touches `AGENTS.md` itself (that's `get_os_engine`/`get_os_upgrade`) and never runs the first-time
+business-setup interview (that's `get_os_init`).
+
+---
+
+## When this applies
+
+A request is a **structural change** — and goes through the whole procedure below — when it would:
+
+- Create or modify a way-of-doing-things (a skill, under `os/skills/`).
+- Create or modify a schedule (under `os/schedules/`).
+- Change `os/routing.md` or a rule (a policy, under `os/policies/`).
+- Require a new externally-configured connection (a new MCP connection the owner would set up).
+- Establish, **for the first time**, a place and shape for a kind of business content that has
+  never been tracked before (e.g. the first time anything is tracked as a "project," not the
+  second or third project once that shape already exists).
+
+Everything else is **everyday activity** and stays immediate, exactly as it always has:
+
+- Using a way-of-doing-things that already exists.
+- Running or reusing a schedule that already exists.
+- Reading or writing content within a kind of business content that already has an established
+  place and shape — no matter how important that content is to the business.
+
+If you're not sure which one a request is, the test is always: *does this decide where or how
+something will be done from now on, or is it just doing the thing?* Deciding is structural. Doing
+is everyday.
+
+---
+
+## Rule zero — explore before proposing
+
+Before drafting anything:
+
+1. `list_directory "os/skills/"`, `list_directory "os/schedules/"`, and `read_file
+   "os/routing.md"` (if it exists) to see what already covers similar ground.
+2. If the request concerns a kind of business content, check whether it already has an
+   established place — look for an existing folder/template shape for that kind of thing in the
+   business's own content area (not `os/`).
+3. If everything the request needs already exists, this **isn't** a structural change — just do
+   it, immediately, no proposal.
+4. If it isn't already achievable, continue to **Draft a proposal** below.
+
+---
+
+## Draft a proposal
+
+1. Derive `<slug>`: short, kebab-case, human-readable, from the request itself (e.g. a request
+   about a daily expiring-policy report → `rapporto-polizze-scadenza`). Never ask the owner to
+   name it.
+2. `list_directory "os/changes/"`. If an entry with this slug already exists:
+   - Same request, still `draft` → reuse it in place (this is a revision, not a new proposal).
+   - A different request → append `-2`, `-3`, ... until the slug is free.
+3. Write three files at `os/changes/<slug>/`, in `os/language` (read that file; English if it
+   doesn't exist):
+
+   **`spec.md`** — front matter `type: change-proposal`, `status: draft`, `created`/`updated` in
+   `YYYY-MM-DD`. Body: what's needed, and why it isn't already covered by something that exists.
+   Plain language — this is what gets shown to the owner, not a technical document.
+
+   **`plan.md`** — the concrete files this change will create or modify: a skill
+   (`os/skills/<name>.md`), a schedule (`os/schedules/<name>.md`), an `os/routing.md` update, a
+   policy, and/or — when the request establishes a new kind of business content — its place and
+   shape (a new folder plus template under the business's own content area). When a new kind of
+   content is being established, **also state** whether a companion way-of-doing-things for
+   handling future instances of it belongs in this same change, or say why one isn't needed. Only
+   include the parts that actually apply to this request.
+
+   **`tasks.md`** — one checklist line (`- [ ]`) per file named in `plan.md`, in the order they'll
+   be created.
+
+4. Never write anything outside `os/changes/<slug>/` at this stage. Nothing in `os/skills/`,
+   `os/schedules/`, `os/routing.md`, a policy, or the business's own content area changes yet.
+
+---
+
+## Get confirmation
+
+1. Present, in chat, in `os/language`: what `spec.md` says (what's needed and why) and what
+   `plan.md` says (what will be created or changed). Keep it short and plain — the owner is
+   approving a summary, not reading the files themselves.
+2. Wait for an explicit answer.
+   - **Confirmed** → set `spec.md`'s `status: confirmed`, updated to today, and move to
+     **Implement** below.
+   - **Declined, or the owner asks for changes** → revise `spec.md`/`plan.md`/`tasks.md` in place
+     (same slug, still `draft`) and present again — or, if the owner wants to abandon it entirely,
+     set `status: discarded`. Either way, nothing outside `os/changes/<slug>/` is touched.
+   - **No answer yet / owner moves on to something else** → leave it as `draft`. It stays exactly
+     as it is, discoverable the next time anyone lists `os/changes/`.
+
+---
+
+## Implement
+
+1. Re-read `tasks.md`. Do only what's still unchecked — if some lines are already checked (a
+   previous session started this same change and was interrupted), pick up from there. Never redo
+   a step that's already checked, never restart the proposal from scratch.
+2. For each unchecked line, create or modify exactly the file `plan.md` describes for it, then
+   check it off (`- [x]`) before moving to the next line.
+3. When every line in `tasks.md` is checked, set `spec.md`'s `status: implemented`, updated to
+   today.
+4. `os/changes/<slug>/` is never deleted or moved once implemented — it stays in place as a
+   historical record of what was asked for and why.
+
+---
+
+## If it can't be done with what's available
+
+If, during **Rule zero** or while drafting the plan, you find the request genuinely can't be
+satisfied with the native tools already available:
+
+1. First consider whether a new externally-configured connection (a new MCP connection the owner
+   sets up) would close the gap. If so, the plan proposes that, and the owner configures it — this
+   is still the normal confirm-then-implement flow above, just with "the owner sets up a
+   connection" as one of the steps.
+2. Only if that's also insufficient, say so plainly and propose that a developer build something
+   new. Never invent or pretend to have a capability that doesn't exist — an honest "this needs
+   custom development" is always better than a fabricated result.
