@@ -545,7 +545,7 @@ function DirectoryNode({
         >
           <ChevronIcon expanded={expanded} />
           <FolderIcon />
-          <span style={labelStyle}>{label}</span>
+          <span style={labelStyle} title={label}>{label}</span>
         </div>
         <RowMenu items={menuItems} disabled={busy} moreActionsLabel={dict.moreActions} />
         <input
@@ -606,7 +606,7 @@ function DirectoryNode({
               onClick={() => onSelectFile(f.path)}
             >
               {iconForPath(f.path)}
-              <span style={{ ...labelStyle, flex: 1, minWidth: 0 }}>{baseName(f.path)}</span>
+              <span style={{ ...labelStyle, flex: 1, minWidth: 0 }} title={baseName(f.path)}>{baseName(f.path)}</span>
               <RowMenu
                 items={[
                   { label: dict.menuDelete, icon: <TrashIcon />, onClick: () => handleDeleteFile(f.path), destructive: true },
