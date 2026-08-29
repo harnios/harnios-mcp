@@ -57,6 +57,26 @@ before saving, convert date serial numbers, quote CSV fields containing a comma/
 — when a companion skill is created for future updates of the same data — carry this same
 checklist into that skill's own instructions.
 
+### Second follow-up (2026-08-29, same day): gate sequencing and fixed names
+
+A second real-world retest (after the v3 `AGENTS.md` change above) found the checklist fixed the
+data-corruption bug completely, and the model did call `get_change_process` this time — but it
+still wrote a real folder and file (a new data category) directly, *before* drafting or confirming
+a proposal, treating only the remaining skill/routing work as needing the gate. It also named the
+new folder using a translated word (`dati/` instead of the fixed `data/`), orphaning the new
+content outside the tree `data/index.md` claims is everything that exists.
+
+Two more changes to **`change-process.md`**'s **Draft a proposal** section (not version-gated,
+same as the first follow-up):
+
+- Strengthened point 4: explicit that *nothing* outside `os/changes/<slug>/` may be written at
+  this stage — not even a single `create_directory` call "to get started." Any write with a path
+  outside that prefix belongs in **Implement**, after confirmation, never before.
+- New point 5: a "fixed names" rule mirroring the one already in `init.md` — any path a
+  confirmed change will create uses the established fixed English convention (e.g. `data/`),
+  never a translated word, regardless of `os/language`. Only file *content* is written in
+  `os/language`.
+
 ## `frontend/lib/os/engine/init.md`
 
 Remove:

@@ -79,8 +79,17 @@ Before drafting anything:
    **`tasks.md`** — one checklist line (`- [ ]`) per file named in `plan.md`, in the order they'll
    be created.
 
-4. Never write anything outside `os/changes/<slug>/` at this stage. Nothing in `os/skills/`,
-   `os/schedules/`, `os/routing.md`, a policy, or the business's own content area changes yet.
+4. **Nothing outside `os/changes/<slug>/` gets touched at this stage — not one file, not even a
+   single empty folder.** This means no `create_directory` and no `create_file` anywhere else yet,
+   including the business's own content area (e.g. don't create `data/polizze/` "to get started" —
+   its creation is itself one of the confirmed steps in **Implement** below, not something to do
+   ahead of time). If you find yourself about to write anything with a path that isn't under
+   `os/changes/<slug>/`, stop — that write belongs in **Implement**, after confirmation, not here.
+5. Fixed names: any new path this change will eventually create — a skill file, a schedule file, a
+   folder for a new kind of business content — uses the same fixed English convention already
+   established in this Company OS (e.g. `data/`, never a translated word like `dati/`), regardless
+   of `os/language`. Only the *content* of files is written in `os/language`; paths are not
+   translated. State the exact path in `plan.md` exactly as it will be created.
 
 ---
 
