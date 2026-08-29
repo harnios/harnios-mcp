@@ -84,6 +84,32 @@ Before drafting anything:
 
 ---
 
+## Transcribing data accurately
+
+When the request involves converting or importing data from an attached file (a spreadsheet, an
+exported table, anything with rows and columns) into a CSV, follow this checklist — silent,
+small transcription mistakes here are the most damaging failure this whole process can produce,
+because they look like success (a file gets created, nothing errors) while actually recording
+wrong data:
+
+1. **Never skip an empty cell.** If a column has no value for a row, write that field as empty in
+   the CSV — still in its own position. Skipping it instead of leaving it empty shifts every
+   column after it by one, silently corrupting the whole row.
+2. **Verify column counts before saving.** After building each row, count its fields and compare
+   to the number of columns in the header. They must match exactly, for every row. If they don't,
+   find and fix the misalignment before writing the file — don't save first and hope.
+3. **Convert date serial numbers.** A date that appears as a plain number (typically in the
+   40000–50000 range in spreadsheet exports) is a serial date, not a value to copy literally —
+   convert it to a real calendar date (day 0 is 1899-12-30) before writing it.
+4. **Quote fields that contain a comma, a quote character, or a line break** — standard CSV
+   quoting. An unquoted comma inside a field (e.g. an address like "Via Roma, 4") splits that
+   field into two, corrupting every column after it, the same way a skipped empty cell does.
+5. **When this change also creates a companion skill** for handling future updates of this same
+   data (see below), include this exact checklist in that skill's own instructions — the same
+   care needs to apply every time the data is updated, not only the first time.
+
+---
+
 ## Get confirmation
 
 1. Present, in chat, in `os/language`: what `spec.md` says (what's needed and why) and what

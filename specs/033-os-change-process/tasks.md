@@ -162,3 +162,22 @@ Task: "Update frontend/lib/os/engine/engine.md (version bump, Build line, v2 cha
 - [Story] labels trace every task back to spec.md's User Story 1/2/3/4.
 - User Stories 2 and 4 are verification-only by design — their entire value is guaranteeing that User Story 1's change doesn't regress existing behavior, and that it reaches already-existing instances through a mechanism (`get_os_upgrade`) that already exists unmodified.
 - Commit after each task or logical group, per repo convention (see recent commit history: one focused commit per spec-numbered change).
+
+### Post-launch hardening (2026-08-29, T001/T003 revisited)
+
+Real-world testing against a live client instance the same day the feature shipped (T008's
+end-to-end validation, done manually with real models instead of a synthetic quickstart run)
+found two gaps with a weaker connected model (Mistral via Chatbox) that a stronger one (Claude,
+both via product and via raw API) didn't have:
+
+1. The gate never triggered at all — the one-line pointer to `get_change_process` in `engine.md`'s
+   Build section depends on the model recognizing, unprompted, that the current request matches
+   its description. Fixed by additionally stating the same trigger list as its own explicit
+   "never" rule in `AGENTS.md`'s body (`os-engine-version` `2` → `3`) — see
+   `contracts/engine-content-changes.md`'s follow-up section for the exact wording.
+2. A CSV conversion had every column shifted by one position (a skipped empty cell) and an
+   unconverted date serial number. Fixed by adding a "Transcribing data accurately" checklist to
+   `change-process.md` (not version-gated — takes effect on the next call, no upgrade needed).
+
+Both fixes are content-only (no code/registration changes) — re-run quickstart.md Scenario 6
+(and ideally the same Mistral scenario) to confirm before considering this closed.

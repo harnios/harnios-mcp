@@ -26,6 +26,37 @@ what must change, precisely, so an implementer doesn't have to re-derive it from
   exactly as they are; the confirm-before-rebuild gate they define already covers this version
   bump with no changes needed to that mechanism itself.
 
+### Follow-up: `os-engine-version` `2` → `3` (post-launch hardening, 2026-08-29)
+
+Real-world testing the same day found that a weaker connected model (Mistral, via Chatbox) never
+called `get_change_process` at all for a request that should have triggered it — the one-line
+pointer in **Build** ("call `get_change_process` before...") depends on the model deciding, on its
+own, that the current request matches that description. A stronger model (Claude, both via the
+Cowork product and via the raw API) handled this reliably; a weaker one did not.
+
+- Front matter `os-engine-version`: `2` → `3`.
+- **Build** section's "nevers" bullet: state the same trigger list (skill, schedule,
+  `os/routing.md`, policy, external connection, new kind of business content) as its own explicit
+  rule, in full, inside the "nevers" — not only as the separate pointer line. The rule itself is
+  now always present in the one file every session reads first, independent of whether the model
+  decides to look up a separate tool.
+- **Changelog**: add a `### v3` entry documenting this (see `engine.md` for exact wording).
+- The pointer line to `get_change_process` (added in v2) stays as well — the explicit rule and the
+  pointer are complementary, not a replacement of one by the other.
+
+## `frontend/lib/os/engine/change-process.md` (follow-up, 2026-08-29)
+
+Not version-gated (this file has no `os-engine-version` front matter — it's returned fresh on
+every tool call, no upgrade propagation needed for its own content). Added a new
+**"Transcribing data accurately"** section, inserted between **Draft a proposal** and **Get
+confirmation**, in response to a concrete data-corruption bug found in the same Mistral test: a
+CSV converted by a weaker model had every column shifted by one position (an empty source cell
+was skipped instead of preserved as an empty field) and a date left as a raw Excel serial number.
+The new section is a five-item checklist: never skip an empty cell, verify column counts match
+before saving, convert date serial numbers, quote CSV fields containing a comma/quote/newline, and
+— when a companion skill is created for future updates of the same data — carry this same
+checklist into that skill's own instructions.
+
 ## `frontend/lib/os/engine/init.md`
 
 Remove:
