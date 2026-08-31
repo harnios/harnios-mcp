@@ -74,6 +74,16 @@ export const fr: Dictionary = {
   common: {
     homeLink: "Retour au tableau de bord",
   },
+  nav: {
+    dashboard: "Tableau de bord",
+    files: "Fichiers",
+    tools: "Outils",
+    schedules: "Planifications",
+    settings: "Paramètres",
+    signOut: "Se déconnecter",
+    menuLabel: "Principal",
+    home: "Accueil",
+  },
   dashboard: {
     title: "Tableau de bord",
     description: "Tout ce que propose ce serveur MCP, au même endroit.",

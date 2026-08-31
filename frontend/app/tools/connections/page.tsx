@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react";
 import { redirect } from "next/navigation";
 import { hasActiveOwnerSession } from "@/lib/oauth/session";
 import { getCachedCatalog, listExternalServerConnections } from "@/lib/external-mcp/store";
@@ -6,9 +5,10 @@ import type { CachedToolCatalog } from "@/lib/external-mcp/types";
 import { resolveExternalTools } from "@/lib/mcp-tools/externalTools";
 import { resolveLanguage } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n/dictionaries";
-import { HomeLink } from "@/app/HomeLink";
-
-const cellStyle: CSSProperties = { textAlign: "left", padding: "0.5rem", borderBottom: "1px solid #ddd" };
+import { Page } from "@/app/_ui/Page";
+import { PageHeader } from "@/app/_ui/PageHeader";
+import { Banner } from "@/app/_ui/Banner";
+import { StatusPill } from "@/app/_ui/StatusPill";
 
 /** Lists every External Server Connection, its cached catalog status, and links to manage it (spec 031, US3/US2). */
 export default async function ExternalConnectionsPage({
@@ -33,34 +33,31 @@ export default async function ExternalConnectionsPage({
 
   const { collisions } = resolveExternalTools(connections, catalogs);
 
-  const fullDict = getDictionary(await resolveLanguage());
-  const dict = fullDict.connections;
+  const dict = getDictionary(await resolveLanguage()).connections;
   const changedStatusLabel =
     to === "enabled" ? dict.enabledLabel : to === "disabled" ? dict.disabledLabel : to === "removed" ? dict.removeAction : undefined;
 
   return (
-    <main style={{ maxWidth: 900, margin: "2rem auto", fontFamily: "system-ui, sans-serif" }}>
-      <HomeLink label={fullDict.common.homeLink} />
-      <h1>{dict.title}</h1>
-      <p>{dict.description}</p>
+    <Page size="lg">
+      <PageHeader title={dict.title} description={dict.description} />
 
       {changed && changedStatusLabel && (
-        <div style={{ border: "1px solid #ddd", borderRadius: 6, padding: "0.75rem 1rem", marginBottom: "1rem" }}>
-          <p style={{ margin: 0 }}>{dict.changedBanner(changed, changedStatusLabel)}</p>
-        </div>
+        <Banner tone="info">
+          <p>{dict.changedBanner(changed, changedStatusLabel)}</p>
+        </Banner>
       )}
 
       {connections.length === 0 ? (
         <p>{dict.empty}</p>
       ) : (
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <table className="table">
           <thead>
             <tr>
-              <th style={cellStyle}>{dict.labelHeader}</th>
-              <th style={cellStyle}>{dict.urlHeader}</th>
-              <th style={cellStyle}>{dict.statusHeader}</th>
-              <th style={cellStyle}>{dict.catalogHeader}</th>
-              <th style={cellStyle} />
+              <th>{dict.labelHeader}</th>
+              <th>{dict.urlHeader}</th>
+              <th>{dict.statusHeader}</th>
+              <th>{dict.catalogHeader}</th>
+              <th />
             </tr>
           </thead>
           <tbody>
@@ -70,32 +67,38 @@ export default async function ExternalConnectionsPage({
                 const catalog = catalogs.get(connection.id);
                 return (
                   <tr key={connection.id}>
-                    <td style={cellStyle}>{connection.label}</td>
-                    <td style={cellStyle}>
+                    <td>{connection.label}</td>
+                    <td>
                       <code>{connection.url}</code>
                     </td>
-                    <td style={cellStyle}>{connection.enabled ? dict.enabledLabel : dict.disabledLabel}</td>
-                    <td style={cellStyle}>
+                    <td>
+                      <StatusPill tone={connection.enabled ? "success" : "muted"}>
+                        {connection.enabled ? dict.enabledLabel : dict.disabledLabel}
+                      </StatusPill>
+                    </td>
+                    <td>
                       {catalog ? (
                         <>
                           <div>{dict.toolCount(catalog.tools.length)}</div>
                           <div>{dict.lastFetched(new Date(catalog.fetchedAt).toLocaleString())}</div>
                           {catalog.lastError && (
-                            <div style={{ color: "#b00" }}>{dict.errorCodeLabel(catalog.lastError.code)}</div>
+                            <div className="error-text">{dict.errorCodeLabel(catalog.lastError.code)}</div>
                           )}
                         </>
                       ) : (
                         <div>{dict.neverFetched}</div>
                       )}
                     </td>
-                    <td style={cellStyle}>
-                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <td>
+                      <div className="cluster">
                         <a href={`/tools/connections/${connection.id}/edit`}>{dict.editAction}</a>
                         <a href={`/tools/connections/${connection.id}/confirm?to=${connection.enabled ? "disabled" : "enabled"}`}>
                           {connection.enabled ? dict.disableAction : dict.enableAction}
                         </a>
                         <form method="POST" action={`/tools/connections/${connection.id}/refresh`}>
-                          <button type="submit">{dict.refreshAction}</button>
+                          <button type="submit" className="btn btn--secondary">
+                            {dict.refreshAction}
+                          </button>
                         </form>
                         <a href={`/tools/connections/${connection.id}/confirm?to=removed`}>{dict.removeAction}</a>
                       </div>
@@ -108,13 +111,13 @@ export default async function ExternalConnectionsPage({
       )}
 
       {collisions.length > 0 && (
-        <div style={{ border: "1px solid #b00", borderRadius: 6, padding: "0.75rem 1rem", margin: "1rem 0" }}>
+        <Banner tone="danger">
           {collisions.map((collision) => (
-            <p key={`${collision.connectionId}-${collision.toolName}`} style={{ margin: 0 }}>
+            <p key={`${collision.connectionId}-${collision.toolName}`}>
               {dict.collisionNotice(collision.toolName, collision.connectionLabel)}
             </p>
           ))}
-        </div>
+        </Banner>
       )}
 
       <p>
@@ -123,6 +126,6 @@ export default async function ExternalConnectionsPage({
       <p>
         <a href="/tools">{dict.title}</a>
       </p>
-    </main>
+    </Page>
   );
 }

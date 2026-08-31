@@ -148,7 +148,7 @@ const kebabButtonStyle: CSSProperties = {
   padding: 0,
   border: "none",
   background: "transparent",
-  color: "#666",
+  color: "var(--text-muted)",
   cursor: "pointer",
   borderRadius: 6,
   flexShrink: 0,
@@ -160,10 +160,10 @@ const menuStyle: CSSProperties = {
   right: 0,
   marginTop: 2,
   minWidth: 180,
-  background: "#fff",
-  border: "1px solid #ddd",
+  background: "var(--surface-raised)",
+  border: "1px solid var(--border)",
   borderRadius: 8,
-  boxShadow: "0 4px 16px rgba(0,0,0,0.15)",
+  boxShadow: "var(--shadow-2)",
   zIndex: 40,
   padding: 4,
   display: "flex",
@@ -256,7 +256,7 @@ function RowMenu({
               key={item.label}
               type="button"
               role="menuitem"
-              style={{ ...menuItemStyle, color: item.destructive ? "#c0392b" : "#222" }}
+              style={{ ...menuItemStyle, color: item.destructive ? "var(--danger-fg)" : "var(--text)" }}
               onClick={(e) => {
                 e.stopPropagation();
                 setOpen(false);
@@ -573,10 +573,10 @@ function DirectoryNode({
       </div>
       {expanded && (
         <div>
-          {loading && <div style={{ color: "#888" }}>{dict.loading}</div>}
-          {error && <div style={{ color: "crimson" }}>{error.message}</div>}
+          {loading && <div style={{ color: "var(--text-muted)" }}>{dict.loading}</div>}
+          {error && <div style={{ color: "var(--danger-fg)" }}>{error.message}</div>}
           {entries && entries.directories.length === 0 && entries.files.length === 0 && (
-            <div style={{ color: "#888", fontStyle: "italic", paddingLeft: 30 }}>{dict.empty}</div>
+            <div style={{ color: "var(--text-muted)", fontStyle: "italic", paddingLeft: 30 }}>{dict.empty}</div>
           )}
           {entries?.directories.map((d) => (
             <DirectoryNode

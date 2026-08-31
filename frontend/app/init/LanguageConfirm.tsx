@@ -2,13 +2,13 @@ import type { CSSProperties } from "react";
 import { LANGUAGE_NAMES, SUPPORTED_LANGUAGES, SupportedLanguage } from "@/lib/i18n/languages";
 
 const FIELDSET_STYLE: CSSProperties = {
-  border: "1px solid #ccc",
-  borderRadius: 4,
-  padding: "0.75rem 1rem",
-  marginBottom: "1rem",
+  border: "1px solid var(--border-strong)",
+  borderRadius: "var(--radius-sm)",
+  padding: "var(--space-3) var(--space-4)",
+  marginBottom: "var(--space-4)",
 };
 
-const OPTION_STYLE: CSSProperties = { display: "block", marginBottom: "0.4rem" };
+const OPTION_STYLE: CSSProperties = { display: "block", marginBottom: "var(--space-2)" };
 
 /**
  * Shows the browser-detected language pre-selected among all six, letting the

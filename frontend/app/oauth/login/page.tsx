@@ -1,20 +1,10 @@
-import type { CSSProperties } from "react";
 import { resolveLanguage } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n/dictionaries";
-
-const PAGE_STYLE: CSSProperties = {
-  maxWidth: 360,
-  margin: "4rem auto",
-  fontFamily: "system-ui, sans-serif",
-};
-
-const INPUT_STYLE: CSSProperties = {
-  display: "block",
-  width: "100%",
-  padding: "0.5rem",
-  marginBottom: "0.75rem",
-  boxSizing: "border-box",
-};
+import { Page } from "@/app/_ui/Page";
+import { PageHeader } from "@/app/_ui/PageHeader";
+import { Banner } from "@/app/_ui/Banner";
+import { Field } from "@/app/_ui/Field";
+import { Button } from "@/app/_ui/Button";
 
 export default async function LoginPage({
   searchParams,
@@ -32,18 +22,23 @@ export default async function LoginPage({
   const errorMessage = params.error ? errorMessages[params.error] ?? dict.errorGeneric : null;
 
   return (
-    <main style={PAGE_STYLE}>
-      <h1>{dict.title}</h1>
-      <p>{dict.description}</p>
-      {errorMessage && <p style={{ color: "#b00020" }}>{errorMessage}</p>}
-      <form method="POST" action="/oauth/login/submit">
+    <Page size="xs">
+      <PageHeader title={dict.title} description={dict.description} />
+      {errorMessage && (
+        <Banner tone="danger">
+          <p>{errorMessage}</p>
+        </Banner>
+      )}
+      <form method="POST" action="/oauth/login/submit" className="stack">
         <input type="hidden" name="continue" value={continueUrl} />
-        <label htmlFor="username">{dict.username}</label>
-        <input style={INPUT_STYLE} id="username" name="username" type="text" required autoFocus />
-        <label htmlFor="password">{dict.password}</label>
-        <input style={INPUT_STYLE} id="password" name="password" type="password" required />
-        <button type="submit">{dict.submit}</button>
+        <Field label={dict.username} htmlFor="username">
+          <input className="input" id="username" name="username" type="text" required autoFocus />
+        </Field>
+        <Field label={dict.password} htmlFor="password">
+          <input className="input" id="password" name="password" type="password" required />
+        </Field>
+        <Button type="submit">{dict.submit}</Button>
       </form>
-    </main>
+    </Page>
   );
 }

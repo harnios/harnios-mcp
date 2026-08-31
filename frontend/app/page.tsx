@@ -1,6 +1,8 @@
 import { resolveLanguage } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import type { Dictionary } from "@/lib/i18n/dictionaries/types";
+import { Page } from "@/app/_ui/Page";
+import { PageHeader } from "@/app/_ui/PageHeader";
 
 // The single place to update when a top-level page is added or removed
 // (spec 026 FR-007) — this is the only list that needs to change; no
@@ -20,16 +22,17 @@ export default async function DashboardPage() {
   const dict = getDictionary(await resolveLanguage()).dashboard;
 
   return (
-    <main style={{ maxWidth: 720, margin: "2rem auto", fontFamily: "system-ui, sans-serif" }}>
-      <h1>{dict.title}</h1>
-      <p>{dict.description}</p>
-      <ul style={{ listStyle: "none", padding: 0 }}>
+    <Page size="md">
+      <PageHeader title={dict.title} description={dict.description} />
+      <ul className="stack--sm" style={{ listStyle: "none", padding: 0, margin: 0 }}>
         {DASHBOARD_LINKS.map(({ href, labelKey }) => (
-          <li key={href} style={{ padding: "0.5rem 0", borderBottom: "1px solid #ddd" }}>
-            <a href={href}>{dict.links[labelKey]}</a>
+          <li key={href}>
+            <a className="card" style={{ display: "block" }} href={href}>
+              {dict.links[labelKey]}
+            </a>
           </li>
         ))}
       </ul>
-    </main>
+    </Page>
   );
 }

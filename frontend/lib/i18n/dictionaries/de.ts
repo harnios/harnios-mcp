@@ -74,6 +74,16 @@ export const de: Dictionary = {
   common: {
     homeLink: "Zurück zum Dashboard",
   },
+  nav: {
+    dashboard: "Übersicht",
+    files: "Dateien",
+    tools: "Werkzeuge",
+    schedules: "Zeitpläne",
+    settings: "Einstellungen",
+    signOut: "Abmelden",
+    menuLabel: "Hauptmenü",
+    home: "Startseite",
+  },
   dashboard: {
     title: "Dashboard",
     description: "Alles, was dieser MCP-Server bietet, an einem Ort.",

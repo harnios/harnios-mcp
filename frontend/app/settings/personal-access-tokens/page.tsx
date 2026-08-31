@@ -1,12 +1,11 @@
-import type { CSSProperties } from "react";
 import { redirect } from "next/navigation";
 import { hasActiveOwnerSession } from "@/lib/oauth/session";
 import { listPersonalAccessTokens } from "@/lib/oauth/personalAccessTokens";
 import { resolveLanguage } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n/dictionaries";
-import { HomeLink } from "@/app/HomeLink";
-
-const cellStyle: CSSProperties = { textAlign: "left", padding: "0.5rem", borderBottom: "1px solid #ddd" };
+import { Page } from "@/app/_ui/Page";
+import { PageHeader } from "@/app/_ui/PageHeader";
+import { StatusPill } from "@/app/_ui/StatusPill";
 
 /** Lists every personal access token, lets the owner create or revoke one (FR-001, FR-005, FR-006). */
 export default async function PersonalAccessTokensPage() {
@@ -16,26 +15,23 @@ export default async function PersonalAccessTokensPage() {
   }
 
   const tokens = await listPersonalAccessTokens();
-  const fullDict = getDictionary(await resolveLanguage());
-  const dict = fullDict.settings.pat;
+  const dict = getDictionary(await resolveLanguage()).settings.pat;
 
   return (
-    <main style={{ maxWidth: 720, margin: "2rem auto", fontFamily: "system-ui, sans-serif" }}>
-      <HomeLink label={fullDict.common.homeLink} />
-      <h1>{dict.title}</h1>
-      <p>{dict.description}</p>
+    <Page size="md">
+      <PageHeader title={dict.title} description={dict.description} />
 
       {tokens.length === 0 ? (
         <p>{dict.empty}</p>
       ) : (
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <table className="table">
           <thead>
             <tr>
-              <th style={cellStyle}>{dict.name}</th>
-              <th style={cellStyle}>{dict.status}</th>
-              <th style={cellStyle}>{dict.created}</th>
-              <th style={cellStyle}>{dict.lastUsed}</th>
-              <th style={cellStyle} />
+              <th>{dict.name}</th>
+              <th>{dict.status}</th>
+              <th>{dict.created}</th>
+              <th>{dict.lastUsed}</th>
+              <th />
             </tr>
           </thead>
           <tbody>
@@ -43,14 +39,20 @@ export default async function PersonalAccessTokensPage() {
               .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
               .map((token) => (
                 <tr key={token.id}>
-                  <td style={cellStyle}>{token.name}</td>
-                  <td style={cellStyle}>{token.revoked ? dict.revoked : dict.active}</td>
-                  <td style={cellStyle}>{new Date(token.createdAt).toLocaleString()}</td>
-                  <td style={cellStyle}>{token.lastUsedAt ? new Date(token.lastUsedAt).toLocaleString() : dict.never}</td>
-                  <td style={cellStyle}>
+                  <td>{token.name}</td>
+                  <td>
+                    <StatusPill tone={token.revoked ? "muted" : "success"}>
+                      {token.revoked ? dict.revoked : dict.active}
+                    </StatusPill>
+                  </td>
+                  <td>{new Date(token.createdAt).toLocaleString()}</td>
+                  <td>{token.lastUsedAt ? new Date(token.lastUsedAt).toLocaleString() : dict.never}</td>
+                  <td>
                     {!token.revoked && (
                       <form method="POST" action={`/settings/personal-access-tokens/${token.id}/revoke`}>
-                        <button type="submit">{dict.revoke}</button>
+                        <button type="submit" className="btn btn--secondary">
+                          {dict.revoke}
+                        </button>
                       </form>
                     )}
                   </td>
@@ -61,10 +63,12 @@ export default async function PersonalAccessTokensPage() {
       )}
 
       <h2>{dict.createTitle}</h2>
-      <form method="POST" action="/settings/personal-access-tokens/create" style={{ display: "flex", gap: 8 }}>
-        <input type="text" name="name" placeholder={dict.namePlaceholder} required style={{ flex: 1 }} />
-        <button type="submit">{dict.generate}</button>
+      <form method="POST" action="/settings/personal-access-tokens/create" className="cluster">
+        <input className="input" type="text" name="name" placeholder={dict.namePlaceholder} required style={{ flex: 1 }} />
+        <button type="submit" className="btn btn--primary">
+          {dict.generate}
+        </button>
       </form>
-    </main>
+    </Page>
   );
 }

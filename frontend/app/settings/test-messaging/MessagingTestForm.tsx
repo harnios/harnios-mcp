@@ -26,21 +26,15 @@ const MAX_RECENT_ATTEMPTS = 10;
 const MAX_TELEGRAM_TEXT_LENGTH = 4096;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const fieldStyle: React.CSSProperties = { display: "block", width: "100%", marginBottom: "0.5rem", padding: "0.4rem" };
-const sectionStyle: React.CSSProperties = { border: "1px solid #ddd", borderRadius: 6, padding: "1rem", marginBottom: "1rem" };
+// Server-component primitives can't be imported into a "use client" file
+// (spec 034), so this uses the shared CSS classes directly.
+const fieldStyle: React.CSSProperties = { marginBottom: "var(--space-2)" };
+const hintStyle: React.CSSProperties = { fontSize: "var(--text-sm)", margin: "0 0 var(--space-2)" };
 
 function ResultBanner({ dict, result }: { dict: Dict; result: TestResponse }) {
   const isSuccess = result.status === "success";
   return (
-    <p
-      style={{
-        marginTop: "0.5rem",
-        padding: "0.5rem 0.75rem",
-        borderRadius: 4,
-        background: isSuccess ? "#e6f4ea" : "#fdecea",
-        color: isSuccess ? "#1e4620" : "#611a15",
-      }}
-    >
+    <p role="alert" className={`banner banner--${isSuccess ? "success" : "danger"}`}>
       {isSuccess ? dict.success(result.destination) : dict.failure(result.errorCode ?? "delivery_failed", result.errorMessage ?? "")}
     </p>
   );
@@ -125,13 +119,14 @@ export function MessagingTestForm({ language }: { language: SupportedLanguage })
   }
 
   return (
-    <div>
-      <section style={sectionStyle}>
+    <div className="stack">
+      <section className="card">
         <h2>{dict.email.sectionTitle}</h2>
         <form onSubmit={handleEmailSubmit}>
           <label>
             {dict.email.toLabel}
             <input
+              className="input"
               type="email"
               value={to}
               onChange={(e) => setTo(e.target.value)}
@@ -143,6 +138,7 @@ export function MessagingTestForm({ language }: { language: SupportedLanguage })
           <label>
             {dict.email.subjectLabel}
             <input
+              className="input"
               type="text"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
@@ -154,6 +150,7 @@ export function MessagingTestForm({ language }: { language: SupportedLanguage })
           <label>
             {dict.email.bodyLabel}
             <textarea
+              className="input"
               value={emailBody}
               onChange={(e) => setEmailBody(e.target.value)}
               placeholder={dict.email.bodyPlaceholder}
@@ -162,11 +159,11 @@ export function MessagingTestForm({ language }: { language: SupportedLanguage })
               required
             />
           </label>
-          <label style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginBottom: "0.5rem" }}>
+          <label className="field field--inline">
             <input type="checkbox" checked={emailIsHtml} onChange={(e) => setEmailIsHtml(e.target.checked)} />
             {dict.email.htmlToggle}
           </label>
-          <button type="submit" disabled={emailPending}>
+          <button type="submit" className="btn btn--primary" disabled={emailPending}>
             {emailPending ? dict.email.sending : dict.email.submit}
           </button>
         </form>
@@ -174,12 +171,13 @@ export function MessagingTestForm({ language }: { language: SupportedLanguage })
         {emailResult && <ResultBanner dict={dict} result={emailResult} />}
       </section>
 
-      <section style={sectionStyle}>
+      <section className="card">
         <h2>{dict.telegram.sectionTitle}</h2>
         <form onSubmit={handleTelegramSubmit}>
           <label>
             {dict.telegram.chatIdLabel}
             <input
+              className="input"
               type="text"
               value={chatId}
               onChange={(e) => setChatId(e.target.value)}
@@ -187,10 +185,11 @@ export function MessagingTestForm({ language }: { language: SupportedLanguage })
               style={fieldStyle}
             />
           </label>
-          <p style={{ margin: "0 0 0.5rem", fontSize: "0.85rem", color: "#666" }}>{dict.telegram.chatIdHint}</p>
+          <p className="muted" style={hintStyle}>{dict.telegram.chatIdHint}</p>
           <label>
             {dict.telegram.textLabel}
             <textarea
+              className="input"
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder={dict.telegram.textPlaceholder}
@@ -200,10 +199,10 @@ export function MessagingTestForm({ language }: { language: SupportedLanguage })
               required
             />
           </label>
-          <p style={{ margin: "0 0 0.5rem", fontSize: "0.85rem", color: "#666" }}>
+          <p className="muted" style={hintStyle}>
             {dict.telegram.charCount(text.length, MAX_TELEGRAM_TEXT_LENGTH)}
           </p>
-          <button type="submit" disabled={telegramPending}>
+          <button type="submit" className="btn btn--primary" disabled={telegramPending}>
             {telegramPending ? dict.telegram.sending : dict.telegram.submit}
           </button>
         </form>
@@ -216,22 +215,22 @@ export function MessagingTestForm({ language }: { language: SupportedLanguage })
         {recentAttempts.length === 0 ? (
           <p>{dict.recent.empty}</p>
         ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <table className="table">
             <thead>
               <tr>
-                <th style={{ textAlign: "left", padding: "0.4rem", borderBottom: "1px solid #ddd" }}>{dict.recent.channel}</th>
-                <th style={{ textAlign: "left", padding: "0.4rem", borderBottom: "1px solid #ddd" }}>{dict.recent.destination}</th>
-                <th style={{ textAlign: "left", padding: "0.4rem", borderBottom: "1px solid #ddd" }}>{dict.recent.time}</th>
-                <th style={{ textAlign: "left", padding: "0.4rem", borderBottom: "1px solid #ddd" }}>{dict.recent.outcome}</th>
+                <th>{dict.recent.channel}</th>
+                <th>{dict.recent.destination}</th>
+                <th>{dict.recent.time}</th>
+                <th>{dict.recent.outcome}</th>
               </tr>
             </thead>
             <tbody>
               {recentAttempts.map((attempt, index) => (
                 <tr key={index}>
-                  <td style={{ padding: "0.4rem", borderBottom: "1px solid #eee" }}>{attempt.channel}</td>
-                  <td style={{ padding: "0.4rem", borderBottom: "1px solid #eee" }}>{attempt.destination}</td>
-                  <td style={{ padding: "0.4rem", borderBottom: "1px solid #eee" }}>{new Date(attempt.timestamp).toLocaleString()}</td>
-                  <td style={{ padding: "0.4rem", borderBottom: "1px solid #eee" }}>
+                  <td>{attempt.channel}</td>
+                  <td>{attempt.destination}</td>
+                  <td>{new Date(attempt.timestamp).toLocaleString()}</td>
+                  <td>
                     {attempt.result.status === "success" ? dict.recent.outcomeSuccess : dict.recent.outcomeFailure}
                   </td>
                 </tr>

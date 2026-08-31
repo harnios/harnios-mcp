@@ -74,6 +74,20 @@ export interface Dictionary {
      * without editing the URL by hand. */
     homeLink: string;
   };
+  /** Shared app header (spec 034) — primary navigation shown on every
+   * top-level page. */
+  nav: {
+    dashboard: string;
+    files: string;
+    tools: string;
+    schedules: string;
+    settings: string;
+    signOut: string;
+    /** aria-label for the <nav> element. */
+    menuLabel: string;
+    /** aria-label for the logo/home link. */
+    home: string;
+  };
   dashboard: {
     title: string;
     description: string;

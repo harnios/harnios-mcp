@@ -40,7 +40,7 @@ export function FileIcon() {
       height="14"
       viewBox="0 0 24 24"
       fill="none"
-      stroke="#888"
+      stroke="currentColor"
       strokeWidth={2}
       style={{ flexShrink: 0 }}
     >
@@ -111,7 +111,7 @@ export function DiagramIcon() {
 
 export function MarkupIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5b6b7a" strokeWidth={2} style={{ flexShrink: 0 }}>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} style={{ flexShrink: 0 }}>
       <path d={FILE_OUTLINE_PATH} strokeLinejoin="round" />
       <path d={FILE_FOLD_PATH} strokeLinejoin="round" />
       <path d="M9.5 12.5l-2.2 2.5 2.2 2.5M14.5 12.5l2.2 2.5-2.2 2.5" strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round" />
