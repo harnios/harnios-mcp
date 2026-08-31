@@ -8,6 +8,7 @@ import type { Dictionary } from "@/lib/i18n/dictionaries/types";
 const DASHBOARD_LINKS: { href: string; labelKey: keyof Dictionary["dashboard"]["links"] }[] = [
   { href: "/files", labelKey: "files" },
   { href: "/tools", labelKey: "tools" },
+  { href: "/tools/connections", labelKey: "externalMcpServers" },
   { href: "/settings/connected-apps", labelKey: "settingsConnectedApps" },
   { href: "/settings/personal-access-tokens", labelKey: "settingsPersonalAccessTokens" },
   { href: "/settings/test-messaging", labelKey: "settingsTestMessaging" },

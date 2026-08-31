@@ -80,6 +80,7 @@ export const it: Dictionary = {
     links: {
       files: "File",
       tools: "Strumenti",
+      externalMcpServers: "Server MCP esterni",
       settingsConnectedApps: "Impostazioni — App connesse",
       settingsPersonalAccessTokens: "Impostazioni — Token di accesso personali",
       settingsTestMessaging: "Impostazioni — Prova strumenti di messaggistica",

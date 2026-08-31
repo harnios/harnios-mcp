@@ -80,6 +80,7 @@ export interface Dictionary {
     links: {
       files: string;
       tools: string;
+      externalMcpServers: string;
       settingsConnectedApps: string;
       settingsPersonalAccessTokens: string;
       settingsTestMessaging: string;
