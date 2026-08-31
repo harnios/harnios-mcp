@@ -22,6 +22,11 @@
   --accent-hover: #4338ca;
   --accent-fg: #ffffff;
 
+  /* brand mark — the glowing teal dot from harnios.com (#4fd1c5),
+     nudged darker for light mode so it stays visible on a pale header */
+  --brand-teal: #0d9488;
+  --brand-glow: rgba(13, 148, 136, 0.5);
+
   /* semantic: each a foreground + a subtle background */
   --success-fg: #1e7d32;  --success-bg: #e6f4ea;
   --warning-fg: #8a6100;  --warning-bg: #fdf3d8;
@@ -79,6 +84,9 @@
     --accent: #8b83ff;
     --accent-hover: #a7a1ff;
     --accent-fg: #16171a;
+
+    --brand-teal: #4fd1c5;
+    --brand-glow: rgba(79, 209, 197, 0.55);
 
     --success-fg: #7bd88f;  --success-bg: #16281c;
     --warning-fg: #e8c06b;  --warning-bg: #2b2313;
@@ -320,12 +328,15 @@ table {
 .site-header__brand {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: 10px;
 }
 .site-header__brand:hover { text-decoration: none; }
 .site-header__name {
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   color: var(--text);
 }
 .site-nav {
@@ -342,17 +353,14 @@ table {
 .site-header__signout { margin-left: auto; }
 .site-header__signout form { margin: 0; }
 
+/* The harnios.com brand mark: a small glowing teal dot. */
 .logo-mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 7px;
-  background: var(--accent);
-  color: var(--accent-fg);
-  font-size: 13px;
-  font-weight: 700;
+  display: block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--brand-teal);
+  box-shadow: 0 0 8px var(--brand-glow);
   flex-shrink: 0;
 }
 

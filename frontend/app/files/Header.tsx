@@ -28,9 +28,7 @@ export function Header({
         <MenuIcon />
       </button>
       <a href="/" className="home-link" title={homeLinkLabel} aria-label={homeLinkLabel}>
-        <span className="logo-mark" aria-hidden="true">
-          {osName.charAt(0).toUpperCase()}
-        </span>
+        <span className="logo-mark" aria-hidden="true" />
         <span className="app-name">{osName}</span>
       </a>
       {/* Same primary nav as the shared SiteHeader (spec 034) — the editor is
@@ -68,23 +66,21 @@ export function Header({
           text-decoration: none;
         }
         .logo-mark {
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          width: 26px;
-          height: 26px;
-          border-radius: 7px;
-          background: var(--accent);
-          color: var(--accent-fg);
-          font-size: 13px;
-          font-weight: 700;
+          display: block;
+          width: 9px;
+          height: 9px;
+          border-radius: 50%;
+          background: var(--brand-teal);
+          box-shadow: 0 0 8px var(--brand-glow);
           flex-shrink: 0;
         }
         .app-name {
-          font-size: 15px;
-          font-weight: 600;
+          font-family: var(--font-mono);
+          font-size: 13px;
+          font-weight: 500;
           color: var(--text);
-          letter-spacing: -0.01em;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
         }
         .editor-nav {
           display: flex;

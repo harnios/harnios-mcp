@@ -29,9 +29,7 @@ export async function SiteHeader() {
   return (
     <header className="site-header">
       <a className="site-header__brand" href="/" aria-label={nav.home}>
-        <span className="logo-mark" aria-hidden="true">
-          {osName.charAt(0).toUpperCase()}
-        </span>
+        <span className="logo-mark" aria-hidden="true" />
         <span className="site-header__name">{osName}</span>
       </a>
       <nav className="site-nav" aria-label={nav.menuLabel}>
