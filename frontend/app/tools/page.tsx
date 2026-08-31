@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react";
 import { redirect } from "next/navigation";
 import { hasActiveOwnerSession } from "@/lib/oauth/session";
 import { TOOL_CATALOG } from "@/lib/mcp-tools/catalog";
@@ -8,9 +7,10 @@ import { getCachedCatalog, listExternalServerConnections } from "@/lib/external-
 import type { CachedToolCatalog } from "@/lib/external-mcp/types";
 import { resolveLanguage } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n/dictionaries";
-import { HomeLink } from "@/app/HomeLink";
-
-const cellStyle: CSSProperties = { textAlign: "left", padding: "0.5rem", borderBottom: "1px solid #ddd" };
+import { Page } from "@/app/_ui/Page";
+import { PageHeader } from "@/app/_ui/PageHeader";
+import { Banner } from "@/app/_ui/Banner";
+import { StatusPill } from "@/app/_ui/StatusPill";
 
 /** Lists every MCP tool, its current active/disabled status, and lets the owner change it (spec 024, spec 025). */
 export default async function ToolsPage({
@@ -54,46 +54,42 @@ export default async function ToolsPage({
     (a, b) => a.group.localeCompare(b.group) || a.name.localeCompare(b.name),
   );
 
-  const fullDict = getDictionary(await resolveLanguage());
-  const dict = fullDict.tools;
+  const dict = getDictionary(await resolveLanguage()).tools;
   const changedStatusLabel = to === "active" ? dict.active : to === "disabled" ? dict.disabled : undefined;
 
   return (
-    <main style={{ maxWidth: 720, margin: "2rem auto", fontFamily: "system-ui, sans-serif" }}>
-      <HomeLink label={fullDict.common.homeLink} />
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <h1>{dict.title}</h1>
-        <form method="POST" action="/oauth/logout">
-          <button type="submit">{dict.signOut}</button>
-        </form>
-      </div>
-      <p>{dict.description}</p>
+    <Page size="md">
+      <PageHeader title={dict.title} description={dict.description} />
       {changed && changedStatusLabel && (
-        <div style={{ border: "1px solid #ddd", borderRadius: 6, padding: "0.75rem 1rem", marginBottom: "1rem" }}>
-          <p style={{ margin: 0 }}>{dict.changedBanner(changed, changedStatusLabel)}</p>
-          <p style={{ margin: "0.5rem 0 0" }}>{dict.warningNotice}</p>
-        </div>
+        <Banner tone="info">
+          <p>{dict.changedBanner(changed, changedStatusLabel)}</p>
+          <p>{dict.warningNotice}</p>
+        </Banner>
       )}
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+      <table className="table">
         <thead>
           <tr>
-            <th style={cellStyle}>{dict.name}</th>
-            <th style={cellStyle}>{dict.group}</th>
-            <th style={cellStyle}>{dict.sourceHeader}</th>
-            <th style={cellStyle}>{dict.status}</th>
-            <th style={cellStyle} />
+            <th>{dict.name}</th>
+            <th>{dict.group}</th>
+            <th>{dict.sourceHeader}</th>
+            <th>{dict.status}</th>
+            <th />
           </tr>
         </thead>
         <tbody>
           {rows.map((tool) => (
             <tr key={tool.name}>
-              <td style={cellStyle}>
+              <td>
                 <code>{tool.name}</code>
               </td>
-              <td style={cellStyle}>{tool.group}</td>
-              <td style={cellStyle}>{tool.source ? dict.sourceExternal(tool.source) : dict.sourceNative}</td>
-              <td style={cellStyle}>{tool.enabled ? dict.active : dict.disabled}</td>
-              <td style={cellStyle}>
+              <td>{tool.group}</td>
+              <td>{tool.source ? dict.sourceExternal(tool.source) : dict.sourceNative}</td>
+              <td>
+                <StatusPill tone={tool.enabled ? "success" : "muted"}>
+                  {tool.enabled ? dict.active : dict.disabled}
+                </StatusPill>
+              </td>
+              <td>
                 <a href={`/tools/${encodeURIComponent(tool.name)}/confirm?to=${tool.enabled ? "disabled" : "active"}`}>
                   {tool.enabled ? dict.disableAction : dict.enableAction}
                 </a>
@@ -102,6 +98,6 @@ export default async function ToolsPage({
           ))}
         </tbody>
       </table>
-    </main>
+    </Page>
   );
 }

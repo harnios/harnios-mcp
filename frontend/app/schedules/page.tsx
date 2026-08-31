@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react";
 import { redirect } from "next/navigation";
 import { hasActiveOwnerSession } from "@/lib/oauth/session";
 import { listSchedules } from "@/lib/scheduler/parseSchedule";
@@ -7,9 +6,10 @@ import type { LastRunRecord } from "@/lib/scheduler/types";
 import { SUPPORTED_MODELS } from "@/lib/scheduler/models";
 import { resolveLanguage } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n/dictionaries";
-import { HomeLink } from "@/app/HomeLink";
-
-const cellStyle: CSSProperties = { textAlign: "left", padding: "0.5rem", borderBottom: "1px solid #ddd" };
+import { Page } from "@/app/_ui/Page";
+import { PageHeader } from "@/app/_ui/PageHeader";
+import { Banner } from "@/app/_ui/Banner";
+import { StatusPill } from "@/app/_ui/StatusPill";
 
 function modelLabel(id: string): string {
   return SUPPORTED_MODELS.find((model) => model.id === id)?.label ?? id;
@@ -27,8 +27,7 @@ export default async function SchedulesPage({
   }
 
   const { changed, to } = await searchParams;
-  const fullDict = getDictionary(await resolveLanguage());
-  const dict = fullDict.schedules;
+  const dict = getDictionary(await resolveLanguage()).schedules;
   const changedStatusLabel =
     to === "enabled" ? dict.enabledLabel : to === "disabled" ? dict.disabledLabel : to === "removed" ? dict.removedLabel : undefined;
 
@@ -42,29 +41,27 @@ export default async function SchedulesPage({
   );
 
   return (
-    <main style={{ maxWidth: 900, margin: "2rem auto", fontFamily: "system-ui, sans-serif" }}>
-      <HomeLink label={fullDict.common.homeLink} />
-      <h1>{dict.title}</h1>
-      <p>{dict.description}</p>
+    <Page size="lg">
+      <PageHeader title={dict.title} description={dict.description} />
 
       {changed && changedStatusLabel && (
-        <div style={{ border: "1px solid #ddd", borderRadius: 6, padding: "0.75rem 1rem", marginBottom: "1rem" }}>
-          <p style={{ margin: 0 }}>{dict.changedBanner(changed, changedStatusLabel)}</p>
-        </div>
+        <Banner tone="info">
+          <p>{dict.changedBanner(changed, changedStatusLabel)}</p>
+        </Banner>
       )}
 
       {schedules.length === 0 ? (
         <p>{dict.empty}</p>
       ) : (
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <table className="table">
           <thead>
             <tr>
-              <th style={cellStyle}>{dict.nameHeader}</th>
-              <th style={cellStyle}>{dict.cronHeader}</th>
-              <th style={cellStyle}>{dict.modelHeader}</th>
-              <th style={cellStyle}>{dict.statusHeader}</th>
-              <th style={cellStyle}>{dict.lastRunHeader}</th>
-              <th style={cellStyle} />
+              <th>{dict.nameHeader}</th>
+              <th>{dict.cronHeader}</th>
+              <th>{dict.modelHeader}</th>
+              <th>{dict.statusHeader}</th>
+              <th>{dict.lastRunHeader}</th>
+              <th />
             </tr>
           </thead>
           <tbody>
@@ -74,31 +71,39 @@ export default async function SchedulesPage({
                 const lastRun = lastRuns.get(schedule.id);
                 return (
                   <tr key={schedule.id}>
-                    <td style={cellStyle}>
+                    <td>
                       <a href={`/schedules/${schedule.id}`}>{schedule.name}</a>
                     </td>
-                    <td style={cellStyle}>
+                    <td>
                       <code>
                         {schedule.cron}
                         {schedule.timezone ? ` (${schedule.timezone})` : ""}
                       </code>
                     </td>
-                    <td style={cellStyle}>{modelLabel(schedule.model)}</td>
-                    <td style={cellStyle}>{schedule.enabled ? dict.enabledLabel : dict.disabledLabel}</td>
-                    <td style={cellStyle}>
+                    <td>{modelLabel(schedule.model)}</td>
+                    <td>
+                      <StatusPill tone={schedule.enabled ? "success" : "muted"}>
+                        {schedule.enabled ? dict.enabledLabel : dict.disabledLabel}
+                      </StatusPill>
+                    </td>
+                    <td>
                       {lastRun
                         ? `${lastRun.lastStatus} — ${new Date(lastRun.lastRunAt).toLocaleString()}`
                         : dict.neverRun}
                     </td>
-                    <td style={cellStyle}>
-                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <td>
+                      <div className="cluster">
                         <a href={`/schedules/${schedule.id}/edit`}>{dict.editAction}</a>
                         <form method="POST" action={`/schedules/${schedule.id}/enabled`}>
                           <input type="hidden" name="to" value={schedule.enabled ? "disabled" : "enabled"} />
-                          <button type="submit">{schedule.enabled ? dict.disableAction : dict.enableAction}</button>
+                          <button type="submit" className="btn btn--secondary">
+                            {schedule.enabled ? dict.disableAction : dict.enableAction}
+                          </button>
                         </form>
                         <form method="POST" action={`/schedules/${schedule.id}/run`}>
-                          <button type="submit">{dict.runNowAction}</button>
+                          <button type="submit" className="btn btn--secondary">
+                            {dict.runNowAction}
+                          </button>
                         </form>
                         <a href={`/schedules/${schedule.id}`}>{dict.historyLink}</a>
                         <a href={`/schedules/${schedule.id}/confirm?to=removed`}>{dict.removeAction}</a>
@@ -114,6 +119,6 @@ export default async function SchedulesPage({
       <p>
         <a href="/schedules/new">{dict.newLink}</a>
       </p>
-    </main>
+    </Page>
   );
 }

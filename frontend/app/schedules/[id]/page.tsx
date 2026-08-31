@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react";
 import { notFound, redirect } from "next/navigation";
 import { hasActiveOwnerSession } from "@/lib/oauth/session";
 import { getSchedule } from "@/lib/scheduler/parseSchedule";
@@ -7,9 +6,9 @@ import type { ScheduleRunRecord } from "@/lib/scheduler/types";
 import { SUPPORTED_MODELS } from "@/lib/scheduler/models";
 import { resolveLanguage } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n/dictionaries";
-import { HomeLink } from "@/app/HomeLink";
-
-const cellStyle: CSSProperties = { textAlign: "left", padding: "0.5rem", borderBottom: "1px solid #ddd" };
+import { Page } from "@/app/_ui/Page";
+import { PageHeader } from "@/app/_ui/PageHeader";
+import { Banner } from "@/app/_ui/Banner";
 
 /** Shows a Scheduled Task's current definition and full execution history, newest first (spec 032, US3, FR-016). */
 export default async function ScheduleDetailPage({
@@ -29,8 +28,7 @@ export default async function ScheduleDetailPage({
   if (!schedule) notFound();
 
   const { alreadyRunning } = await searchParams;
-  const fullDict = getDictionary(await resolveLanguage());
-  const dict = fullDict.schedules;
+  const dict = getDictionary(await resolveLanguage()).schedules;
   const modelLabel = SUPPORTED_MODELS.find((model) => model.id === schedule.model)?.label ?? schedule.model;
 
   const allRuns = await listRecords<ScheduleRunRecord>("runs/");
@@ -39,13 +37,12 @@ export default async function ScheduleDetailPage({
     .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
 
   return (
-    <main style={{ maxWidth: 900, margin: "2rem auto", fontFamily: "system-ui, sans-serif" }}>
-      <HomeLink label={fullDict.common.homeLink} />
-      <h1>{schedule.name}</h1>
+    <Page size="lg">
+      <PageHeader title={schedule.name} />
       {alreadyRunning === "true" && (
-        <div style={{ border: "1px solid #ddd", borderRadius: 6, padding: "0.75rem 1rem", marginBottom: "1rem" }}>
-          <p style={{ margin: 0 }}>{dict.runNowAlreadyRunning}</p>
-        </div>
+        <Banner tone="info">
+          <p>{dict.runNowAlreadyRunning}</p>
+        </Banner>
       )}
       <p>
         <code>
@@ -54,10 +51,12 @@ export default async function ScheduleDetailPage({
         </code>{" "}
         · {modelLabel} · {schedule.enabled ? dict.enabledLabel : dict.disabledLabel}
       </p>
-      <div style={{ display: "flex", gap: 8, marginBottom: "1.5rem" }}>
+      <div className="cluster" style={{ marginBottom: "var(--space-5)" }}>
         <a href={`/schedules/${schedule.id}/edit`}>{dict.editAction}</a>
         <form method="POST" action={`/schedules/${schedule.id}/run`}>
-          <button type="submit">{dict.runNowAction}</button>
+          <button type="submit" className="btn btn--secondary">
+            {dict.runNowAction}
+          </button>
         </form>
         <a href={`/schedules/${schedule.id}/confirm?to=removed`}>{dict.removeAction}</a>
         <a href="/schedules">{dict.backLink}</a>
@@ -67,29 +66,29 @@ export default async function ScheduleDetailPage({
       {runs.length === 0 ? (
         <p>{dict.historyEmpty}</p>
       ) : (
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <table className="table">
           <thead>
             <tr>
-              <th style={cellStyle}>{dict.startedAtHeader}</th>
-              <th style={cellStyle}>{dict.statusHeader}</th>
-              <th style={cellStyle}>{dict.summaryHeader}</th>
+              <th>{dict.startedAtHeader}</th>
+              <th>{dict.statusHeader}</th>
+              <th>{dict.summaryHeader}</th>
             </tr>
           </thead>
           <tbody>
             {runs.map((run) => (
               <tr key={run.runId}>
-                <td style={cellStyle}>
+                <td>
                   {new Date(run.startedAt).toLocaleString()}
                   {" — "}
                   {run.trigger === "manual" ? dict.triggerManual : dict.triggerScheduled}
                 </td>
-                <td style={cellStyle}>{run.status === "success" ? dict.statusSuccess : dict.statusFailure}</td>
-                <td style={cellStyle}>{run.summary}</td>
+                <td>{run.status === "success" ? dict.statusSuccess : dict.statusFailure}</td>
+                <td>{run.summary}</td>
               </tr>
             ))}
           </tbody>
         </table>
       )}
-    </main>
+    </Page>
   );
 }
