@@ -352,7 +352,9 @@ table {
 .site-nav {
   display: flex;
   gap: var(--space-4);
-  flex: 1;
+  /* Pushed to the right, like harnios.com — so the nav's start position
+     doesn't shift with the length of the OS instance name. */
+  margin-left: auto;
 }
 .site-nav a { color: var(--text-muted); }
 .site-nav a:hover { color: var(--text); text-decoration: none; }
@@ -360,7 +362,6 @@ table {
   color: var(--text);
   font-weight: 600;
 }
-.site-header__signout { margin-left: auto; }
 .site-header__signout form { margin: 0; }
 
 /* The harnios.com brand mark: a small glowing teal dot. */
@@ -390,5 +391,8 @@ table {
   }
   .site-header__instance {
     display: none;
+  }
+  .site-header__signout {
+    margin-left: auto;
   }
 }

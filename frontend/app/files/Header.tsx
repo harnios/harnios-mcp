@@ -96,7 +96,7 @@ export function Header({
         .editor-nav {
           display: flex;
           gap: 16px;
-          margin-left: 8px;
+          margin-left: auto;
           min-width: 0;
           overflow-x: auto;
           scrollbar-width: none;
