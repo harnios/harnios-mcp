@@ -4,27 +4,16 @@ import { useMemo, useState, type CSSProperties } from "react";
 import { getDictionary, type Dictionary } from "@/lib/i18n/dictionaries";
 import type { SupportedLanguage } from "@/lib/i18n/languages";
 
-const INPUT_STYLE: CSSProperties = {
-  display: "block",
-  width: "100%",
-  padding: "0.5rem",
-  marginBottom: "0.75rem",
-  boxSizing: "border-box",
-};
+// The shared `.input` class (spec 034) handles the box itself; only the
+// per-field bottom spacing is kept here since these inputs aren't wrapped
+// in a <Field> (this is a client component and can't import it).
+const INPUT_STYLE: CSSProperties = { marginBottom: "var(--space-3)" };
 
 const PRE_STYLE: CSSProperties = {
-  background: "#f5f5f5",
+  background: "var(--surface)",
   padding: "1rem",
   overflowWrap: "anywhere",
   whiteSpace: "pre-wrap",
-};
-
-const ERROR_BOX_STYLE: CSSProperties = {
-  background: "#fdeceb",
-  border: "1px solid #b00020",
-  borderRadius: 4,
-  padding: "0.75rem 1rem",
-  marginBottom: "1.5rem",
 };
 
 interface Fields {
@@ -95,6 +84,7 @@ function CopyButton({ text, dict }: { text: string; dict: Dictionary["init"]["en
   return (
     <button
       type="button"
+      className="btn btn--secondary"
       onClick={() => {
         void navigator.clipboard.writeText(text);
         setCopied(true);
@@ -171,7 +161,7 @@ export function EnvSetupHelper({
       <p>{dict.description}</p>
 
       {connectionErrorMessage && (
-        <div style={ERROR_BOX_STYLE}>
+        <div className="banner banner--danger">
           <strong>{dict.connectionErrorHeading}</strong>
           <pre style={{ ...PRE_STYLE, background: "transparent", padding: 0, marginTop: "0.5rem" }}>
             {connectionErrorMessage}
@@ -183,7 +173,7 @@ export function EnvSetupHelper({
 
       <label htmlFor="endpoint">{dict.endpoint}</label>
       <input
-        style={INPUT_STYLE}
+        className="input" style={INPUT_STYLE}
         id="endpoint"
         type="text"
         placeholder="http://localhost:9000"
@@ -193,7 +183,7 @@ export function EnvSetupHelper({
 
       <label htmlFor="region">{dict.region}</label>
       <input
-        style={INPUT_STYLE}
+        className="input" style={INPUT_STYLE}
         id="region"
         type="text"
         value={fields.region}
@@ -202,7 +192,7 @@ export function EnvSetupHelper({
 
       <label htmlFor="accessKeyId">{dict.accessKeyId}</label>
       <input
-        style={INPUT_STYLE}
+        className="input" style={INPUT_STYLE}
         id="accessKeyId"
         type="text"
         value={fields.accessKeyId}
@@ -211,7 +201,7 @@ export function EnvSetupHelper({
 
       <label htmlFor="secretAccessKey">{dict.secretAccessKey}</label>
       <input
-        style={INPUT_STYLE}
+        className="input" style={INPUT_STYLE}
         id="secretAccessKey"
         type="password"
         value={fields.secretAccessKey}
@@ -220,7 +210,7 @@ export function EnvSetupHelper({
 
       <label htmlFor="bucket">{dict.bucket}</label>
       <input
-        style={INPUT_STYLE}
+        className="input" style={INPUT_STYLE}
         id="bucket"
         type="text"
         value={fields.bucket}
@@ -241,7 +231,7 @@ export function EnvSetupHelper({
 
       <label htmlFor="ownerUsername">{dict.username}</label>
       <input
-        style={INPUT_STYLE}
+        className="input" style={INPUT_STYLE}
         id="ownerUsername"
         type="text"
         value={fields.ownerUsername}
@@ -250,7 +240,7 @@ export function EnvSetupHelper({
 
       <label htmlFor="ownerPassword">{dict.password}</label>
       <input
-        style={INPUT_STYLE}
+        className="input" style={INPUT_STYLE}
         id="ownerPassword"
         type="password"
         value={fields.ownerPassword}
@@ -261,7 +251,7 @@ export function EnvSetupHelper({
 
       <label htmlFor="osName">{dict.systemNameLabel}</label>
       <input
-        style={INPUT_STYLE}
+        className="input" style={INPUT_STYLE}
         id="osName"
         type="text"
         placeholder="harness-mcp"
@@ -276,7 +266,7 @@ export function EnvSetupHelper({
 
       <label htmlFor="smtpHost">{dict.smtpHost}</label>
       <input
-        style={INPUT_STYLE}
+        className="input" style={INPUT_STYLE}
         id="smtpHost"
         type="text"
         value={fields.smtpHost}
@@ -285,7 +275,7 @@ export function EnvSetupHelper({
 
       <label htmlFor="smtpPort">{dict.smtpPort}</label>
       <input
-        style={INPUT_STYLE}
+        className="input" style={INPUT_STYLE}
         id="smtpPort"
         type="text"
         value={fields.smtpPort}
@@ -303,7 +293,7 @@ export function EnvSetupHelper({
 
       <label htmlFor="smtpUser">{dict.smtpUser}</label>
       <input
-        style={INPUT_STYLE}
+        className="input" style={INPUT_STYLE}
         id="smtpUser"
         type="text"
         value={fields.smtpUser}
@@ -312,7 +302,7 @@ export function EnvSetupHelper({
 
       <label htmlFor="smtpPassword">{dict.smtpPassword}</label>
       <input
-        style={INPUT_STYLE}
+        className="input" style={INPUT_STYLE}
         id="smtpPassword"
         type="password"
         value={fields.smtpPassword}
@@ -321,7 +311,7 @@ export function EnvSetupHelper({
 
       <label htmlFor="smtpFrom">{dict.smtpFrom}</label>
       <input
-        style={INPUT_STYLE}
+        className="input" style={INPUT_STYLE}
         id="smtpFrom"
         type="text"
         placeholder="Risorse OS <noreply@example.com>"
@@ -333,7 +323,7 @@ export function EnvSetupHelper({
 
       <label htmlFor="telegramBotToken">{dict.telegramBotToken}</label>
       <input
-        style={INPUT_STYLE}
+        className="input" style={INPUT_STYLE}
         id="telegramBotToken"
         type="password"
         value={fields.telegramBotToken}
@@ -342,7 +332,7 @@ export function EnvSetupHelper({
 
       <label htmlFor="telegramChatId">{dict.telegramChatId}</label>
       <input
-        style={INPUT_STYLE}
+        className="input" style={INPUT_STYLE}
         id="telegramChatId"
         type="text"
         placeholder="123456789"
@@ -354,7 +344,7 @@ export function EnvSetupHelper({
 
       <label htmlFor="rateLimitMax">{dict.rateLimitMax}</label>
       <input
-        style={INPUT_STYLE}
+        className="input" style={INPUT_STYLE}
         id="rateLimitMax"
         type="text"
         value={fields.rateLimitMax}
@@ -363,7 +353,7 @@ export function EnvSetupHelper({
 
       <label htmlFor="rateLimitWindowMinutes">{dict.rateLimitWindowMinutes}</label>
       <input
-        style={INPUT_STYLE}
+        className="input" style={INPUT_STYLE}
         id="rateLimitWindowMinutes"
         type="text"
         value={fields.rateLimitWindowMinutes}

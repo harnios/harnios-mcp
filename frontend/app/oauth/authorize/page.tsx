@@ -1,16 +1,12 @@
-import type { CSSProperties } from "react";
 import { redirect } from "next/navigation";
 import { getRecord } from "@/lib/oauth/store";
 import type { RegisteredClient } from "@/lib/oauth/types";
 import { hasActiveOwnerSession } from "@/lib/oauth/session";
 import { resolveLanguage } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n/dictionaries";
-
-const PAGE_STYLE: CSSProperties = {
-  maxWidth: 420,
-  margin: "4rem auto",
-  fontFamily: "system-ui, sans-serif",
-};
+import { Page } from "@/app/_ui/Page";
+import { PageHeader } from "@/app/_ui/PageHeader";
+import { Button } from "@/app/_ui/Button";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -20,10 +16,10 @@ function first(value: string | string[] | undefined): string | undefined {
 
 function ErrorPage({ message, title }: { message: string; title: string }) {
   return (
-    <main style={PAGE_STYLE}>
-      <h1>{title}</h1>
+    <Page size="xs">
+      <PageHeader title={title} />
       <p>{message}</p>
-    </main>
+    </Page>
   );
 }
 
@@ -67,21 +63,21 @@ export default async function AuthorizePage({ searchParams }: { searchParams: Pr
   }
 
   return (
-    <main style={PAGE_STYLE}>
-      <h1>{dict.title}</h1>
+    <Page size="xs">
+      <PageHeader title={dict.title} />
       <p>{dict.requesting(client.clientName)}</p>
-      <form method="POST" action="/oauth/authorize/decision">
+      <form method="POST" action="/oauth/authorize/decision" className="cluster">
         <input type="hidden" name="client_id" value={clientId} />
         <input type="hidden" name="redirect_uri" value={redirectUri} />
         <input type="hidden" name="state" value={state} />
         <input type="hidden" name="code_challenge" value={codeChallenge} />
-        <button type="submit" name="decision" value="approve">
+        <Button type="submit" name="decision" value="approve">
           {dict.approve}
-        </button>{" "}
-        <button type="submit" name="decision" value="deny">
+        </Button>
+        <Button type="submit" name="decision" value="deny" variant="secondary">
           {dict.deny}
-        </button>
+        </Button>
       </form>
-    </main>
+    </Page>
   );
 }

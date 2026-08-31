@@ -133,6 +133,15 @@ code, pre, kbd, samp {
   font-size: 0.9em;
 }
 
+pre {
+  background: var(--surface);
+  padding: var(--space-3);
+  border-radius: var(--radius);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 button, input, select, textarea {
   font: inherit;
   color: inherit;

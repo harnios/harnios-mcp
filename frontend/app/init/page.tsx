@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { checkOsStatus } from "@/lib/os/init";
@@ -9,15 +8,12 @@ import { detectBrowserLanguage } from "@/lib/i18n/detect";
 import { resolveLanguage } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { requestOrigin } from "@/lib/http";
+import { Page } from "@/app/_ui/Page";
+import { PageHeader } from "@/app/_ui/PageHeader";
+import { Button } from "@/app/_ui/Button";
 import { EnvSetupHelper } from "./EnvSetupHelper";
 import { LanguageConfirm } from "./LanguageConfirm";
 import { McpConnectManual } from "./McpConnectManual";
-
-const PAGE_STYLE: CSSProperties = {
-  maxWidth: 640,
-  margin: "4rem auto",
-  fontFamily: "system-ui, sans-serif",
-};
 
 /** Bootstraps a fresh Company OS in the configured storage bucket (spec 014). */
 export default async function InitPage({
@@ -38,9 +34,9 @@ export default async function InitPage({
     const language = detectBrowserLanguage(hdrs.get("accept-language"));
 
     return (
-      <main style={PAGE_STYLE}>
+      <Page size="sm">
         <EnvSetupHelper language={language} connectionErrorMessage={err.message} />
-      </main>
+      </Page>
     );
   }
 
@@ -56,10 +52,9 @@ export default async function InitPage({
 
   if (status === "partial") {
     return (
-      <main style={PAGE_STYLE}>
-        <h1>{dict.init.unexpectedStateTitle}</h1>
-        <p>{dict.init.unexpectedStateBody}</p>
-      </main>
+      <Page size="sm">
+        <PageHeader title={dict.init.unexpectedStateTitle} description={dict.init.unexpectedStateBody} />
+      </Page>
     );
   }
 
@@ -68,21 +63,20 @@ export default async function InitPage({
     const mcpUrl = `${requestOrigin({ headers: hdrs })}/mcp`;
 
     return (
-      <main style={PAGE_STYLE}>
+      <Page size="sm">
         <McpConnectManual mcpUrl={mcpUrl} justCreated={params.created === "1"} dict={dict.init.mcpConnect} />
-      </main>
+      </Page>
     );
   }
 
   return (
-    <main style={PAGE_STYLE}>
-      <h1>{dict.init.setupTitle}</h1>
-      <p>{dict.init.setupDescription}</p>
+    <Page size="sm">
+      <PageHeader title={dict.init.setupTitle} description={dict.init.setupDescription} />
       <p>{dict.init.languagePrompt}</p>
-      <form method="POST" action="/init/submit">
+      <form method="POST" action="/init/submit" className="stack">
         <LanguageConfirm detected={language} />
-        <button type="submit">{dict.init.submit}</button>
+        <Button type="submit">{dict.init.submit}</Button>
       </form>
-    </main>
+    </Page>
   );
 }
