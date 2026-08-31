@@ -74,6 +74,16 @@ export const ru: Dictionary = {
   common: {
     homeLink: "Назад на главную",
   },
+  nav: {
+    dashboard: "Панель",
+    files: "Файлы",
+    tools: "Инструменты",
+    schedules: "Расписания",
+    settings: "Настройки",
+    signOut: "Выйти",
+    menuLabel: "Основное",
+    home: "Главная",
+  },
   dashboard: {
     title: "Панель управления",
     description: "Всё, что предлагает этот MCP-сервер, в одном месте.",
