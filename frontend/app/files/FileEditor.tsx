@@ -286,15 +286,15 @@ export function FileEditor({ path, onDirtyChange, dict, csvDict }: FileEditorPro
   }
 
   if (!path || state.status === "idle") {
-    return <p style={{ color: "#888" }}>{dict.selectPrompt}</p>;
+    return <p style={{ color: "var(--text-muted)" }}>{dict.selectPrompt}</p>;
   }
   if (state.status === "loading") {
-    return <p style={{ color: "#888" }}>{dict.loading(path)}</p>;
+    return <p style={{ color: "var(--text-muted)" }}>{dict.loading(path)}</p>;
   }
   if (state.status === "unsupported") {
     return (
       <div>
-        <p style={{ color: "#888" }}>{state.message}</p>
+        <p style={{ color: "var(--text-muted)" }}>{state.message}</p>
         <a
           href={`/api/file/download?path=${encodeURIComponent(path)}`}
           target="_blank"
@@ -306,10 +306,10 @@ export function FileEditor({ path, onDirtyChange, dict, csvDict }: FileEditorPro
     );
   }
   if (state.status === "folder") {
-    return <p style={{ color: "#888" }}>{state.message}</p>;
+    return <p style={{ color: "var(--text-muted)" }}>{state.message}</p>;
   }
   if (state.status === "error") {
-    return <p style={{ color: "crimson" }}>{state.message}</p>;
+    return <p style={{ color: "var(--danger-fg)" }}>{state.message}</p>;
   }
 
   const { session } = state;
@@ -319,14 +319,15 @@ export function FileEditor({ path, onDirtyChange, dict, csvDict }: FileEditorPro
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8, flexWrap: "wrap" }}>
         <h3 style={{ margin: 0, overflowWrap: "anywhere" }}>{session.path}</h3>
         {(session.kind === "markdown" || session.kind === "csv") && (
-          <div style={{ display: "inline-flex", border: "1px solid #ddd", borderRadius: 6, overflow: "hidden" }}>
+          <div style={{ display: "inline-flex", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
             <button
               type="button"
               onClick={() => setMode("preview")}
               style={{
                 padding: "6px 12px",
                 border: "none",
-                background: mode === "preview" ? "#eee" : "#fff",
+                background: mode === "preview" ? "var(--surface)" : "var(--surface-raised)",
+                color: "var(--text)",
                 fontWeight: mode === "preview" ? 600 : 400,
                 cursor: "pointer",
               }}
@@ -339,8 +340,9 @@ export function FileEditor({ path, onDirtyChange, dict, csvDict }: FileEditorPro
               style={{
                 padding: "6px 12px",
                 border: "none",
-                borderLeft: "1px solid #ddd",
-                background: mode === "edit" ? "#eee" : "#fff",
+                borderLeft: "1px solid var(--border)",
+                background: mode === "edit" ? "var(--surface)" : "var(--surface-raised)",
+                color: "var(--text)",
                 fontWeight: mode === "edit" ? 600 : 400,
                 cursor: "pointer",
               }}
@@ -349,16 +351,21 @@ export function FileEditor({ path, onDirtyChange, dict, csvDict }: FileEditorPro
             </button>
           </div>
         )}
-        {dirty && <span style={{ color: "#b8860b" }}>{dict.unsavedChanges}</span>}
-        <button onClick={handleSave} disabled={session.saveState === "saving" || !dirty}>
+        {dirty && <span style={{ color: "var(--warning-fg)" }}>{dict.unsavedChanges}</span>}
+        <button
+          type="button"
+          className="btn btn--primary"
+          onClick={handleSave}
+          disabled={session.saveState === "saving" || !dirty}
+        >
           {session.saveState === "saving" ? dict.saving : dict.save}
         </button>
         {session.saveState === "idle" && !dirty && session.loadedContent !== "" && (
-          <span style={{ color: "#2e7d32" }}>{dict.saved}</span>
+          <span style={{ color: "var(--success-fg)" }}>{dict.saved}</span>
         )}
       </div>
       {session.saveState === "error" && (
-        <p style={{ color: "crimson" }}>{dict.saveFailed(session.saveError ?? "")}</p>
+        <p style={{ color: "var(--danger-fg)" }}>{dict.saveFailed(session.saveError ?? "")}</p>
       )}
       {session.externalChange && !session.externalChange.dismissed && (
         <ExternalChangeBanner onReload={handleReloadExternal} onKeepMine={handleKeepMine} dict={dict} />

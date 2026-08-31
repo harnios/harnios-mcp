@@ -91,7 +91,6 @@ export default function EditorApp({ osName, language }: { osName: string; langua
           display: flex;
           flex-direction: column;
           height: 100vh;
-          font-family: system-ui, sans-serif;
         }
         .body-row {
           display: flex;
@@ -102,7 +101,7 @@ export default function EditorApp({ osName, language }: { osName: string; langua
         .sidebar {
           width: 280px;
           flex-shrink: 0;
-          border-right: 1px solid #ddd;
+          border-right: 1px solid var(--border);
           overflow: auto;
           padding: 12px;
         }
@@ -119,15 +118,15 @@ export default function EditorApp({ osName, language }: { osName: string; langua
         @media (max-width: 768px) {
           .sidebar {
             position: fixed;
-            top: 52px;
+            top: var(--header-h);
             bottom: 0;
             left: 0;
             width: min(85vw, 320px);
-            background: #fff;
+            background: var(--surface-raised);
             z-index: 25;
             transform: translateX(-100%);
             transition: transform 0.2s ease;
-            box-shadow: 2px 0 12px rgba(0, 0, 0, 0.2);
+            box-shadow: var(--shadow-2);
           }
           .sidebar-open {
             transform: translateX(0);
@@ -135,7 +134,7 @@ export default function EditorApp({ osName, language }: { osName: string; langua
           .sidebar-backdrop {
             display: block;
             position: fixed;
-            top: 52px;
+            top: var(--header-h);
             left: 0;
             right: 0;
             bottom: 0;

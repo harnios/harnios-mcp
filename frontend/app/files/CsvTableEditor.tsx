@@ -18,15 +18,15 @@ const thStyle: CSSProperties = {
   top: 0,
   textAlign: "left",
   padding: "6px 12px",
-  background: "#eee",
+  background: "var(--surface)",
   fontWeight: 600,
-  borderBottom: "1px solid #ddd",
+  borderBottom: "1px solid var(--border)",
   whiteSpace: "nowrap",
 };
 
 const tdStyle: CSSProperties = {
   padding: "6px 12px",
-  borderBottom: "1px solid #f0f0f0",
+  borderBottom: "1px solid var(--border)",
   whiteSpace: "nowrap",
 };
 
@@ -41,18 +41,18 @@ export function CsvTableEditor({ value, onChange, mode, dict }: CsvTableEditorPr
   const { headers, rows, truncated, totalRowCount } = parseCsv(value);
 
   if (headers.length === 0 && rows.length === 0) {
-    return <p style={{ color: "#888" }}>{dict.empty}</p>;
+    return <p style={{ color: "var(--text-muted)" }}>{dict.empty}</p>;
   }
 
   const columnCount = Math.max(headers.length, ...rows.map((row) => row.length));
 
   return (
     <div>
-      <p style={{ color: "#666" }}>{dict.summary(totalRowCount, columnCount)}</p>
+      <p style={{ color: "var(--text-muted)" }}>{dict.summary(totalRowCount, columnCount)}</p>
       {truncated && (
-        <p style={{ color: "#b8860b" }}>{dict.truncated(rows.length, totalRowCount)}</p>
+        <p style={{ color: "var(--warning-fg)" }}>{dict.truncated(rows.length, totalRowCount)}</p>
       )}
-      <div style={{ maxHeight: "60vh", overflow: "auto", border: "1px solid #ddd" }}>
+      <div style={{ maxHeight: "60vh", overflow: "auto", border: "1px solid var(--border)" }}>
         <table style={{ borderCollapse: "collapse", width: "100%" }}>
           <thead>
             <tr>
@@ -78,7 +78,7 @@ export function CsvTableEditor({ value, onChange, mode, dict }: CsvTableEditorPr
             })}
           </tbody>
         </table>
-        {rows.length === 0 && <p style={{ color: "#888", padding: "6px 12px" }}>{dict.noRows}</p>}
+        {rows.length === 0 && <p style={{ color: "var(--text-muted)", padding: "6px 12px" }}>{dict.noRows}</p>}
       </div>
     </div>
   );

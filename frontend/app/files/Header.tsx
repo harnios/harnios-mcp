@@ -35,11 +35,11 @@ export function Header({
           display: flex;
           align-items: center;
           gap: 10px;
-          height: 52px;
+          height: var(--header-h);
           flex-shrink: 0;
           padding: 0 16px;
-          border-bottom: 1px solid #e5e5e5;
-          background: #fff;
+          border-bottom: 1px solid var(--border);
+          background: var(--surface-raised);
         }
         .sidebar-toggle {
           display: none;
@@ -57,8 +57,8 @@ export function Header({
           width: 26px;
           height: 26px;
           border-radius: 7px;
-          background: #4f46e5;
-          color: #fff;
+          background: var(--accent);
+          color: var(--accent-fg);
           font-size: 13px;
           font-weight: 700;
           flex-shrink: 0;
@@ -66,7 +66,7 @@ export function Header({
         .app-name {
           font-size: 15px;
           font-weight: 600;
-          color: #1a1a1a;
+          color: var(--text);
           letter-spacing: -0.01em;
         }
 
@@ -78,10 +78,10 @@ export function Header({
             width: 32px;
             height: 32px;
             flex-shrink: 0;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border-strong);
             border-radius: 8px;
-            background: #fff;
-            color: #333;
+            background: var(--surface-raised);
+            color: var(--text);
           }
         }
       `}</style>
