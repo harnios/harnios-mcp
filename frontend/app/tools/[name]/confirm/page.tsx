@@ -3,6 +3,10 @@ import { hasActiveOwnerSession } from "@/lib/oauth/session";
 import { TOOL_CATALOG } from "@/lib/mcp-tools/catalog";
 import { resolveLanguage } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { Page } from "@/app/_ui/Page";
+import { PageHeader } from "@/app/_ui/PageHeader";
+import { Banner } from "@/app/_ui/Banner";
+import { Button } from "@/app/_ui/Button";
 
 /** Owner-gated confirmation screen for one pending tool status change (spec 025 FR-002, FR-003). */
 export default async function ConfirmToolStatusPage({
@@ -27,28 +31,36 @@ export default async function ConfirmToolStatusPage({
 
   if (!knownTool || !validStatus) {
     return (
-      <main style={{ maxWidth: 640, margin: "2rem auto", fontFamily: "system-ui, sans-serif" }}>
-        <h1>{dict.confirmTitle}</h1>
-        <p>{dict.changeFailed(!knownTool ? `unknown tool "${name}"` : `invalid status "${to}"`)}</p>
+      <Page size="sm">
+        <PageHeader title={dict.confirmTitle} />
+        <Banner tone="danger">
+          <p>{dict.changeFailed(!knownTool ? `unknown tool "${name}"` : `invalid status "${to}"`)}</p>
+        </Banner>
         <p>
           <a href="/tools">{dict.title}</a>
         </p>
-      </main>
+      </Page>
     );
   }
 
   const statusLabel = to === "active" ? dict.active : dict.disabled;
 
   return (
-    <main style={{ maxWidth: 640, margin: "2rem auto", fontFamily: "system-ui, sans-serif" }}>
-      <h1>{dict.confirmTitle}</h1>
+    <Page size="sm">
+      <PageHeader title={dict.confirmTitle} />
       <p>{dict.confirmPendingChange(name, statusLabel)}</p>
-      <p>{dict.warningNotice}</p>
-      <form method="POST" action={`/tools/${encodeURIComponent(name)}/status`} style={{ display: "flex", gap: 8 }}>
+      <Banner tone="warning">
+        <p>{dict.warningNotice}</p>
+      </Banner>
+      <form method="POST" action={`/tools/${encodeURIComponent(name)}/status`} className="cluster">
         <input type="hidden" name="to" value={to} />
-        <button type="submit">{dict.confirmButton}</button>
-        <a href="/tools">{dict.cancelButton}</a>
+        <Button type="submit" variant={to === "disabled" ? "danger" : "primary"}>
+          {dict.confirmButton}
+        </Button>
+        <Button as="a" href="/tools" variant="ghost">
+          {dict.cancelButton}
+        </Button>
       </form>
-    </main>
+    </Page>
   );
 }

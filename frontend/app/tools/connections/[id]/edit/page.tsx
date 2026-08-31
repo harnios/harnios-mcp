@@ -3,7 +3,12 @@ import { hasActiveOwnerSession } from "@/lib/oauth/session";
 import { getExternalServerConnection } from "@/lib/external-mcp/store";
 import { resolveLanguage } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n/dictionaries";
-import { HomeLink } from "@/app/HomeLink";
+import { Page } from "@/app/_ui/Page";
+import { PageHeader } from "@/app/_ui/PageHeader";
+import { Banner } from "@/app/_ui/Banner";
+import { BackLink } from "@/app/_ui/BackLink";
+import { Field } from "@/app/_ui/Field";
+import { Button } from "@/app/_ui/Button";
 
 /** Owner-gated edit form for one External Server Connection — token field is always blank (write-only, FR-015). */
 export default async function EditExternalConnectionPage({ params }: { params: Promise<{ id: string }> }) {
@@ -15,64 +20,45 @@ export default async function EditExternalConnectionPage({ params }: { params: P
     redirect(`/oauth/login?continue=${encodeURIComponent(currentUrl)}`);
   }
 
-  const fullDict = getDictionary(await resolveLanguage());
-  const dict = fullDict.connections;
+  const dict = getDictionary(await resolveLanguage()).connections;
   const connection = await getExternalServerConnection(id);
 
   if (!connection) {
     return (
-      <main style={{ maxWidth: 640, margin: "2rem auto", fontFamily: "system-ui, sans-serif" }}>
-        <HomeLink label={fullDict.common.homeLink} />
-        <h1>{dict.editTitle}</h1>
-        <p>{dict.changeFailed(`unknown connection "${id}"`)}</p>
+      <Page size="sm">
+        <BackLink href="/tools/connections" label={dict.cancelButton} />
+        <PageHeader title={dict.editTitle} />
+        <Banner tone="danger">
+          <p>{dict.changeFailed(`unknown connection "${id}"`)}</p>
+        </Banner>
         <p>
           <a href="/tools/connections">{dict.title}</a>
         </p>
-      </main>
+      </Page>
     );
   }
 
   return (
-    <main style={{ maxWidth: 640, margin: "2rem auto", fontFamily: "system-ui, sans-serif" }}>
-      <HomeLink label={fullDict.common.homeLink} />
-      <h1>{dict.editTitle}</h1>
-      <form
-        method="POST"
-        action={`/tools/connections/${connection.id}`}
-        style={{ display: "flex", flexDirection: "column", gap: 12 }}
-      >
-        <label>
-          {dict.labelFieldLabel}
-          <input
-            type="text"
-            name="label"
-            defaultValue={connection.label}
-            required
-            style={{ display: "block", width: "100%" }}
-          />
-        </label>
-        <label>
-          {dict.urlFieldLabel}
-          <input
-            type="url"
-            name="url"
-            defaultValue={connection.url}
-            required
-            style={{ display: "block", width: "100%" }}
-          />
-        </label>
-        <label>
-          {dict.tokenFieldLabel}
-          <input type="password" name="token" placeholder={dict.tokenPlaceholder} style={{ display: "block", width: "100%" }} />
-          <small>{dict.tokenWriteOnlyNotice}</small>
-        </label>
-        <div>
-          <button type="submit">{dict.submitEdit}</button>
-          <a href="/tools/connections" style={{ marginLeft: 12 }}>
+    <Page size="sm">
+      <BackLink href="/tools/connections" label={dict.cancelButton} />
+      <PageHeader title={dict.editTitle} />
+      <form method="POST" action={`/tools/connections/${connection.id}`} className="stack">
+        <Field label={dict.labelFieldLabel}>
+          <input className="input" type="text" name="label" defaultValue={connection.label} required />
+        </Field>
+        <Field label={dict.urlFieldLabel}>
+          <input className="input" type="url" name="url" defaultValue={connection.url} required />
+        </Field>
+        <Field label={dict.tokenFieldLabel} hint={dict.tokenWriteOnlyNotice}>
+          <input className="input" type="password" name="token" placeholder={dict.tokenPlaceholder} />
+        </Field>
+        <div className="cluster">
+          <Button type="submit">{dict.submitEdit}</Button>
+          <Button as="a" href="/tools/connections" variant="ghost">
             {dict.cancelButton}
-          </a>
+          </Button>
         </div>
       </form>
-    </main>
+    </Page>
   );
 }

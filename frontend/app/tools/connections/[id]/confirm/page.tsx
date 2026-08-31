@@ -3,6 +3,10 @@ import { hasActiveOwnerSession } from "@/lib/oauth/session";
 import { listExternalServerConnections } from "@/lib/external-mcp/store";
 import { resolveLanguage } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { Page } from "@/app/_ui/Page";
+import { PageHeader } from "@/app/_ui/PageHeader";
+import { Banner } from "@/app/_ui/Banner";
+import { Button } from "@/app/_ui/Button";
 
 /** Owner-gated confirmation screen for enabling, disabling, or removing one External Server Connection (spec 031, US2, FR-009, FR-017). */
 export default async function ConfirmConnectionChangePage({
@@ -28,13 +32,15 @@ export default async function ConfirmConnectionChangePage({
 
   if (!connection || !validTo) {
     return (
-      <main style={{ maxWidth: 640, margin: "2rem auto", fontFamily: "system-ui, sans-serif" }}>
-        <h1>{dict.confirmTitle}</h1>
-        <p>{dict.changeFailed(!connection ? `unknown connection "${id}"` : `invalid status "${to}"`)}</p>
+      <Page size="sm">
+        <PageHeader title={dict.confirmTitle} />
+        <Banner tone="danger">
+          <p>{dict.changeFailed(!connection ? `unknown connection "${id}"` : `invalid status "${to}"`)}</p>
+        </Banner>
         <p>
           <a href="/tools/connections">{dict.title}</a>
         </p>
-      </main>
+      </Page>
     );
   }
 
@@ -51,15 +57,21 @@ export default async function ConfirmConnectionChangePage({
       : `/tools/connections/${connection.id}/enabled`;
 
   return (
-    <main style={{ maxWidth: 640, margin: "2rem auto", fontFamily: "system-ui, sans-serif" }}>
-      <h1>{dict.confirmTitle}</h1>
+    <Page size="sm">
+      <PageHeader title={dict.confirmTitle} />
       <p>{message}</p>
-      <p>{to === "removed" ? dict.removeWarning : dict.warningNotice}</p>
-      <form method="POST" action={action} style={{ display: "flex", gap: 8 }}>
+      <Banner tone="warning">
+        <p>{to === "removed" ? dict.removeWarning : dict.warningNotice}</p>
+      </Banner>
+      <form method="POST" action={action} className="cluster">
         {to !== "removed" && <input type="hidden" name="to" value={to} />}
-        <button type="submit">{dict.confirmButton}</button>
-        <a href="/tools/connections">{dict.cancelButton}</a>
+        <Button type="submit" variant={to === "removed" ? "danger" : "primary"}>
+          {dict.confirmButton}
+        </Button>
+        <Button as="a" href="/tools/connections" variant="ghost">
+          {dict.cancelButton}
+        </Button>
       </form>
-    </main>
+    </Page>
   );
 }
