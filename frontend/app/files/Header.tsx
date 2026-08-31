@@ -29,7 +29,8 @@ export function Header({
       </button>
       <a href="/" className="home-link" title={homeLinkLabel} aria-label={homeLinkLabel}>
         <span className="logo-mark" aria-hidden="true" />
-        <span className="app-name">{osName}</span>
+        <span className="wordmark">HARNIOS</span>
+        <span className="instance">{osName}</span>
       </a>
       {/* Same primary nav as the shared SiteHeader (spec 034) — the editor is
           chromeless, so without this the rest of the app is unreachable from
@@ -74,13 +75,23 @@ export function Header({
           box-shadow: 0 0 8px var(--brand-glow);
           flex-shrink: 0;
         }
-        .app-name {
+        .wordmark {
           font-family: var(--font-mono);
           font-size: 13px;
           font-weight: 500;
           color: var(--text);
           text-transform: uppercase;
-          letter-spacing: 0.05em;
+          letter-spacing: 0.08em;
+        }
+        .instance {
+          font-family: var(--font-mono);
+          font-size: 11px;
+          color: var(--text-muted);
+        }
+        .instance::before {
+          content: "/";
+          margin: 0 0.4em 0 0.15em;
+          color: var(--border-strong);
         }
         .editor-nav {
           display: flex;
@@ -119,7 +130,7 @@ export function Header({
             background: var(--surface-raised);
             color: var(--text);
           }
-          .app-name {
+          .instance {
             display: none;
           }
         }

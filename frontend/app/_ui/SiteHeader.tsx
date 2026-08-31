@@ -30,7 +30,8 @@ export async function SiteHeader() {
     <header className="site-header">
       <a className="site-header__brand" href="/" aria-label={nav.home}>
         <span className="logo-mark" aria-hidden="true" />
-        <span className="site-header__name">{osName}</span>
+        <span className="site-header__wordmark">HARNIOS</span>
+        <span className="site-header__instance">{osName}</span>
       </a>
       <nav className="site-nav" aria-label={nav.menuLabel}>
         {NAV_ITEMS.map((item) => {
