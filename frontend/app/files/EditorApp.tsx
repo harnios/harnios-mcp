@@ -66,6 +66,7 @@ export default function EditorApp({ osName, language }: { osName: string; langua
         osName={osName}
         onToggleSidebar={() => setSidebarOpen((open) => !open)}
         dict={dict.header}
+        nav={fullDict.nav}
         homeLinkLabel={fullDict.common.homeLink}
       />
       <div className="body-row">
