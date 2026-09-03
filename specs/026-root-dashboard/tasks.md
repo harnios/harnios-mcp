@@ -51,7 +51,7 @@ Not applicable — this feature adds one page and dictionary entries to an alrea
 
 ### Implementation for User Story 1
 
-- [X] T008 [US1] Create `frontend/app/page.tsx` as a Server Component: define a local `DashboardLink[]` array with the four fixed entries from data-model.md (`{ href: "/files", labelKey: "files" }`, `{ href: "/tools", labelKey: "tools" }`, `{ href: "/settings/connected-apps", labelKey: "settingsConnectedApps" }`, `{ href: "/settings/personal-access-tokens", labelKey: "settingsPersonalAccessTokens" }`); resolve `dict = getDictionary(await resolveLanguage()).dashboard`; render `dict.title`/`dict.description` and one `<a href>` per array entry labeled via `dict.links[labelKey]`; use inline `CSSProperties` matching `frontend/app/tools/page.tsx` (`<main>` with `maxWidth`/`margin`/`fontFamily`) — no new auth check in this file (research.md §3). Depends on: T001–T007.
+- [X] T008 [US1] Create `frontend/app/page.tsx` as a Server Component: define a local `DashboardLink[]` array with the four fixed entries from data-model.md (`{ href: "/files", labelKey: "files" }`, `{ href: "/tools", labelKey: "tools" }`, `{ href: "/settings/connected-apps", labelKey: "settingsConnectedApps" }`, `{ href: "/settings/personal-access-tokens", labelKey: "settingsPersonalAccessTokens" }`); resolve `dict = getDictionary(await resolveLanguage()).dashboard`; render `dict.title`/`dict.description` and one `<a href>` per array entry labeled via `dict.links[labelKey]`; use inline `CSSProperties` matching `frontend/app/tools/page.tsx` (`<main>` with `maxWidth`/`margin`/`fontFamily`) — ~~no new auth check in this file (research.md §3)~~ **superseded 2026-09-02, see T014**. Depends on: T001–T007.
 - [X] T009 [US1] Manually verify quickstart.md steps 1–4 in a running dev server: `/` renders without a 404, shows exactly the four expected links with no link to `/editor`, `/init`, `/oauth/*`, or `/tools/*/confirm`, and each link navigates to and loads its target page. Depends on: T008.
 
 **Checkpoint**: User Story 1 is fully functional and independently testable — the dashboard exists and every top-level page is one click away.
@@ -158,3 +158,15 @@ Task: "Add dashboard translations (Russian) to frontend/lib/i18n/dictionaries/ru
 - This is a small, single-developer-shaped feature (one new page, one dictionary namespace) — the "parallel team" pattern from the template isn't meaningfully applicable beyond the six locale files in Phase 2.
 - Commit after each task or logical group.
 - Avoid: vague tasks, same-file conflicts, cross-story dependencies that break independence.
+
+### Post-launch fix (2026-09-02): dashboard now requires its own session
+
+- [X] T014 Add `hasActiveOwnerSession()` + `redirect("/oauth/login?continue=/")` at the top of
+  `frontend/app/page.tsx`'s `DashboardPage`, before resolving the dictionary or rendering
+  `DASHBOARD_LINKS` — same pattern as `frontend/app/tools/page.tsx`. Reverses T008's original
+  "no new auth check" decision (research.md §3, spec.md's Follow-up section explain why: an
+  unauthenticated visitor could see the full admin section list before signing in). Depends on:
+  T008.
+- [ ] T015 Manually verify: with no active session, visiting `/` directly redirects to
+  `/oauth/login?continue=%2F` without rendering any part of the link list; after signing in via
+  that link, land back on `/` and see the dashboard normally. Depends on: T014.

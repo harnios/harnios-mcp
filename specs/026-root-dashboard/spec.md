@@ -59,7 +59,8 @@ A user whose storage is not yet configured is still redirected to the storage se
 ### Edge Cases
 
 - What happens if a page section has no meaningful "entry point" URL of its own (e.g., an in-flow confirmation step or an OAuth callback route)? These are not standalone destinations a user would navigate to directly, so they are excluded from the dashboard's link list (see Assumptions).
-- What happens if the user is not authenticated/authorized for a given linked page? Clicking the link takes them to that page, which enforces its own existing access rules exactly as if the user had typed or bookmarked the URL directly; the dashboard itself does not duplicate that access logic.
+- What happens if the user is not authenticated/authorized for a given linked page? Clicking the link takes them to that page, which enforces its own existing access rules exactly as if the user had typed or bookmarked the URL directly.
+- What happens if the user is not authenticated at all when landing on `/` itself? **(Reversed 2026-09-02, see Follow-up below)** They are redirected to `/oauth/login?continue=/` before the link list renders — the dashboard now requires its own session, it does not just rely on each link's own check.
 - What happens on a very small screen? The dashboard's link list remains readable and every link stays individually tappable (no overlapping targets).
 
 ## Requirements *(mandatory)*
@@ -73,6 +74,7 @@ A user whose storage is not yet configured is still redirected to the storage se
 - **FR-005**: The dashboard MUST continue to honor the existing storage-configuration redirect: a user whose storage is not configured is still sent to the storage setup page instead of seeing the dashboard.
 - **FR-006**: The dashboard MUST render its text in the user's resolved language, consistent with the rest of the product's multilingual support.
 - **FR-007**: The dashboard's link list MUST be derived in a way that keeps it consistent with the actual set of top-level pages, so that adding or removing a top-level page is reflected on the dashboard as part of that same change rather than requiring a separately-tracked update elsewhere.
+- **FR-008** *(added 2026-09-02, see Follow-up)*: The dashboard itself MUST require an active owner session — an unauthenticated visitor MUST be redirected to `/oauth/login?continue=/` before the link list renders, not merely when they click a link.
 
 ### Key Entities
 
@@ -91,6 +93,23 @@ A user whose storage is not yet configured is still redirected to the storage se
 
 - "All existing page" is interpreted as all existing top-level, user-navigable page sections — files, tools, and the settings sub-sections — not internal flow steps such as the tool-confirmation step or OAuth authorize/login routes, which are not pages a user would choose to land on directly. `/editor` is excluded as a link target because it is a legacy redirect that only forwards to `/files` (spec 018 FR-013), not a distinct destination.
 - The storage setup page (`/init`) is deliberately excluded from the dashboard's link list: it is an onboarding/recovery destination reached automatically via redirect when storage is unconfigured, not a page a configured user would navigate to on purpose.
-- The dashboard does not introduce any new authentication or authorization gate of its own; each linked page continues to enforce whatever access rules it already has.
+- ~~The dashboard does not introduce any new authentication or authorization gate of its own; each linked page continues to enforce whatever access rules it already has.~~ **Reversed 2026-09-02** — the dashboard now does gate on its own session, in addition to each linked page enforcing its own rules (see FR-008 and Follow-up below).
 - No new visual design system is assumed beyond what the product already uses; the dashboard follows existing UI conventions (consistent with pages like the tools status page) rather than introducing a distinct look.
 - The dashboard is a simple, static list/grid of links — no search, filtering, favorites, or usage-based ordering is in scope for this feature.
+
+## Follow-up (2026-09-02): dashboard now requires its own session
+
+Live-tested by the owner against a real Harnios instance: an unauthenticated visitor hitting `/`
+saw the full list of every top-level admin section (Files, Tools, Settings › Connected Apps,
+Settings › Personal Access Tokens, Settings › Test Messaging, Scheduled Tasks). Clicking any link
+still correctly redirected to login (the original design's guarantee held), but the list of
+sections itself — including that PAT management and external-connection management exist — was
+visible with no session at all.
+
+The original design (this spec, as originally written) deliberately chose not to gate the
+dashboard itself, reasoning that a static link list carried nothing worth protecting. That
+judgment call turned out not to match the owner's actual security expectation for the root landing
+page of an otherwise fully-gated app. Fixed by adding the same `hasActiveOwnerSession()` +
+`redirect("/oauth/login?continue=/")` check already used by every other top-level page (see FR-008,
+the updated Edge Cases and Assumptions above, and `research.md` §3) — `frontend/app/page.tsx` now
+checks this before rendering `DASHBOARD_LINKS` at all.

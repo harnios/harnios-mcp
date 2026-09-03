@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+import { hasActiveOwnerSession } from "@/lib/oauth/session";
 import { resolveLanguage } from "@/lib/i18n/resolve";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import type { Dictionary } from "@/lib/i18n/dictionaries/types";
@@ -19,6 +21,11 @@ const DASHBOARD_LINKS: { href: string; labelKey: keyof Dictionary["dashboard"]["
 
 /** Lands every visitor on a list of links to every existing top-level page (spec 026). */
 export default async function DashboardPage() {
+  const signedIn = await hasActiveOwnerSession();
+  if (!signedIn) {
+    redirect(`/oauth/login?continue=${encodeURIComponent("/")}`);
+  }
+
   const dict = getDictionary(await resolveLanguage()).dashboard;
 
   return (

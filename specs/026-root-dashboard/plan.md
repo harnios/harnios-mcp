@@ -8,13 +8,20 @@
 
 ## Summary
 
-`/` currently has no `app/page.tsx`, so it 404s once storage is configured. Add a server-rendered dashboard at `frontend/app/page.tsx` that lists a link to every existing top-level page (Files, Tools, Settings › Connected Apps, Settings › Personal Access Tokens), following the same conventions already used by `app/tools/page.tsx` and the settings pages (inline styles, `resolveLanguage()` + `getDictionary()` for text, no new auth gate of its own — each link's destination continues to enforce its own existing session check). The link list is a small, centrally-maintained array co-located with the page rather than an automatically generated route scan, since Next.js App Router has no runtime API to enumerate pages.
+`/` currently has no `app/page.tsx`, so it 404s once storage is configured. Add a server-rendered dashboard at `frontend/app/page.tsx` that lists a link to every existing top-level page (Files, Tools, Settings › Connected Apps, Settings › Personal Access Tokens), following the same conventions already used by `app/tools/page.tsx` and the settings pages (inline styles, `resolveLanguage()` + `getDictionary()` for text; each link's destination continues to also enforce its own existing session check). The link list is a small, centrally-maintained array co-located with the page rather than an automatically generated route scan, since Next.js App Router has no runtime API to enumerate pages.
+
+**Follow-up (2026-09-02)**: the dashboard originally shipped with no auth gate of its own (this
+Summary said so above). Reversed after the owner found an unauthenticated visitor to `/` could see
+the full admin section list before signing in — see spec.md's Follow-up section and research.md §3.
+`frontend/app/page.tsx` now starts with the same `hasActiveOwnerSession()` +
+`redirect("/oauth/login?continue=/")` check every other top-level page already uses, before
+resolving the dictionary or rendering `DASHBOARD_LINKS`.
 
 ## Technical Context
 
 **Language/Version**: TypeScript 5.9.3, React 19.2.7
 
-**Primary Dependencies**: Next.js 16.2.10 (App Router, Server Components); existing `lib/i18n` (`resolveLanguage`, `getDictionary`) and `lib/oauth/session` (`hasActiveOwnerSession`, used by linked pages, not by the dashboard itself)
+**Primary Dependencies**: Next.js 16.2.10 (App Router, Server Components); existing `lib/i18n` (`resolveLanguage`, `getDictionary`) and `lib/oauth/session` (`hasActiveOwnerSession`, used by linked pages and, as of the 2026-09-02 follow-up, by the dashboard itself)
 
 **Storage**: N/A — the dashboard's link list is static data in code; no persisted state is read or written
 

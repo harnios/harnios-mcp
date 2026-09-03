@@ -16,9 +16,27 @@ All items below were resolved by reading the existing codebase (`frontend/app/**
 
 ## 3. Should the dashboard page itself require an owner session?
 
-- **Decision**: No. The dashboard renders unconditionally (once storage is configured) and simply lists links; each link's destination continues to run its own existing `hasActiveOwnerSession()` check and its own `redirect(...)` to `/oauth/login?continue=...` exactly as it does today when visited directly.
-- **Rationale**: Every existing protected page already redirects unauthenticated visitors to login with the correct `continue` target. Gating the dashboard itself would duplicate that logic for no behavioral benefit, and would contradict the spec's explicit assumption ("The dashboard does not introduce any new authentication or authorization gate of its own").
-- **Alternatives considered**: Requiring sign-in to view the dashboard — rejected as unnecessary duplication; a signed-out visitor still lands safely on login when they click any protected link.
+- **Decision (reversed 2026-09-02)**: Yes. `app/page.tsx` now calls `hasActiveOwnerSession()` and
+  redirects to `/oauth/login?continue=/` when signed out, before rendering anything — same pattern
+  as `app/tools/page.tsx`.
+- **Original decision (2026, spec authored)**: No. The dashboard rendered unconditionally (once
+  storage is configured) and simply listed links; each link's destination ran its own existing
+  `hasActiveOwnerSession()` check and its own `redirect(...)` to `/oauth/login?continue=...` exactly
+  as it does today when visited directly.
+- **Why reversed**: Live-tested by the owner against a real Harnios instance: an unauthenticated
+  visitor hitting `/` saw the full list of every top-level admin section (Files, Tools, Settings ›
+  Connected Apps, Settings › Personal Access Tokens, Settings › Test Messaging, Scheduled Tasks) —
+  clicking any of them still correctly redirected to login, but the list itself was visible with no
+  session at all. The original rationale ("gating would duplicate logic for no behavioral benefit")
+  assumed the link list carried no information worth protecting; in practice, unauthenticated
+  disclosure of the full admin surface (including that PAT management and external-connection
+  management exist and where they live) was judged not acceptable for the root landing page of an
+  otherwise fully gated app. The original alternative ("a signed-out visitor still lands safely on
+  login when they click any protected link") is still true and was not the concern — the concern
+  is what's visible *before* clicking anything.
+- **Alternatives considered**: Leaving it as-is (rejected — this is the finding above); gating only
+  when storage is configured but not otherwise (already the case, since `middleware.ts` redirects
+  to `/init` before this check ever runs).
 
 ## 4. How should the dashboard stay in sync with the actual page set (FR-007)?
 
