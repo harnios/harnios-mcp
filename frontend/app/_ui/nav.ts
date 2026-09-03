@@ -4,7 +4,11 @@ import type { Dictionary } from "@/lib/i18n/dictionaries";
  * One array to edit when a section is added or removed — mirroring the
  * `DASHBOARD_LINKS` convention in `app/page.tsx` (there is no route scanning).
  * `prefix` drives the active-item match; `/tools/connections` intentionally
- * sits under the "Tools" prefix, and the exhaustive index stays on `/`. */
+ * sits under the "Tools" prefix, and the exhaustive index stays on `/`.
+ * Every entry other than Dashboard is expected to have a matching
+ * documentation topic in `DOCS_TOPICS` (`lib/docs/content.ts`, spec 035) —
+ * a new entry here is a prompt to add its topic there too, by hand, no
+ * automated check enforces it. */
 export const NAV_ITEMS: {
   href: string;
   prefix: string;
@@ -15,4 +19,5 @@ export const NAV_ITEMS: {
   { href: "/tools", prefix: "/tools", key: "tools" },
   { href: "/schedules", prefix: "/schedules", key: "schedules" },
   { href: "/settings/connected-apps", prefix: "/settings", key: "settings" },
+  { href: "/docs", prefix: "/docs", key: "docs" },
 ];

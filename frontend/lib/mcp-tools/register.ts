@@ -1,5 +1,6 @@
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { registerTools } from "@/lib/mcp-tools";
+import { registerDocsTools } from "@/lib/mcp-tools/docsTools";
 import { registerEngineTools } from "@/lib/mcp-tools/engineTools";
 import { registerInboxTools } from "@/lib/mcp-tools/inboxTools";
 import { registerMessagingTools } from "@/lib/mcp-tools/messagingTools";
@@ -24,5 +25,6 @@ export async function registerNativeTools(server: McpServer): Promise<ReadonlySe
   await registerMessagingTools(server, disabledTools);
   await registerInboxTools(server, disabledTools);
   await registerTreeTools(server, disabledTools);
+  await registerDocsTools(server, disabledTools);
   return disabledTools;
 }

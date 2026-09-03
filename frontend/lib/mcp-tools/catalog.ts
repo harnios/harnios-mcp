@@ -30,4 +30,5 @@ export const TOOL_CATALOG: ToolCatalogEntry[] = [
   { name: "list_directory_tree", group: "Tree Search" },
   { name: "find_files_by_name", group: "Tree Search" },
   { name: "search_file_content", group: "Tree Search" },
+  { name: "get_docs", group: "Docs" },
 ];

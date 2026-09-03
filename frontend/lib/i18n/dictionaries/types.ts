@@ -82,11 +82,32 @@ export interface Dictionary {
     tools: string;
     schedules: string;
     settings: string;
+    docs: string;
     signOut: string;
     /** aria-label for the <nav> element. */
     menuLabel: string;
     /** aria-label for the logo/home link. */
     home: string;
+  };
+  /** Chrome for the /docs page routes (spec 035) — the documentation
+   * *content* itself (lib/docs/*.md) is not part of Dictionary; only this
+   * surrounding page text is translated. */
+  docs: {
+    pageTitle: string;
+    pageDescription: string;
+    topicsHeading: string;
+    /** One label per DocsTopicId (lib/docs/content.ts's DOCS_TOPICS). */
+    topics: {
+      overview: string;
+      dashboard: string;
+      files: string;
+      tools: string;
+      schedules: string;
+      settings: string;
+    };
+    notFoundTitle: string;
+    notFoundBody: string;
+    backToOverview: string;
   };
   dashboard: {
     title: string;
