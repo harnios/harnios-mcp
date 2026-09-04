@@ -124,6 +124,7 @@ export const it: Dictionary = {
       menuUploadFolder: "Carica cartella",
       menuDownloadZip: "Scarica come zip",
       menuDeleteFolder: "Elimina cartella",
+      menuDownload: "Scarica",
       menuDelete: "Elimina",
       moreActions: "Altre azioni",
       promptNewFile: "Nome del nuovo file:",

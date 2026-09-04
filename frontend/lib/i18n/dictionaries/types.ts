@@ -132,6 +132,7 @@ export interface Dictionary {
       menuUploadFolder: string;
       menuDownloadZip: string;
       menuDeleteFolder: string;
+      menuDownload: string;
       menuDelete: string;
       moreActions: string;
       promptNewFile: string;

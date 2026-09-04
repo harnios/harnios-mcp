@@ -124,6 +124,7 @@ export const ru: Dictionary = {
       menuUploadFolder: "Загрузить папку",
       menuDownloadZip: "Скачать как zip",
       menuDeleteFolder: "Удалить папку",
+      menuDownload: "Скачать",
       menuDelete: "Удалить",
       moreActions: "Другие действия",
       promptNewFile: "Имя нового файла:",

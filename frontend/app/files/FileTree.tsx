@@ -5,7 +5,7 @@ import type { CSSProperties, ReactNode } from "react";
 import useSWR from "swr";
 import { authedFetch } from "@/lib/editorFetch";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
-import { ALL_ALLOWED_EXTENSIONS, categoryForPath, isAllowedExtension } from "@/lib/storage/fileTypes";
+import { ALL_ALLOWED_EXTENSIONS, categoryForPath, isAllowedExtension, isNativelyRenderable } from "@/lib/storage/fileTypes";
 import {
   ChevronIcon,
   DiagramIcon,
@@ -437,6 +437,48 @@ function DirectoryNode({
     }
   }
 
+  /** Downloads a single file's current saved content directly from the tree,
+   * for any file type — editable or not — without first opening it (spec 036
+   * FR-001–FR-004). Reuses the same /api/file/download route the editor
+   * pane's "open or download" link already uses for unsupported files, and
+   * mirrors handleDownloadFolder's blob-based approach so a session-expiry
+   * 401 or a storage error surfaces the same way delete/zip-download already
+   * do (FR-006), rather than a bare <a> navigation. For a natively-renderable
+   * type it opens in a new tab instead of forcing a save, matching that same
+   * existing link's behavior for the same file types (FR-005). */
+  async function handleDownloadFile(filePath: string) {
+    setBusy(true);
+    try {
+      const res = await authedFetch(`/api/file/download?path=${encodeURIComponent(filePath)}`);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({ message: res.statusText }));
+        window.alert(dict.downloadFailed(data.message ?? res.statusText));
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      if (isNativelyRenderable(filePath)) {
+        // The new tab loads the blob URL asynchronously, so revoking it in
+        // this same tick (as the download branch below safely does) can
+        // race the load and leave the tab blank. Give it a moment instead.
+        window.open(url, "_blank");
+        setTimeout(() => URL.revokeObjectURL(url), 30_000);
+      } else {
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = baseName(filePath);
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      }
+    } catch (err) {
+      window.alert(dict.downloadFailed((err as Error).message));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   /** Creates a new empty file by name in this directory, confirming first if
    * it would overwrite an existing file, then opens it in the editor
    * (FR-004, FR-006, FR-007, FR-010). */
@@ -609,6 +651,7 @@ function DirectoryNode({
               <span style={{ ...labelStyle, flex: 1, minWidth: 0 }} title={baseName(f.path)}>{baseName(f.path)}</span>
               <RowMenu
                 items={[
+                  { label: dict.menuDownload, icon: <DownloadIcon />, onClick: () => handleDownloadFile(f.path) },
                   { label: dict.menuDelete, icon: <TrashIcon />, onClick: () => handleDeleteFile(f.path), destructive: true },
                 ]}
                 disabled={busy}
