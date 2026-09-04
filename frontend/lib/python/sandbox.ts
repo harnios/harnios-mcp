@@ -1,4 +1,11 @@
-import { Monty, MontyCrashedError, MontyRuntimeError, MontySyntaxError } from "@pydantic/monty";
+// Uses the WASM backend (@pydantic/monty/wasm), not the native napi build
+// (@pydantic/monty) — the native build's precompiled linux-x64-gnu binary
+// requires GLIBC 2.38, which is newer than Debian Bookworm's 2.36 (the base
+// this project's production hosts use); the WASM backend has no such
+// requirement and exposes an API deliberately kept identical to the native
+// one (same Monty/MontySession/CollectString/MontySyntaxError/
+// MontyRuntimeError/MontyCrashedError), so nothing below needed to change.
+import { Monty, MontyCrashedError, MontyRuntimeError, MontySyntaxError, type WorkerPool } from "@pydantic/monty/wasm";
 
 /** Distinct failure categories for run_python (spec 037 FR-007, data-model.md PythonSandboxError). */
 export type PythonSandboxErrorCode =
@@ -39,11 +46,12 @@ const MAX_STDOUT_CHARS = 100_000;
 
 // Lazily created, reused across calls within this process — mirrors the
 // module-level singleton idiom already used for the S3 client
-// (frontend/lib/storage/client.ts). `Monty` itself *is* the worker pool
-// (its own docs describe it as "an async pool of crash-isolated monty
-// worker subprocesses"), not a separate handle to one.
-let montyPromise: Promise<Monty> | null = null;
-function getMonty(): Promise<Monty> {
+// (frontend/lib/storage/client.ts). `Monty.create()` resolves to a
+// `WorkerPool` (a pool of wasm workers) on this backend — unlike the native
+// backend, where `Monty` itself is the pool — but the resulting object has
+// the same `checkout()`/`close()`/`[Symbol.asyncDispose]()` shape.
+let montyPromise: Promise<WorkerPool> | null = null;
+function getMonty(): Promise<WorkerPool> {
   montyPromise ??= Monty.create();
   return montyPromise;
 }
@@ -67,7 +75,7 @@ export async function runPython(
   args: Record<string, unknown> | undefined,
   timeoutSeconds: number,
 ): Promise<RunPythonResult> {
-  let monty: Monty;
+  let monty: WorkerPool;
   try {
     monty = await getMonty();
   } catch (err) {

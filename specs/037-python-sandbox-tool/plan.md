@@ -12,13 +12,13 @@ Add one new MCP tool, `run_python`, that executes a small Python script — prov
 
 **Language/Version**: TypeScript, Next.js 16 (App Router), Node.js runtime — same as the rest of `frontend/`. No new language/runtime for the app itself.
 
-**Primary Dependencies**: `@pydantic/monty` (NEW — pinned exact version `0.0.22`, matching this repo's existing convention of exact-pinned dependencies. Verified installable and functional via a manual spike run against this repo's `frontend/`: `Monty.create()` → `pool.checkout()` → `session.feedRun(code, { printCallback })` with `CollectString` for stdout capture — confirmed against the live pydantic.dev quickstart docs and empirically executed, not just read). `@modelcontextprotocol/sdk` + `mcp-handler` (tool registration/transport, existing), `zod` (input schema, existing) — no other new dependencies.
+**Primary Dependencies**: `@pydantic/monty` (NEW — pinned exact version `0.0.22`, matching this repo's existing convention of exact-pinned dependencies), imported from its **WASM entrypoint** (`@pydantic/monty/wasm`), not the native napi entrypoint (`@pydantic/monty`) — the native `linux-x64-gnu` binary requires GLIBC >= 2.38, newer than Coolify's Debian Bookworm build base (GLIBC 2.36), confirmed by reproducing the failure via SSH on the actual production host (research.md §2). The WASM backend has no glibc dependency and is deliberately API-identical to the native one. `@modelcontextprotocol/sdk` + `mcp-handler` (tool registration/transport, existing), `zod` (input schema, existing) — no other new dependencies.
 
 **Storage**: The existing single S3-compatible bucket (spec 001/007) — the `path` input case reads a `.py` file through the existing `readFile()` in `frontend/lib/storage/files.ts`, completely unchanged. No new storage system.
 
 **Testing**: No automated test framework exists in this repo (research.md §5, consistent with specs 002/011/022) and none is introduced for this feature — verification is the manual `quickstart.md` walkthrough.
 
-**Target Platform**: Same stateless Next.js Route Handler as the rest of the app, deployed to both Vercel (serverless, `maxDuration: 60`) and self-hosted Coolify (Docker/Nixpacks). `@pydantic/monty` is the first native (napi-rs) dependency in this project — everything else is pure JS — so platform compatibility across both deploy targets is the primary technical risk (research.md §1-§2).
+**Target Platform**: Same stateless Next.js Route Handler as the rest of the app, deployed to both Vercel (serverless, `maxDuration: 60`) and self-hosted Coolify (Docker/Railpack). Using Monty's WASM backend rather than its native napi build (research.md §2) means this project still has no native/glibc-dependent runtime code, keeping platform compatibility a non-issue across both deploy targets.
 
 **Project Type**: Web service extension — new modules inside the existing single Next.js app (`frontend/`), not a new project/service.
 

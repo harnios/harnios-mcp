@@ -11,9 +11,19 @@
 - **Vercel Sandbox** — native Vercel product (Firecracker microVMs). Rejected: tied to a Vercel account/billing even when reachable via API from elsewhere; doesn't fit a self-hosted Coolify deployment story as cleanly as a dependency-free library.
 - **Anthropic's / Mistral's native code-execution tools** (`code_execution_20260521` server tool on the Messages API; Mistral's `code_interpreter` on its Agents/Conversations API) — rejected because they tie execution to a specific LLM vendor's account regardless of which AI client is actually calling the harness-mcp MCP tool (a ChatGPT- or Cursor-originated call would still need harness-mcp to hold, e.g., an Anthropic API key). Anthropic's variant additionally has zero network access with no override (confirmed via its live docs: "Internet access: Completely disabled for security... No outbound network requests permitted"), which — while compatible with this feature's own no-network v1 constraint (§ spec FR-008) — would still add an unnecessary vendor dependency for something Monty already does with none.
 
-## §2. Native module deployment risk (highest-priority open item)
+## §2. Native module deployment risk — resolved: switched to the WASM backend
 
-**Decision**: Ship Monty, but treat first-deploy verification on both platforms as required before merging, not optional.
+**Update (post-deploy, 2026-09-04)**: The native backend (`@pydantic/monty`) failed on the real Coolify production host on every deploy attempt, with an error Monty itself misattributes to "npm has a bug related to optional dependencies" (npm/cli#4828). Regenerating the lockfile and later pinning the platform package as a direct (non-optional) dependency both failed identically — neither was the real cause. SSH access to the actual Coolify host plus a from-scratch reproduction in a plain `node:24-bookworm` container (same OS Coolify's Railpack build uses) surfaced the real underlying error, one level beneath Monty's misleading wrapper message:
+
+```
+Error: /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.38' not found (required by monty.linux-x64-gnu.node)
+```
+
+The precompiled `linux-x64-gnu` binary for `@pydantic/monty` versions 0.0.19 through 0.0.22 requires GLIBC >= 2.38; Debian Bookworm (Coolify's build base, confirmed via SSH: `ldd` reports GLIBC 2.36) is too old. Versions 0.0.15-0.0.18 load fine under 2.36, but expose a completely different, already-superseded synchronous/in-process API (no worker-pool, no subprocess crash isolation, errors returned rather than thrown) — downgrading would mean losing the crash-isolation story this engine was chosen for in the first place, not just a compatibility tweak.
+
+**Fix**: switched to Monty's **WASM backend** (`@pydantic/monty/wasm` instead of `@pydantic/monty`) — deliberately kept API-identical to the native backend (same `Monty.create()` → pool → `checkout()` → `MontySession`, same `CollectString`, same `MontySyntaxError`/`MontyRuntimeError`/`MontyCrashedError` classes and messages) except that `Monty.create()` resolves to a `WorkerPool` rather than `Monty` itself being the pool — a one-line type change in `lib/python/sandbox.ts`, no logic change. WASM has no glibc dependency at all, sidestepping the whole class of problem rather than chasing a specific version. Verified exhaustively before considering this closed: same error taxonomy (syntax/runtime/timeout/memory-limit) reproduced correctly via a throwaway script inside the exact Bookworm container Coolify builds in; then the *actual* project — fresh `npm ci` + `npm run build` + `npm run start` with the boot-time smoke test (research.md's own T017) — run end-to-end in that same container, all green.
+
+**Original diagnosis (superseded, kept for the record)**: The section below was written before the deploy failures and incorrectly treated this as a "verify before merging" checklist item rather than a live blocker. Left as-is for the historical decision trail; §2 above is the current state.
 
 **Findings**:
 - `@pydantic/monty` ships as a napi-rs Rust addon via `optionalDependencies`: `@pydantic/monty-{darwin-x64,darwin-arm64,linux-x64-gnu,linux-arm64-gnu,win32-x64-msvc}`. **There is no `linux-*-musl` build.**
