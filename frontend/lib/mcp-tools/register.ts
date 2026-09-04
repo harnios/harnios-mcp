@@ -4,6 +4,7 @@ import { registerDocsTools } from "@/lib/mcp-tools/docsTools";
 import { registerEngineTools } from "@/lib/mcp-tools/engineTools";
 import { registerInboxTools } from "@/lib/mcp-tools/inboxTools";
 import { registerMessagingTools } from "@/lib/mcp-tools/messagingTools";
+import { registerPythonTools } from "@/lib/mcp-tools/pythonTools";
 import { getDisabledTools } from "@/lib/mcp-tools/store";
 import { registerTreeTools } from "@/lib/mcp-tools/treeTools";
 
@@ -23,6 +24,7 @@ export async function registerNativeTools(server: McpServer): Promise<ReadonlySe
   await registerTools(server, disabledTools);
   await registerEngineTools(server, disabledTools);
   await registerMessagingTools(server, disabledTools);
+  await registerPythonTools(server, disabledTools);
   await registerInboxTools(server, disabledTools);
   await registerTreeTools(server, disabledTools);
   await registerDocsTools(server, disabledTools);

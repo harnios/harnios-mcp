@@ -59,5 +59,16 @@ export async function register() {
     } catch (err) {
       console.error(`\nWarning: scheduler failed to start — scheduled tasks will not run.\n${(err as Error).message}\n`);
     }
+
+    // spec 037-python-sandbox-tool: @pydantic/monty is this project's first
+    // native (napi) dependency — a platform binary that fails to resolve or
+    // load would otherwise only surface on the first run_python call, as a
+    // confusing sandbox_unavailable error. Fail loud at boot instead.
+    const { runPython } = await import("./lib/python/sandbox");
+    try {
+      await runPython("1", undefined, 1);
+    } catch (err) {
+      console.error(`\nWarning: the Python sandbox is unavailable — run_python will fail until this is resolved.\n${(err as Error).message}\n`);
+    }
   }
 }

@@ -17,6 +17,7 @@
     "@codemirror/view": "6.43.6",
     "@mistralai/mistralai": "2.6.4",
     "@modelcontextprotocol/sdk": "1.26.0",
+    "@pydantic/monty": "0.0.22",
     "@uiw/react-codemirror": "4.25.11",
     "codemirror": "6.0.2",
     "cron-parser": "5.10.0",

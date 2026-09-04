@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
   experimental: {
     proxyClientMaxBodySize: "30mb",
   },
+  // @pydantic/monty (spec 037) is a native napi addon — the first one in
+  // this project. Without this, Next's bundler/file-tracing can fail to
+  // include the right platform binary in the deployed function output.
+  serverExternalPackages: ["@pydantic/monty"],
 };
 
 export default nextConfig;

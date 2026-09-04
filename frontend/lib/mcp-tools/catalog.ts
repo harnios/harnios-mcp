@@ -26,6 +26,7 @@ export const TOOL_CATALOG: ToolCatalogEntry[] = [
   { name: "get_os_init", group: "Engine" },
   { name: "send_email", group: "Messaging" },
   { name: "send_telegram_message", group: "Messaging" },
+  { name: "run_python", group: "Code Execution" },
   { name: "get_inbox", group: "Inbox" },
   { name: "list_directory_tree", group: "Tree Search" },
   { name: "find_files_by_name", group: "Tree Search" },
