@@ -11,7 +11,7 @@ const CATEGORY_EXTENSIONS: Record<FileCategory, string[]> = {
   spreadsheet: ["xls", "xlsx", "csv"],
   image: ["jpg", "jpeg", "png", "gif", "bmp", "webp"],
   diagram: ["bpmn"],
-  markup: ["html", "xml", "css", "md", "txt", "json"],
+  markup: ["html", "xml", "css", "md", "txt", "json", "py"],
   archive: ["zip"],
 };
 
@@ -35,6 +35,7 @@ const MIME_TYPES: Record<string, string> = {
   md: "text/markdown",
   txt: "text/plain",
   json: "application/json",
+  py: "text/x-python",
   zip: "application/zip",
 };
 

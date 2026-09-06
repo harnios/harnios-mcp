@@ -8,6 +8,7 @@ import { CsvTableEditor } from "./CsvTableEditor";
 import { ExternalChangeBanner } from "./ExternalChangeBanner";
 import { MarkdownEditor } from "./MarkdownEditor";
 import { PlainTextEditor } from "./PlainTextEditor";
+import { PythonEditor } from "./PythonEditor";
 
 /**
  * Editor Session (data-model.md): the state of whichever file is currently
@@ -18,7 +19,7 @@ export interface EditorSession {
   path: string;
   loadedContent: string;
   currentContent: string;
-  kind: "markdown" | "text" | "csv";
+  kind: "markdown" | "text" | "csv" | "python";
   saveState: "idle" | "saving" | "error";
   saveError: string | null;
   /** ETag of the version reflected in `loadedContent` (spec 019 data-model.md). */
@@ -39,6 +40,7 @@ export function deriveKind(path: string): EditorSession["kind"] {
   const lower = path.toLowerCase();
   if (lower.endsWith(".md")) return "markdown";
   if (lower.endsWith(".csv")) return "csv";
+  if (lower.endsWith(".py")) return "python";
   return "text";
 }
 
@@ -379,6 +381,8 @@ export function FileEditor({ path, onDirtyChange, dict, csvDict }: FileEditorPro
           mode={mode === "preview" ? "table" : "raw"}
           dict={csvDict}
         />
+      ) : session.kind === "python" ? (
+        <PythonEditor value={session.currentContent} onChange={handleContentChange} />
       ) : (
         <PlainTextEditor value={session.currentContent} onChange={handleContentChange} />
       )}

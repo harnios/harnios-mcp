@@ -1,6 +1,7 @@
 "use client";
 
 import { markdown } from "@codemirror/lang-markdown";
+import { oneDark } from "@codemirror/theme-one-dark";
 import CodeMirror from "@uiw/react-codemirror";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -26,5 +27,5 @@ export function MarkdownEditor({ value, onChange, mode }: MarkdownEditorProps) {
     );
   }
 
-  return <CodeMirror value={value} height="60vh" extensions={extensions} onChange={onChange} />;
+  return <CodeMirror value={value} height="60vh" theme={oneDark} extensions={extensions} onChange={onChange} />;
 }
