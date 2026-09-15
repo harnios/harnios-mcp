@@ -5,7 +5,7 @@
 // requirement and exposes an API deliberately kept identical to the native
 // one (same Monty/MontySession/CollectString/MontySyntaxError/
 // MontyRuntimeError/MontyCrashedError), so nothing below needed to change.
-import { Monty, MontyCrashedError, MontyRuntimeError, MontySyntaxError, type WorkerPool } from "@pydantic/monty/wasm";
+import { Monty, MontyCrashedError, MontyRuntimeError, MontySyntaxError, type OsCallback, type WorkerPool } from "@pydantic/monty/wasm";
 
 /** Distinct failure categories for run_python (spec 037 FR-007, data-model.md PythonSandboxError). */
 export type PythonSandboxErrorCode =
@@ -75,6 +75,17 @@ export async function runPython(
   args: Record<string, unknown> | undefined,
   timeoutSeconds: number,
 ): Promise<RunPythonResult> {
+  return runPythonWithOs(code, args, timeoutSeconds);
+}
+
+/** Internal variant for registered jobs. `run_python` intentionally calls this
+ * without an OS callback, preserving its filesystem-free contract. */
+export async function runPythonWithOs(
+  code: string,
+  args: Record<string, unknown> | undefined,
+  timeoutSeconds: number,
+  os?: OsCallback,
+): Promise<RunPythonResult> {
   let monty: WorkerPool;
   try {
     monty = await getMonty();
@@ -106,7 +117,7 @@ export async function runPython(
   }
 
   try {
-    const result = await session.feedRun(code, { inputs: args, printCallback });
+    const result = await session.feedRun(code, { inputs: args, printCallback, os });
     return { stdout, stdoutTruncated, result: result ?? null, durationMs: Date.now() - started };
   } catch (err) {
     throw mapMontyError(err);

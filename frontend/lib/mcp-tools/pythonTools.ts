@@ -43,7 +43,8 @@ export async function registerPythonTools(server: McpServer, disabledTools: Read
         "no numpy/pandas/etc.), no class inheritance, no generators, no match statements, no async " +
         "with/for. Writing ordinary Python that uses any of these will fail with a runtime_error naming " +
         "the unsupported construct, not silently work. The script has NO network, filesystem, or " +
-        "environment-variable access — use args to pass it any data it needs. Runs are capped by " +
+        "environment-variable access — use args to pass it any data it needs. For reusable scripts " +
+        "that process workspace files through controlled access, use run_job instead. Runs are capped by " +
         "timeoutSeconds (default 5, max 20).",
       inputSchema: {
         code: z.string().optional().describe(

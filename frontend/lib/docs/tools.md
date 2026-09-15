@@ -46,3 +46,14 @@ Python installation, so it comes with real limitations worth knowing before rely
 
 These limits are deliberate trade-offs for running untrusted, AI-generated code safely without any
 external sandboxing service — not bugs to work around by escalating privileges.
+
+## Persistent jobs (`run_job`)
+
+The "Jobs" group's `run_job` tool executes a registered workflow stored in the workspace S3
+filesystem under `os/jobs/<jobId>/`. A caller supplies only `jobId` and the arguments declared by
+that job's manifest. The script can read its selected input and stage one configured output through
+a virtual filesystem; only output metadata and an aggregate summary return to the assistant.
+
+`run_job` is for reusable workflows; `run_python` remains the filesystem-free option for ad-hoc
+code. In the current version every authenticated MCP client can edit `os/`, so its contents are not
+yet an approval boundary. A future access-control feature will protect job artifacts.

@@ -35,6 +35,7 @@ MCP_DISABLED_TOOLS=send_email,send_telegram_message
 | Inbox (`inboxTools.ts`) | `get_inbox` |
 | Tree search (`treeTools.ts`) | `list_directory_tree`, `find_files_by_name`, `search_file_content` |
 | Code execution (`pythonTools.ts`) | `run_python` |
+| Jobs (`jobTools.ts`) | `run_job` |
 
 **When it takes effect**: Only at server start. Changing the value while the server is already running has no effect until the next restart (spec.md FR-008).
 
