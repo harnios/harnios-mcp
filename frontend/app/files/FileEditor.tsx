@@ -6,6 +6,7 @@ import { authedFetch } from "@/lib/editorFetch";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { CsvTableEditor } from "./CsvTableEditor";
 import { ExternalChangeBanner } from "./ExternalChangeBanner";
+import { HtmlEditor } from "./HtmlEditor";
 import { MarkdownEditor } from "./MarkdownEditor";
 import { PlainTextEditor } from "./PlainTextEditor";
 import { PythonEditor } from "./PythonEditor";
@@ -19,7 +20,7 @@ export interface EditorSession {
   path: string;
   loadedContent: string;
   currentContent: string;
-  kind: "markdown" | "text" | "csv" | "python";
+  kind: "markdown" | "text" | "csv" | "python" | "html";
   saveState: "idle" | "saving" | "error";
   saveError: string | null;
   /** ETag of the version reflected in `loadedContent` (spec 019 data-model.md). */
@@ -41,6 +42,7 @@ export function deriveKind(path: string): EditorSession["kind"] {
   if (lower.endsWith(".md")) return "markdown";
   if (lower.endsWith(".csv")) return "csv";
   if (lower.endsWith(".py")) return "python";
+  if (lower.endsWith(".html") || lower.endsWith(".htm")) return "html";
   return "text";
 }
 
@@ -320,7 +322,7 @@ export function FileEditor({ path, onDirtyChange, dict, csvDict }: FileEditorPro
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8, flexWrap: "wrap" }}>
         <h3 style={{ margin: 0, overflowWrap: "anywhere" }}>{session.path}</h3>
-        {(session.kind === "markdown" || session.kind === "csv") && (
+        {(session.kind === "markdown" || session.kind === "csv" || session.kind === "html") && (
           <div style={{ display: "inline-flex", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
             <button
               type="button"
@@ -383,6 +385,8 @@ export function FileEditor({ path, onDirtyChange, dict, csvDict }: FileEditorPro
         />
       ) : session.kind === "python" ? (
         <PythonEditor value={session.currentContent} onChange={handleContentChange} />
+      ) : session.kind === "html" ? (
+        <HtmlEditor value={session.currentContent} onChange={handleContentChange} mode={mode} />
       ) : (
         <PlainTextEditor value={session.currentContent} onChange={handleContentChange} />
       )}
