@@ -17,7 +17,7 @@ const extensions = [html()];
  * Single-view HTML editor, mirroring MarkdownEditor: either a rendered
  * preview or the raw-source CodeMirror editor, never both at once.
  *
- * The preview is a sandboxed `<iframe srcDoc>` with only `allow-popups` —
+ * The preview is a sandboxed `<iframe srcDoc>` with popup navigation only —
  * deliberately *not* `allow-scripts` or `allow-same-origin`. `/api/file`
  * (which feeds `value` here) already returns any text file's raw content
  * regardless of type, but this app's one other HTML-rendering path
@@ -27,9 +27,10 @@ const extensions = [html()];
  * A sandboxed iframe with no script/same-origin grant renders the markup
  * and CSS — which is what a generated report/table file like this is
  * actually for — while any embedded `<script>` simply doesn't run, and the
- * frame has no access to this app's cookies, DOM, or API. `allow-popups` is
- * kept so an in-page link (e.g. `target="_blank"`) can still open a new tab
- * instead of silently failing.
+ * frame has no access to this app's cookies, DOM, or API. The two popup
+ * permissions let an in-page link (e.g. `target="_blank"`) open a normal,
+ * unsandboxed external tab — required by sites such as WhatsApp, which reject
+ * requests originating from a sandboxed frame.
  */
 export function HtmlEditor({ value, onChange, mode }: HtmlEditorProps) {
   if (mode === "preview") {
@@ -37,7 +38,7 @@ export function HtmlEditor({ value, onChange, mode }: HtmlEditorProps) {
       <iframe
         title="HTML preview"
         srcDoc={value}
-        sandbox="allow-popups"
+        sandbox="allow-popups allow-popups-to-escape-sandbox"
         style={{ width: "100%", height: "70vh", border: "1px solid var(--border)", borderRadius: "var(--radius)", background: "#fff" }}
       />
     );
