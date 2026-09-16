@@ -57,3 +57,13 @@ a virtual filesystem; only output metadata and an aggregate summary return to th
 `run_job` is for reusable workflows; `run_python` remains the filesystem-free option for ad-hoc
 code. In the current version every authenticated MCP client can edit `os/`, so its contents are not
 yet an approval boundary. A future access-control feature will protect job artifacts.
+
+## Browser file handoff (`get_upload_link`)
+
+The `get_upload_link` tool returns an authenticated `/upload` page and the
+`data/inbox/` destination for a user-selected file. The browser upload keeps
+file bytes in Harnios S3; the assistant receives only the resulting path and
+can pass it to a registered `run_job`. Set `PUBLIC_APP_URL` to the public
+deployment origin so the returned link works behind a reverse proxy. The
+dedicated upload accepts one file at a time and uses the same allow-list and
+25 MB limit as the existing file uploader.
