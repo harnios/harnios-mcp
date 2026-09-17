@@ -17,7 +17,7 @@
 ## Phase 3: User Story 1 - Build and publish image (P1)
 
 - [X] T006 [US1] Add the pull-request and `main` push workflow in `.github/workflows/docker.yml` with least-required GHCR permissions and explicit Node/ESLint setup.
-- [X] T007 [US1] Configure SHA and `latest` image metadata and publication to `ghcr.io/harnios/harnios-mcp` in `.github/workflows/docker.yml`.
+- [X] T007 [US1] Configure SHA and `latest` image metadata, publication to `ghcr.io/harnios/harnios-mcp`, and the optional Coolify webhook trigger using repository secrets in `.github/workflows/docker.yml`.
 - [X] T008 [US1] Validate dependency installation, lint, and production build locally from `frontend/`.
 
 ## Phase 4: User Story 2 - Run image in Coolify (P1)

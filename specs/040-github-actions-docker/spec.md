@@ -62,6 +62,7 @@ As a developer, I want Docker packaging for the app to remain separate from the 
 - **FR-009**: The image MUST expose a health check using `/api/health` and preserve the existing application port; the application MUST return a successful health response without requiring storage access.
 - **FR-010**: The deployment MUST support rollback by retaining immutable SHA-tagged images.
 - **FR-011**: The root MinIO compose workflow MUST remain local-development-only and unchanged.
+- **FR-012**: After a successful image publication, the workflow MUST optionally trigger a Coolify deploy webhook when the required GitHub secrets are configured.
 
 ### Key Entities
 

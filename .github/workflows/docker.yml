@@ -40,6 +40,9 @@ jobs:
     needs: validate
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    env:
+      COOLIFY_DEPLOY_WEBHOOK: ${{ secrets.COOLIFY_DEPLOY_WEBHOOK }}
+      COOLIFY_TOKEN: ${{ secrets.COOLIFY_DEPLOY_TOKEN }}
     permissions:
       contents: read
       packages: write
@@ -72,3 +75,9 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Trigger Coolify deployment
+        if: ${{ env.COOLIFY_DEPLOY_WEBHOOK != '' && env.COOLIFY_TOKEN != '' }}
+        run: |
+          curl --fail --request GET "$COOLIFY_DEPLOY_WEBHOOK" \
+            --header "Authorization: Bearer $COOLIFY_TOKEN"

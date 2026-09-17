@@ -29,6 +29,7 @@ Expected results:
 
 - Open a pull request and confirm validation runs without publishing.
 - Merge/push to `main` and confirm GHCR contains both the full SHA tag and `latest`.
+- Add repository secrets `COOLIFY_DEPLOY_WEBHOOK` and `COOLIFY_DEPLOY_TOKEN`; the publish job then triggers Coolify automatically after pushing the image.
 
 ## Coolify rollout
 
