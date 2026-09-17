@@ -10,6 +10,8 @@ This repo pairs that local MinIO setup with the Next.js app that uses it. See [s
 
 The Next.js app (web editor + MCP server) lives entirely in [`frontend/`](frontend/) — that's the folder to point a future Vercel project's Root Directory setting at (see [specs/006-frontend-folder-structure](specs/006-frontend-folder-structure/spec.md)). Everything else at the repo root (`docker-compose.yml`, `data/`, `scripts/`) is local-dev infrastructure that isn't deployed.
 
+For production Docker delivery, GitHub Actions validates the app and publishes `ghcr.io/harnios/harnios-mcp` on successful pushes to `main`. Coolify runs that published image; runtime environment variables remain configured in Coolify. To build locally, run `docker build -t harnios-mcp:local frontend/`.
+
 ## Technical Overview
 
 - **App**: [`frontend/`](frontend/) is a single Next.js 16 (App Router) application in TypeScript, serving both the web editor UI and the MCP server from one deployable unit — no separate backend service.

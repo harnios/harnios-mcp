@@ -38,7 +38,12 @@ function withPathnameHeader(request: NextRequest): NextResponse {
  */
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  if (pathname === "/init" || pathname.startsWith("/_next") || pathname === "/favicon.ico") {
+  if (
+    pathname === "/init" ||
+    pathname === "/api/health" ||
+    pathname.startsWith("/_next") ||
+    pathname === "/favicon.ico"
+  ) {
     return withPathnameHeader(request);
   }
 
