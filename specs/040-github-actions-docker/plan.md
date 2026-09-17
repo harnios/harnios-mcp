@@ -41,7 +41,7 @@ specs/040-github-actions-docker/
 ## Implementation Details
 
 - Set `output: "standalone"` in `frontend/next.config.ts`.
-- Use `node:22-alpine` builder/runtime stages and `npm ci` from `frontend/package-lock.json`.
+- Use `node:22-alpine` builder/runtime stages and `npm ci` from `frontend/package-lock.json`; label the image with the public repository source for GHCR package linkage.
 - Start with `node server.js` from the standalone output, bind to `0.0.0.0`, port 3000.
 - Use GitHub Actions permissions `contents: read` and `packages: write`.
 - Run lint/build on pull requests; on `main`, build and push SHA plus `latest` tags.

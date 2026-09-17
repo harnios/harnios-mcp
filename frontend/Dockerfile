@@ -12,6 +12,7 @@ RUN npm run build
 
 FROM node:22-alpine AS runner
 WORKDIR /app
+LABEL org.opencontainers.image.source="https://github.com/harnios/harnios-mcp"
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV HOSTNAME=0.0.0.0

@@ -63,6 +63,7 @@ As a developer, I want Docker packaging for the app to remain separate from the 
 - **FR-010**: The deployment MUST support rollback by retaining immutable SHA-tagged images.
 - **FR-011**: The root MinIO compose workflow MUST remain local-development-only and unchanged.
 - **FR-012**: After a successful image publication, the workflow MUST optionally trigger a Coolify deploy webhook when the required GitHub secrets are configured.
+- **FR-013**: The published OCI image MUST declare the public repository as its source so a newly recreated GHCR package can inherit the repository's public visibility and remain anonymously pullable.
 
 ### Key Entities
 
