@@ -53,8 +53,8 @@ The "Jobs" group's `run_job` tool executes a registered workflow stored in the w
 filesystem under `os/jobs/<jobId>/`. A caller supplies only `jobId` and the arguments declared by
 that job's manifest. The script can read its selected input and stage one configured output through
 a virtual filesystem; only output metadata and an aggregate summary return to the assistant.
-The output metadata includes both the workspace `path` and an absolute authenticated `url` for
-downloading the generated file.
+The output metadata includes the workspace `path`, an absolute authenticated `url` that opens the
+file in the `/files` interface, and a `downloadUrl` for direct download.
 
 `run_job` is for reusable workflows; `run_python` remains the filesystem-free option for ad-hoc
 code. In the current version every authenticated MCP client can edit `os/`, so its contents are not

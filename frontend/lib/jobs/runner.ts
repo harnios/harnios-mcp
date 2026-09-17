@@ -5,7 +5,7 @@ import { JobError, resolveRegisteredJob } from "./registry";
 import { createVirtualFilesystem, VirtualFilesystemError } from "./virtualFilesystem";
 
 export interface RunJobResult {
-  jobId: string; jobVersion: number; output: { path: string; url: string; size: number; contentType: string; etag: string }; durationMs: number; summary: Record<string, string | number | boolean | null>;
+  jobId: string; jobVersion: number; output: { path: string; url: string; downloadUrl: string; size: number; contentType: string; etag: string }; durationMs: number; summary: Record<string, string | number | boolean | null>;
 }
 
 function summaryFrom(value: unknown, allowed: string[]): Record<string, string | number | boolean | null> {
@@ -37,7 +37,10 @@ export async function runRegisteredJob(jobId: string, args: Record<string, unkno
   const summary = summaryFrom(run.result, job.manifest.summary);
   try {
     const metadata = await createFile(job.manifest.output.path, output);
-    const url = `${getPublicAppUrl()}/api/file/download?path=${encodeURIComponent(metadata.path)}`;
-    return { jobId, jobVersion: job.manifest.version, output: { path: metadata.path, url, size: metadata.size, contentType: metadata.contentType, etag: metadata.etag }, durationMs: run.durationMs, summary };
+    const publicUrl = getPublicAppUrl();
+    const encodedPath = metadata.path.split("/").map(encodeURIComponent).join("/");
+    const url = `${publicUrl}/files/${encodedPath}`;
+    const downloadUrl = `${publicUrl}/api/file/download?path=${encodeURIComponent(metadata.path)}`;
+    return { jobId, jobVersion: job.manifest.version, output: { path: metadata.path, url, downloadUrl, size: metadata.size, contentType: metadata.contentType, etag: metadata.etag }, durationMs: run.durationMs, summary };
   } catch (err) { throw new JobError("publish_failed", err instanceof Error ? err.message : String(err)); }
 }
