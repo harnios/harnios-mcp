@@ -18,7 +18,7 @@
 
 1. From an authenticated MCP client call `get_upload_link`; verify URL, destination, allowed extensions, and limit.
 2. Pass the returned inbox CSV path as `source_path` to the table job's `run_job` call.
-3. Verify output metadata/summary only, then open the resulting HTML path in Harnios.
+3. Verify output metadata/summary only, then open the absolute `output.url` in Harnios; use `output.downloadUrl` only when a direct download is needed.
 4. Confirm the CSV is never read into the conversation.
 5. Temporarily remove `PUBLIC_APP_URL` and verify `get_upload_link` returns `configuration_error` rather than an internal URL.
 6. Place two CSVs in the inbox and verify the assistant asks which path to use instead of guessing.

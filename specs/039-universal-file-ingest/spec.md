@@ -37,7 +37,7 @@ An operator returns to any connected assistant after uploading a CSV. The assist
 **Acceptance Scenarios**:
 
 1. **Given** an uploaded CSV path is available, **When** an assistant invokes an eligible registered workflow with that path, **Then** the workflow can complete without the CSV content being sent to the assistant.
-2. **Given** the workflow completes, **When** the assistant receives its result, **Then** it receives output metadata and a summary but no source-file records or generated-file body.
+2. **Given** the workflow completes, **When** the assistant receives its result, **Then** it receives output metadata, an absolute authenticated viewer URL, an optional direct-download URL, and a summary but no source-file records or generated-file body.
 3. **Given** more than one eligible uploaded CSV is present, **When** the user has not identified one, **Then** the assistant asks the user which file to use.
 
 ---
@@ -75,6 +75,7 @@ An operator uses a model or client other than the current chat client. That clie
 - **FR-006**: The system MUST permit registered workflows to opt in to CSV inputs stored under `data/inbox/` while still limiting each run to the one selected input path.
 - **FR-007**: The system MUST let an assistant use an uploaded file path as a registered workflow input without reading or embedding the file content in the conversation.
 - **FR-008**: The system MUST return upload and workflow results as paths and metadata, not file contents, by default.
+- **FR-009**: A completed workflow result MUST include an absolute authenticated URL that opens the generated output in the Harnios `/files` interface; it SHOULD also include a separate direct-download URL.
 - **FR-009**: The system MUST retain the current multi-file folder upload experience unchanged.
 
 ### Key Entities *(include if feature involves data)*

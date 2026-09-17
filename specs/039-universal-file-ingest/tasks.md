@@ -54,6 +54,7 @@ description: "Task list for universal file ingest"
 - [X] T011 [US2] Update the persisted manifest at `os/jobs/tabella-polizze-scadenza/manifest.json` so its CSV input prefix accepts `data/` while retaining the `.csv` extension and single-input contract.
 - [X] T012 [US2] Update the persisted skill at `os/skills/tabella-polizze-scadenza.md` to select a returned inbox path and invoke `run_job` without `read_file`, `run_python`, or content transfer.
 - [X] T013 [US2] Verify `run_job` accepts `data/inbox/<uuid>-*.csv`, publishes `data/polizze/tabella-scadenza.html`, and returns no source or output body; record the command and expected result in `specs/039-universal-file-ingest/quickstart.md`.
+- [X] T021 [US2] Return an absolute authenticated viewer URL (`output.url`) and separate direct-download URL (`output.downloadUrl`) for generated workflow output.
 
 **Checkpoint**: Upload-to-job-to-HTML works with only S3 paths and compact metadata in the conversation.
 

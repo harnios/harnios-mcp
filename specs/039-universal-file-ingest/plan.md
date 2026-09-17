@@ -28,7 +28,7 @@ Provide a model-independent handoff from chat to browser upload: an MCP client o
 - The single-file inbox endpoint reuses the existing allow-list, content-type inference, 25 MB limit, and owner session/OAuth/PAT authentication.
 - A server-generated UUID prefixes a sanitized basename, preventing same-name collision and caller-selected S3 paths.
 - `PUBLIC_APP_URL` supplies the canonical public origin used by MCP to return an absolute `/upload` link; no internal proxy URL is exposed.
-- `run_job` remains the executor. The first policy job broadens its persisted CSV prefix to `data/`, but each run still exposes only its one supplied input path to the sandbox.
+- `run_job` remains the executor. The first policy job broadens its persisted CSV prefix to `data/`, but each run still exposes only its one supplied input path to the sandbox. Completed runs return both the relative output path and absolute authenticated viewer/download URLs.
 
 **Scale/Scope**: One upload page, one multipart endpoint, one read-only MCP discovery tool, one shared ingest service, and a manifest/skill migration. Provider-specific automatic attachment transfer is out of scope.
 
