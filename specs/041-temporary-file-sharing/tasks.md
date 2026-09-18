@@ -100,6 +100,8 @@
 - [X] T031 Review all public share responses and logs in `frontend/app/share/[token]/`, `frontend/app/api/shares/`, and `frontend/lib/sharing/` to confirm no raw token, password, S3 key, owner credential, stack trace, or unrelated file metadata is exposed
 - [X] T032 [US1] Build generated share links from the validated canonical `PUBLIC_APP_URL`, reject missing or invalid public URL configuration before persisting a share, and verify no internal bind address can appear in the returned link
 - [X] T033 Run `npm run lint` and `npm run build` from `frontend/`, then execute every scenario in `specs/041-temporary-file-sharing/quickstart.md` against local S3-compatible storage and record any implementation-specific adjustments in the feature documentation
+- [X] T034 [US1] Mark `/share/*` as a chromeless public surface so shared visitors never receive the authenticated app header or primary navigation
+- [ ] T035 [US1] Restrict `/shares` client-component translation props to the serializable share-management strings so the authenticated management page renders without a Next.js server/client serialization error
 
 ---
 

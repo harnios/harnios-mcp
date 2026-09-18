@@ -8,7 +8,19 @@ import { ShareManager } from "./ShareManager";
 
 export default async function SharesPage() {
   if (!(await hasActiveOwnerSession())) redirect(`/oauth/login?continue=${encodeURIComponent("/shares")}`);
-  const dict = getDictionary(await resolveLanguage()).editor.file;
+  const fileDict = getDictionary(await resolveLanguage()).editor.file;
+  const dict = {
+    shareConfirmRevoke: fileDict.shareConfirmRevoke,
+    shareEmpty: fileDict.shareEmpty,
+    sharePath: fileDict.sharePath,
+    shareExpires: fileDict.shareExpires,
+    shareStatus: fileDict.shareStatus,
+    shareProtected: fileDict.shareProtected,
+    shareActive: fileDict.shareActive,
+    shareExpired: fileDict.shareExpired,
+    shareRevoked: fileDict.shareRevoked,
+    shareRevoke: fileDict.shareRevoke,
+  };
   return (
     <Page size="lg">
       <PageHeader title={dict.shareManager} description={dict.shareManagerDescription} />

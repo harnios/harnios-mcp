@@ -118,7 +118,7 @@ correct.
 ### Edge Cases
 
 - Logged-out visitor to `/` — header renders without a sign-out control.
-- A chromeless surface (`/oauth/*`, `/init`, `/files`, `/editor`) — the shared header must not
+- A chromeless surface (`/oauth/*`, `/init`, `/files`, `/editor`, `/share/*`) — the shared header must not
   appear; `/files` retains its own bespoke editor header.
 - A viewer with no `prefers-color-scheme` preference — defaults to the light palette.
 - A client component (the first-run env helper, the messaging test form, the editor) cannot

@@ -4,7 +4,21 @@ import useSWR from "swr";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import type { TemporaryShareSummary } from "@/lib/sharing/types";
 
-export function ShareManager({ dict }: { dict: Dictionary["editor"]["file"] }) {
+type ShareManagerDictionary = Pick<
+  Dictionary["editor"]["file"],
+  | "shareConfirmRevoke"
+  | "shareEmpty"
+  | "sharePath"
+  | "shareExpires"
+  | "shareStatus"
+  | "shareProtected"
+  | "shareActive"
+  | "shareExpired"
+  | "shareRevoked"
+  | "shareRevoke"
+>;
+
+export function ShareManager({ dict }: { dict: ShareManagerDictionary }) {
   const { data: shares, error, isLoading, mutate } = useSWR<TemporaryShareSummary[]>(
     "/api/shares",
     async (url: string) => {

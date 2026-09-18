@@ -90,6 +90,8 @@ As a visitor, I want the shared file to open in the browser when the browser sup
 - **FR-014**: The system MUST provide the owner with a way to see active shares and their expiration status, and to revoke them.
 - **FR-015**: The system MUST record enough share metadata to support expiration, revocation, and operational troubleshooting without storing the raw bearer token in a user-visible listing.
 - **FR-016**: The system MUST build generated share links from the configured canonical public application URL (`PUBLIC_APP_URL`) and MUST NOT expose an internal bind address, proxy address, or `0.0.0.0` in a visitor-facing link. If the public URL is missing or invalid, share creation MUST fail before persisting a share record.
+- **FR-017**: The public share route (`/share/<token>`) MUST render without the authenticated application header, primary navigation, or owner controls.
+- **FR-018**: The authenticated share-management page (`/shares`) MUST render successfully and pass only serializable translation values to client components.
 
 ### Key Entities
 

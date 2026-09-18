@@ -6,9 +6,10 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 import { NAV_ITEMS } from "./nav";
 
 /** Surfaces that render without the standard app chrome (spec 034 FR-008):
- * pre-auth (`/oauth/*`), first-run setup (`/init`), and the file editor
- * (`/files` has its own header; `/editor` only 308-redirects into it). */
-const CHROMELESS = ["/oauth", "/init", "/files", "/editor"];
+ * pre-auth (`/oauth/*`), first-run setup (`/init`), the file editor
+ * (`/files` has its own header; `/editor` only 308-redirects into it), and
+ * public temporary shares (`/share/*`). */
+const CHROMELESS = ["/oauth", "/init", "/files", "/editor", "/share"];
 
 function isChromeless(pathname: string): boolean {
   return CHROMELESS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
