@@ -26,7 +26,7 @@ Add owner-controlled, read-only temporary links for individual files. A visitor 
 
 **Performance Goals**: Share creation and owner share-list operations should complete within the normal existing file-management interaction time; a valid public view should begin loading within one normal application request round trip for files up to the existing 25 MB upload limit
 
-**Constraints**: No database service; public routes must not require owner authentication; raw bearer tokens and passwords must not be persisted; revocation must apply on the next request; unsafe browser-executable content must never be served inline; no automatic download for unsupported formats
+**Constraints**: No database service; public routes must not require owner authentication; raw bearer tokens and passwords must not be persisted; revocation must apply on the next request; unsafe browser-executable content must never be served inline; no automatic download for unsupported formats; generated links must use the canonical `PUBLIC_APP_URL` rather than request-derived internal origins
 
 **Scale/Scope**: One configured owner and one S3 bucket; one share targets one file; existing file size and allowed-extension limits apply; folder shares, editing, ZIP generation, analytics dashboards, and external identity accounts are out of scope
 

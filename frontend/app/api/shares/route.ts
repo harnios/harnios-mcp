@@ -6,6 +6,7 @@ import { createShareToken, digestShareToken, hashSharePassword } from "@/lib/sha
 import { createTemporaryShare, listTemporaryShares, revokeTemporaryShare } from "@/lib/sharing/store";
 import { SHARES_PREFIX } from "@/lib/sharing/store";
 import type { CreateTemporaryShareInput } from "@/lib/sharing/types";
+import { getPublicAppUrl, PublicUrlConfigError } from "@/lib/config/publicUrl";
 
 const MAX_SHARE_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -43,6 +44,14 @@ export async function POST(request: NextRequest) {
     return jsonError("The password cannot be empty", 400);
   }
 
+  let publicAppUrl: string;
+  try {
+    publicAppUrl = getPublicAppUrl();
+  } catch (err) {
+    if (err instanceof PublicUrlConfigError) return jsonError("The public application URL is not configured", 503);
+    return jsonError("The public application URL is unavailable", 503);
+  }
+
   try {
     await getFileMetadata(filePath);
     const token = createShareToken();
@@ -64,7 +73,7 @@ export async function POST(request: NextRequest) {
       {
         id: created.id,
         path: created.filePath,
-        url: `${request.nextUrl.origin}/share/${encodeURIComponent(token)}`,
+        url: `${publicAppUrl}/share/${encodeURIComponent(token)}`,
         expiresAt: created.expiresAt,
         passwordProtected: Boolean(created.passwordHash),
         status: "active",

@@ -89,6 +89,7 @@ As a visitor, I want the shared file to open in the browser when the browser sup
 - **FR-013**: The system MUST prevent a shared visitor from editing, deleting, moving, or replacing the associated file.
 - **FR-014**: The system MUST provide the owner with a way to see active shares and their expiration status, and to revoke them.
 - **FR-015**: The system MUST record enough share metadata to support expiration, revocation, and operational troubleshooting without storing the raw bearer token in a user-visible listing.
+- **FR-016**: The system MUST build generated share links from the configured canonical public application URL (`PUBLIC_APP_URL`) and MUST NOT expose an internal bind address, proxy address, or `0.0.0.0` in a visitor-facing link. If the public URL is missing or invalid, share creation MUST fail before persisting a share record.
 
 ### Key Entities
 
