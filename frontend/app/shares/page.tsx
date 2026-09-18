@@ -10,6 +10,8 @@ export default async function SharesPage() {
   if (!(await hasActiveOwnerSession())) redirect(`/oauth/login?continue=${encodeURIComponent("/shares")}`);
   const fileDict = getDictionary(await resolveLanguage()).editor.file;
   const dict = {
+    shareManager: fileDict.shareManager,
+    shareManagerDescription: fileDict.shareManagerDescription,
     shareConfirmRevoke: fileDict.shareConfirmRevoke,
     shareEmpty: fileDict.shareEmpty,
     sharePath: fileDict.sharePath,

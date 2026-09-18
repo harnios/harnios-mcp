@@ -6,6 +6,8 @@ import type { TemporaryShareSummary } from "@/lib/sharing/types";
 
 type ShareManagerDictionary = Pick<
   Dictionary["editor"]["file"],
+  | "shareManager"
+  | "shareManagerDescription"
   | "shareConfirmRevoke"
   | "shareEmpty"
   | "sharePath"
