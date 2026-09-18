@@ -10,6 +10,7 @@ import { HtmlEditor } from "./HtmlEditor";
 import { MarkdownEditor } from "./MarkdownEditor";
 import { PlainTextEditor } from "./PlainTextEditor";
 import { PythonEditor } from "./PythonEditor";
+import { ShareDialog } from "./ShareDialog";
 
 /**
  * Editor Session (data-model.md): the state of whichever file is currently
@@ -66,6 +67,7 @@ export function FileEditor({ path, onDirtyChange, dict, csvDict }: FileEditorPro
   // Markdown/CSV files open showing the rendered view by default; "Edit"/"Raw"
   // is an explicit switch, never shown side-by-side with the preview/table.
   const [mode, setMode] = useState<"preview" | "edit">("preview");
+  const [shareOpen, setShareOpen] = useState(false);
 
   // Full content — loaded once per path, never polled on a timer (FR-010):
   // it's only revalidated by an explicit mutate() call below, triggered by
@@ -110,6 +112,7 @@ export function FileEditor({ path, onDirtyChange, dict, csvDict }: FileEditorPro
   // in-progress edits (data-model.md).
   useEffect(() => {
     setMode("preview");
+    setShareOpen(false);
 
     if (!path) {
       setState({ status: "idle" });
@@ -299,6 +302,10 @@ export function FileEditor({ path, onDirtyChange, dict, csvDict }: FileEditorPro
     return (
       <div>
         <p style={{ color: "var(--text-muted)" }}>{state.message}</p>
+        <button type="button" className="btn btn--secondary" onClick={() => setShareOpen((open) => !open)}>
+          {dict.share}
+        </button>
+        {shareOpen && <ShareDialog path={path} dict={dict} onClose={() => setShareOpen(false)} />}
         <a
           href={`/api/file/download?path=${encodeURIComponent(path)}`}
           target="_blank"
@@ -356,6 +363,9 @@ export function FileEditor({ path, onDirtyChange, dict, csvDict }: FileEditorPro
           </div>
         )}
         {dirty && <span style={{ color: "var(--warning-fg)" }}>{dict.unsavedChanges}</span>}
+        <button type="button" className="btn btn--secondary" onClick={() => setShareOpen((open) => !open)}>
+          {dict.share}
+        </button>
         <button
           type="button"
           className="btn btn--primary"
@@ -368,6 +378,7 @@ export function FileEditor({ path, onDirtyChange, dict, csvDict }: FileEditorPro
           <span style={{ color: "var(--success-fg)" }}>{dict.saved}</span>
         )}
       </div>
+      {shareOpen && <ShareDialog path={session.path} dict={dict} onClose={() => setShareOpen(false)} />}
       {session.saveState === "error" && (
         <p style={{ color: "var(--danger-fg)" }}>{dict.saveFailed(session.saveError ?? "")}</p>
       )}

@@ -20,4 +20,5 @@ export const NAV_ITEMS: {
   { href: "/schedules", prefix: "/schedules", key: "schedules" },
   { href: "/settings/connected-apps", prefix: "/settings", key: "settings" },
   { href: "/docs", prefix: "/docs", key: "docs" },
+  { href: "/shares", prefix: "/shares", key: "shares" },
 ];

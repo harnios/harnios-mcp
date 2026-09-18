@@ -3,6 +3,7 @@ import { OAUTH_PREFIX } from "@/lib/oauth/store";
 import { TOOLS_PREFIX } from "@/lib/mcp-tools/store";
 import { EXTERNAL_CATALOG_PREFIX, EXTERNAL_SERVERS_PREFIX } from "@/lib/external-mcp/store";
 import { SCHEDULER_PREFIX } from "@/lib/scheduler/store";
+import { SHARES_PREFIX } from "@/lib/sharing/store";
 import { BUCKET, s3Client } from "./client";
 import { alreadyExists, notFound, typeMismatch, wrapStorageError } from "./errors";
 import { move } from "./move";
@@ -64,7 +65,8 @@ export async function listDirectory(path: string): Promise<{ path: string } & Di
           !obj.Key.startsWith(TOOLS_PREFIX) &&
           !obj.Key.startsWith(EXTERNAL_SERVERS_PREFIX) &&
           !obj.Key.startsWith(EXTERNAL_CATALOG_PREFIX) &&
-          !obj.Key.startsWith(SCHEDULER_PREFIX),
+          !obj.Key.startsWith(SCHEDULER_PREFIX) &&
+          !obj.Key.startsWith(SHARES_PREFIX),
       ) // exclude the directory's own marker object and reserved OAuth/tool-status/external-connection/scheduler state
       .map((obj) => ({
         path: obj.Key as string,
@@ -80,7 +82,8 @@ export async function listDirectory(path: string): Promise<{ path: string } & Di
           p.Prefix !== TOOLS_PREFIX &&
           p.Prefix !== EXTERNAL_SERVERS_PREFIX &&
           p.Prefix !== EXTERNAL_CATALOG_PREFIX &&
-          p.Prefix !== SCHEDULER_PREFIX,
+          p.Prefix !== SCHEDULER_PREFIX &&
+          p.Prefix !== SHARES_PREFIX,
       )
       .map((p) => ({ path: p.Prefix as string }));
 

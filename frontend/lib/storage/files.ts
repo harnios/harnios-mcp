@@ -8,6 +8,7 @@ import {
   isNotFoundError,
   normalizeDirectoryPath,
   normalizeFilePath,
+  isReservedStoragePath,
 } from "./paths";
 import { isUnderTrash, trashDestinationFor } from "./trash";
 import { mimeTypeForPath } from "./fileTypes";
@@ -38,6 +39,7 @@ export interface FileContent extends FileMetadata {
  */
 export async function createFile(path: string, content: Buffer, contentType?: string): Promise<FileMetadata> {
   const key = normalizeFilePath(path);
+  if (isReservedStoragePath(key)) throw notFound(path);
   const resolvedContentType = contentType || mimeTypeForPath(path);
 
   try {
@@ -67,6 +69,7 @@ export async function createFile(path: string, content: Buffer, contentType?: st
  * research.md §2, §4). */
 export async function readFile(path: string): Promise<FileContent> {
   const key = normalizeFilePath(path);
+  if (isReservedStoragePath(key)) throw notFound(path);
 
   try {
     const result = await s3Client.send(new GetObjectCommand({ Bucket: BUCKET, Key: key }));
@@ -98,6 +101,7 @@ export async function readFile(path: string): Promise<FileContent> {
  */
 export async function updateFile(path: string, content: Buffer, contentType?: string): Promise<FileMetadata> {
   const key = normalizeFilePath(path);
+  if (isReservedStoragePath(key)) throw notFound(path);
   const resolvedContentType = contentType || mimeTypeForPath(path);
 
   try {
@@ -131,6 +135,7 @@ export async function updateFile(path: string, content: Buffer, contentType?: st
  */
 export async function getFileMetadata(path: string): Promise<FileMetadata> {
   const key = normalizeFilePath(path);
+  if (isReservedStoragePath(key)) throw notFound(path);
 
   try {
     const result = await s3Client.send(new HeadObjectCommand({ Bucket: BUCKET, Key: key }));
@@ -162,6 +167,7 @@ export async function deleteFile(
   path: string,
 ): Promise<{ path: string; deleted: true; permanent: boolean; trashedTo?: string }> {
   const key = normalizeFilePath(path);
+  if (isReservedStoragePath(key)) throw notFound(path);
 
   try {
     if (!(await headObjectExists(key))) {

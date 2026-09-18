@@ -42,6 +42,20 @@ const MIME_TYPES: Record<string, string> = {
 /** Only these open inline (new browser tab) via /api/file/download; every
  * other allowed type downloads as an attachment (research.md §5). */
 const NATIVELY_RENDERABLE_EXTENSIONS = new Set(["pdf", "jpg", "jpeg", "png"]);
+const SHARE_INLINE_MIME_TYPES = new Set([
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/bmp",
+  "image/webp",
+  "audio/mpeg",
+  "audio/wav",
+  "audio/ogg",
+  "video/mp4",
+  "video/webm",
+  "video/ogg",
+]);
 
 export const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
 
@@ -71,4 +85,8 @@ export function mimeTypeForPath(path: string): string {
 
 export function isNativelyRenderable(path: string): boolean {
   return NATIVELY_RENDERABLE_EXTENSIONS.has(extensionOf(path));
+}
+
+export function isSafeInlineShareMimeType(contentType: string): boolean {
+  return SHARE_INLINE_MIME_TYPES.has(contentType.toLowerCase());
 }

@@ -25,6 +25,7 @@ const DOCS_CONTENT = {
   tools: readFileSync(join(DOCS_DIR, "tools.md"), "utf-8"),
   schedules: readFileSync(join(DOCS_DIR, "schedules.md"), "utf-8"),
   settings: readFileSync(join(DOCS_DIR, "settings.md"), "utf-8"),
+  shares: readFileSync(join(DOCS_DIR, "shares.md"), "utf-8"),
 } as const;
 
 /**
@@ -34,7 +35,7 @@ const DOCS_CONTENT = {
  * hand when either changes (User Story 3, spec.md) — there is no derivation
  * between the two.
  */
-export const DOCS_TOPICS = ["overview", "dashboard", "files", "tools", "schedules", "settings"] as const;
+export const DOCS_TOPICS = ["overview", "dashboard", "files", "tools", "schedules", "settings", "shares"] as const;
 
 export type DocsTopicId = (typeof DOCS_TOPICS)[number];
 

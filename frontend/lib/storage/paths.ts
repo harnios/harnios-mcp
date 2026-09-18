@@ -3,6 +3,13 @@ import { BUCKET, s3Client } from "./client";
 
 export type PathKind = "file" | "directory" | "none";
 
+export const SHARES_PREFIX = ".shares/";
+
+export function isReservedStoragePath(path: string): boolean {
+  const normalized = normalizeFilePath(path);
+  return normalized === ".shares" || normalized.startsWith(SHARES_PREFIX);
+}
+
 export function normalizeFilePath(path: string): string {
   return path.trim().replace(/\/+/g, "/").replace(/^\/+/, "").replace(/\/+$/, "");
 }
@@ -43,6 +50,7 @@ export async function hasAnyObjectWithPrefix(prefix: string): Promise<boolean> {
  */
 export async function statPath(path: string): Promise<PathKind> {
   const filePath = normalizeFilePath(path);
+  if (isReservedStoragePath(filePath)) return "none";
   if (filePath !== "" && (await headObjectExists(filePath))) {
     return "file";
   }

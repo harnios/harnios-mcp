@@ -83,6 +83,7 @@ export interface Dictionary {
     schedules: string;
     settings: string;
     docs: string;
+    shares: string;
     signOut: string;
     /** aria-label for the <nav> element. */
     menuLabel: string;
@@ -104,6 +105,7 @@ export interface Dictionary {
       tools: string;
       schedules: string;
       settings: string;
+      shares: string;
     };
     notFoundTitle: string;
     notFoundBody: string;
@@ -173,6 +175,30 @@ export interface Dictionary {
       loadFailed: string;
       openedPathIsFolder: (path: string) => string;
       openOrDownload: string;
+      share: string;
+      shareTitle: string;
+      shareDescription: string;
+      shareCreate: string;
+      shareCancel: string;
+      shareExpiration: string;
+      sharePassword: string;
+      sharePasswordHint: string;
+      shareCopy: string;
+      shareCopied: string;
+      shareLinkCreated: string;
+      shareFailed: (message: string) => string;
+      shareManager: string;
+      shareManagerDescription: string;
+      shareEmpty: string;
+      sharePath: string;
+      shareExpires: string;
+      shareStatus: string;
+      shareProtected: string;
+      shareRevoke: string;
+      shareRevoked: string;
+      shareExpired: string;
+      shareActive: string;
+      shareConfirmRevoke: string;
       externalChangeMessage: string;
       externalChangeReload: string;
       externalChangeKeepMine: string;
