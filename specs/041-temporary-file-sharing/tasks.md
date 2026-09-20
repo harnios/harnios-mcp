@@ -43,7 +43,7 @@
 ### Implementation for User Story 1
 
 - [X] T011 [US1] Implement `POST /api/shares` in `frontend/app/api/shares/route.ts`, requiring the existing owner guard, validating an existing file and an expiration in the future and no more than 30 days after creation, creating the share record, and returning the one-time share URL per `specs/041-temporary-file-sharing/contracts/shares-http.md`
-- [X] T012 [US1] Implement the owner share creation form in `frontend/app/files/ShareDialog.tsx`, including suggested durations of 1 hour, 1 day, 7 days, and 30 days, optional password entry, validation messages, and copyable one-time URL handling
+- [X] T012 [US1] Implement the owner share creation form in `frontend/app/files/ShareDialog.tsx`, including suggested durations of 1 hour, 1 day, 7 days, and 30 days, optional password entry, validation messages, copyable one-time URL handling, and a Web Share API action that pre-fills the filename
 - [X] T013 [US1] Integrate the share action and dialog state into `frontend/app/files/FileEditor.tsx` and `frontend/app/files/EditorApp.tsx`, showing it only for an owner-selected file and preserving existing unsaved-edit navigation guards
 - [X] T014 [US1] Implement the public share page at `frontend/app/share/[token]/page.tsx`, showing the active preview shell, password form, loading state, and non-sensitive invalid/expired/revoked/unavailable states without exposing the storage path
 - [X] T015 [US1] Implement password verification at `frontend/app/share/[token]/verify/route.ts`, validating the optional password through `frontend/lib/sharing/authorize.ts`, issuing the scoped signed visitor cookie on success, and returning a generic failure on incorrect passwords
@@ -102,6 +102,7 @@
 - [X] T033 Run `npm run lint` and `npm run build` from `frontend/`, then execute every scenario in `specs/041-temporary-file-sharing/quickstart.md` against local S3-compatible storage and record any implementation-specific adjustments in the feature documentation
 - [X] T034 [US1] Mark `/share/*` as a chromeless public surface so shared visitors never receive the authenticated app header or primary navigation
 - [X] T035 [US1] Restrict `/shares` client-component translation props to the serializable share-management strings so the authenticated management page renders without a Next.js server/client serialization error
+- [X] T036 [US1] Add the native share action to the generated-link state in `frontend/app/files/ShareDialog.tsx`, localize its label in all supported dictionaries, and document mobile share-sheet behavior in the feature specification
 
 ---
 

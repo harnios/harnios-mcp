@@ -37,6 +37,17 @@ export function ShareDialog({ path, dict, onClose }: { path: string; dict: FileD
     setCopied(true);
   }
 
+  async function shareFile() {
+    if (!result || !navigator.share) return;
+
+    const fileName = path.split("/").pop() ?? path;
+    await navigator.share({
+      title: fileName,
+      text: fileName,
+      url: result,
+    });
+  }
+
   return (
     <div role="dialog" aria-modal="true" aria-labelledby="share-title" style={{ marginTop: 12, padding: 16, border: "1px solid var(--border)", borderRadius: "var(--radius)", background: "var(--surface-raised)" }}>
       <h4 id="share-title">{dict.shareTitle}</h4>
@@ -47,6 +58,9 @@ export function ShareDialog({ path, dict, onClose }: { path: string; dict: FileD
           <input readOnly value={result} aria-label="Share URL" />
           <div className="cluster">
             <button type="button" className="btn btn--primary" onClick={copyLink}>{copied ? dict.shareCopied : dict.shareCopy}</button>
+            {typeof navigator !== "undefined" && typeof navigator.share === "function" && (
+              <button type="button" className="btn btn--secondary" onClick={shareFile}>{dict.shareNative}</button>
+            )}
             <button type="button" className="btn btn--secondary" onClick={onClose}>{dict.shareCancel}</button>
           </div>
         </div>

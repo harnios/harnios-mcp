@@ -184,6 +184,7 @@ export interface Dictionary {
       sharePassword: string;
       sharePasswordHint: string;
       shareCopy: string;
+      shareNative: string;
       shareCopied: string;
       shareLinkCreated: string;
       shareFailed: (message: string) => string;

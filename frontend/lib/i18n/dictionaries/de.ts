@@ -177,6 +177,7 @@ export const de: Dictionary = {
       sharePassword: "Passwort (optional)",
       sharePasswordHint: "Wer den Link besitzt, kann die Datei sehen, sofern kein Passwort gesetzt ist.",
       shareCopy: "Link kopieren",
+      shareNative: "Teilen",
       shareCopied: "Link kopiert",
       shareLinkCreated: "Link erstellt. Jetzt kopieren; er wird nicht erneut angezeigt.",
       shareFailed: (message) => `Freigabe fehlgeschlagen: ${message}`,

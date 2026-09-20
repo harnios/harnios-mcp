@@ -16,8 +16,10 @@ from what an assistant sees.
 - **Staying in sync**: if the same file changes elsewhere (e.g. an assistant edits it while you
   have it open), the editor lets you know instead of silently overwriting your changes.
 - **Temporary sharing**: select a file and use **Share temporarily** to create a read-only browser
-  link. Choose an expiry up to 30 days and optionally add a password. Manage or revoke links at
-  `/shares`; unsupported formats show an optional download action but never download automatically.
+  link. Choose an expiry up to 30 days and optionally add a password. After creating the link,
+  use **Share** to open the browser or mobile system share sheet with the filename included in the
+  message, or use **Copy link**. Manage or revoke links at `/shares`; unsupported formats show an
+  optional download action but never download automatically.
 
 Unlike the rest of the app, `/files` has its own header instead of the shared top menu, so there's
 more room for the file tree and editor.

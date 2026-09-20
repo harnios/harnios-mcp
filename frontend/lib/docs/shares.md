@@ -6,6 +6,7 @@ From the file editor, use **Share temporarily** to create a read-only browser li
 - You can optionally protect the link with a password.
 - PDF, images, media, text, and Markdown open in the browser when supported. Markdown is rendered without executing raw HTML or scripts.
 - Unsupported formats show a preview-unavailable page with an explicit download button. Nothing downloads automatically.
+- After creating a link, **Share** opens the native browser/mobile sharing UI and includes the file name in the message. **Copy link** remains available when native sharing is unsupported.
 - Manage and revoke links from `/shares`. Revocation applies to later requests immediately.
 
 A share URL is a bearer credential: anyone who has the URL can view the file until it expires or is revoked. Treat it like a password and avoid posting it in public places.

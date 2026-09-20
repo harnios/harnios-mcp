@@ -177,6 +177,7 @@ export const ru: Dictionary = {
       sharePassword: "Пароль (необязательно)",
       sharePasswordHint: "Любой обладатель ссылки сможет просмотреть файл, если не задан пароль.",
       shareCopy: "Копировать ссылку",
+      shareNative: "Поделиться",
       shareCopied: "Ссылка скопирована",
       shareLinkCreated: "Ссылка создана. Скопируйте её сейчас — она больше не будет показана.",
       shareFailed: (message) => `Не удалось поделиться: ${message}`,

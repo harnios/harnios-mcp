@@ -13,6 +13,10 @@
 - Q: Deve essere possibile proteggere un link condiviso anche con una password? → A: Sì, con password opzionale scelta dal proprietario.
 - Q: Per i formati che il browser non riesce a visualizzare, vuoi comunque offrire un pulsante opzionale per scaricare il file? → A: Sì, mostrare una pagina informativa con download opzionale, senza download automatico.
 
+### Session 2026-09-20
+
+- Q: Dopo aver creato il link, come deve essere condiviso rapidamente il file? → A: Mostrare un pulsante di condivisione nativa quando il browser supporta la Web Share API; il testo condiviso deve contenere il nome del file e sui dispositivi mobili deve aprire il pannello di condivisione del sistema.
+
 ## User Scenarios & Testing
 
 ### User Story 1 - Create a temporary browser-view link (Priority: P1)
@@ -29,6 +33,7 @@ As the owner, I want to create a temporary link for a file so that another perso
 2. **Given** a valid, unexpired share link, **When** an unauthenticated visitor opens it, **Then** the file is presented in the browser without requiring an owner login.
 3. **Given** a valid share link, **When** the visitor attempts to edit, rename, delete, or browse outside the shared file, **Then** the system provides no write or additional-file access.
 4. **Given** a share protected by a password, **When** a visitor opens the link, **Then** the system requests the password before displaying the file and does not reveal the file content for an incorrect password.
+5. **Given** the owner has created a share and the browser supports native sharing, **When** the owner selects the share action, **Then** the system opens the browser or mobile operating system share UI with the generated link and the shared file's name in the message text.
 
 ### User Story 2 - Revoke or let a share expire (Priority: P1)
 
@@ -92,6 +97,8 @@ As a visitor, I want the shared file to open in the browser when the browser sup
 - **FR-016**: The system MUST build generated share links from the configured canonical public application URL (`PUBLIC_APP_URL`) and MUST NOT expose an internal bind address, proxy address, or `0.0.0.0` in a visitor-facing link. If the public URL is missing or invalid, share creation MUST fail before persisting a share record.
 - **FR-017**: The public share route (`/share/<token>`) MUST render without the authenticated application header, primary navigation, or owner controls.
 - **FR-018**: The authenticated share-management page (`/shares`) MUST render successfully and pass only serializable translation values to client components.
+- **FR-019**: After creating a share link, the owner-facing file UI MUST show a native share action when the browser exposes the Web Share API, passing the generated URL and the file name in the share payload.
+- **FR-020**: On mobile browsers that support the Web Share API, activating the native share action MUST open the operating system share sheet; browsers without Web Share API support MUST continue to offer the copy-link action.
 
 ### Key Entities
 
@@ -109,6 +116,7 @@ As a visitor, I want the shared file to open in the browser when the browser sup
 - **SC-004**: A visitor with a valid share can access exactly one file and cannot perform any write operation or access a neighboring file.
 - **SC-005**: Unsupported formats produce a clear fallback experience rather than a blank page or an unhandled application error.
 - **SC-006**: No shared link exposes the owner's credentials, storage path, or the contents of any unrelated file.
+- **SC-007**: On supported mobile browsers, one tap on the native share action opens the operating system share sheet with the generated link and the file name prefilled in the share message.
 
 ## Assumptions
 
@@ -119,6 +127,7 @@ As a visitor, I want the shared file to open in the browser when the browser sup
 - The owner may optionally add a password to provide a second protection layer for sensitive shares.
 - Expiration is mandatory, with a maximum duration of 30 days; the suggested durations are 1 hour, 1 day, 7 days, and 30 days.
 - Browser viewing is best effort and depends on the visitor's browser support for the file format.
+- Native sharing is best effort and depends on browser support for the Web Share API; copying the generated URL remains available as a fallback.
 - Unsupported formats show a preview-unavailable message with an optional download action; no file is downloaded automatically.
 - Existing owner authentication and file access rules remain the source of truth for owner operations.
 - The feature must work with the application's existing S3-compatible storage backends without requiring a separate database service.

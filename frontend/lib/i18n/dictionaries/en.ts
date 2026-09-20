@@ -178,6 +178,7 @@ export const en: Dictionary = {
       sharePassword: "Password (optional)",
       sharePasswordHint: "Anyone with the link can view it unless you add a password.",
       shareCopy: "Copy link",
+      shareNative: "Share",
       shareCopied: "Link copied",
       shareLinkCreated: "Share link created. Copy it now; it will not be shown again.",
       shareFailed: (message) => `Share failed: ${message}`,
