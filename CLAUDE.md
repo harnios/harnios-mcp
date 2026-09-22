@@ -1,5 +1,5 @@
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan
-at specs/042-harnios-chat-mvp/plan.md
+at specs/043-bpmn-viewer/plan.md
 <!-- SPECKIT END -->

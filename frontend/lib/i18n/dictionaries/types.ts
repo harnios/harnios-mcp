@@ -181,6 +181,17 @@ export interface Dictionary {
       table: string;
       edit: string;
       raw: string;
+      diagram: string;
+      xml: string;
+      bpmnLoading: string;
+      bpmnImportError: string;
+      modelerTitle: string;
+      modifyDiagram: string;
+      apply: string;
+      cancel: string;
+      close: string;
+      discardModelerChanges: string;
+      modelerExportError: string;
       unsavedChanges: string;
       save: string;
       saving: string;

@@ -5,6 +5,8 @@ import useSWR from "swr";
 import { authedFetch } from "@/lib/editorFetch";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { CsvTableEditor } from "./CsvTableEditor";
+import { BpmnViewer } from "./BpmnViewer";
+import { BpmnModelerDialog } from "./BpmnModelerDialog";
 import { ExternalChangeBanner } from "./ExternalChangeBanner";
 import { HtmlEditor } from "./HtmlEditor";
 import { MarkdownEditor } from "./MarkdownEditor";
@@ -21,7 +23,7 @@ export interface EditorSession {
   path: string;
   loadedContent: string;
   currentContent: string;
-  kind: "markdown" | "text" | "csv" | "python" | "html";
+  kind: "markdown" | "text" | "csv" | "python" | "html" | "bpmn";
   saveState: "idle" | "saving" | "error";
   saveError: string | null;
   /** ETag of the version reflected in `loadedContent` (spec 019 data-model.md). */
@@ -44,6 +46,7 @@ export function deriveKind(path: string): EditorSession["kind"] {
   if (lower.endsWith(".csv")) return "csv";
   if (lower.endsWith(".py")) return "python";
   if (lower.endsWith(".html") || lower.endsWith(".htm")) return "html";
+  if (lower.endsWith(".bpmn")) return "bpmn";
   return "text";
 }
 
@@ -68,6 +71,7 @@ export function FileEditor({ path, onDirtyChange, dict, csvDict }: FileEditorPro
   // is an explicit switch, never shown side-by-side with the preview/table.
   const [mode, setMode] = useState<"preview" | "edit">("preview");
   const [shareOpen, setShareOpen] = useState(false);
+  const [modelerOpen, setModelerOpen] = useState(false);
 
   // Full content — loaded once per path, never polled on a timer (FR-010):
   // it's only revalidated by an explicit mutate() call below, triggered by
@@ -113,6 +117,7 @@ export function FileEditor({ path, onDirtyChange, dict, csvDict }: FileEditorPro
   useEffect(() => {
     setMode("preview");
     setShareOpen(false);
+    setModelerOpen(false);
 
     if (!path) {
       setState({ status: "idle" });
@@ -329,7 +334,7 @@ export function FileEditor({ path, onDirtyChange, dict, csvDict }: FileEditorPro
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8, flexWrap: "wrap" }}>
         <h3 style={{ margin: 0, overflowWrap: "anywhere" }}>{session.path}</h3>
-        {(session.kind === "markdown" || session.kind === "csv" || session.kind === "html") && (
+        {(session.kind === "markdown" || session.kind === "csv" || session.kind === "html" || session.kind === "bpmn") && (
           <div style={{ display: "inline-flex", border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
             <button
               type="button"
@@ -343,7 +348,7 @@ export function FileEditor({ path, onDirtyChange, dict, csvDict }: FileEditorPro
                 cursor: "pointer",
               }}
             >
-              {session.kind === "csv" ? dict.table : dict.preview}
+              {session.kind === "bpmn" ? dict.diagram : session.kind === "csv" ? dict.table : dict.preview}
             </button>
             <button
               type="button"
@@ -358,9 +363,14 @@ export function FileEditor({ path, onDirtyChange, dict, csvDict }: FileEditorPro
                 cursor: "pointer",
               }}
             >
-              {session.kind === "csv" ? dict.raw : dict.edit}
+              {session.kind === "bpmn" ? dict.xml : session.kind === "csv" ? dict.raw : dict.edit}
             </button>
           </div>
+        )}
+        {session.kind === "bpmn" && mode === "preview" && (
+          <button type="button" className="btn btn--secondary" onClick={() => setModelerOpen(true)}>
+            {dict.modifyDiagram}
+          </button>
         )}
         {dirty && <span style={{ color: "var(--warning-fg)" }}>{dict.unsavedChanges}</span>}
         <button type="button" className="btn btn--secondary" onClick={() => setShareOpen((open) => !open)}>
@@ -398,6 +408,34 @@ export function FileEditor({ path, onDirtyChange, dict, csvDict }: FileEditorPro
         <PythonEditor value={session.currentContent} onChange={handleContentChange} />
       ) : session.kind === "html" ? (
         <HtmlEditor value={session.currentContent} onChange={handleContentChange} mode={mode} />
+      ) : session.kind === "bpmn" && mode === "preview" ? (
+        <>
+          <BpmnViewer
+            xml={session.currentContent}
+            loadingMessage={dict.bpmnLoading}
+            errorMessage={dict.bpmnImportError}
+          />
+          {modelerOpen && (
+            <BpmnModelerDialog
+              xml={session.currentContent}
+              labels={{
+                title: dict.modelerTitle,
+                apply: dict.apply,
+                cancel: dict.cancel,
+                close: dict.close,
+                discardChanges: dict.discardModelerChanges,
+                exportError: dict.modelerExportError,
+                importError: dict.bpmnImportError,
+                loading: dict.bpmnLoading,
+              }}
+              onApply={(updatedXml) => {
+                handleContentChange(updatedXml);
+                setModelerOpen(false);
+              }}
+              onClose={() => setModelerOpen(false)}
+            />
+          )}
+        </>
       ) : (
         <PlainTextEditor value={session.currentContent} onChange={handleContentChange} />
       )}
