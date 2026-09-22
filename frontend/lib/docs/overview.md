@@ -17,3 +17,15 @@ The main menu has five sections:
   send a one-off test message to confirm email/Telegram delivery works.
 
 Pick a topic from the list below for details on any of these.
+
+## In-app chat
+
+When signed in as the owner, use the floating button in the lower-right corner
+to open the temporary Harnios assistant. It uses the configured `CHAT_MODEL`
+(currently Mistral, falling back to `MISTRAL_MODEL`) and includes the current
+`os/AGENTS.md` instructions plus the enabled MCP tools on each request.
+
+The MVP keeps messages in memory only: it does not save chat history to S3 or
+the browser. Read-only tools can run directly; mutations, deletions, messages,
+jobs, code execution, and external tools require an explicit approval in the
+chat. Missing provider configuration is shown as a safe error.

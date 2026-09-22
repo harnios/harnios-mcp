@@ -1,6 +1,7 @@
 import type { Dictionary } from "./types";
 
 export const es: Dictionary = {
+  chat: { open: "Abrir chat", close: "Cerrar chat", title: "Asistente Harnios", placeholder: "Pregunta a Harnios…", send: "Enviar", thinking: "Pensando…", error: "Algo salió mal.", approve: "Aprobar", deny: "Rechazar", toolRunning: "Ejecutando herramienta", toolComplete: "Herramienta completada", toolFailed: "Herramienta fallida" },
   init: {
     setupTitle: "Configura tu Company OS",
     setupDescription:

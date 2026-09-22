@@ -2,6 +2,7 @@ import "./globals.css";
 import { getOsName } from "@/lib/config/app";
 import { resolveLanguage } from "@/lib/i18n/resolve";
 import { SiteHeader } from "@/app/_ui/SiteHeader";
+import { ChatShell } from "@/app/_ui/ChatShell";
 
 export const metadata = {
   title: getOsName(),
@@ -25,6 +26,7 @@ export default async function RootLayout({
       <body>
         <SiteHeader />
         {children}
+        <ChatShell />
       </body>
     </html>
   );

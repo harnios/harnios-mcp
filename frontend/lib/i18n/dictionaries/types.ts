@@ -6,6 +6,20 @@
  * stay outside the translated text itself.
  */
 export interface Dictionary {
+  chat: {
+    open: string;
+    close: string;
+    title: string;
+    placeholder: string;
+    send: string;
+    thinking: string;
+    error: string;
+    approve: string;
+    deny: string;
+    toolRunning: string;
+    toolComplete: string;
+    toolFailed: string;
+  };
   init: {
     setupTitle: string;
     setupDescription: string;

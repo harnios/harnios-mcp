@@ -1,0 +1,45 @@
+# Research — Harnios Chat MVP
+
+## Decision 1: AI SDK come contratto unico tra UI e modelli
+
+- **Decision**: usare `ai` e `@ai-sdk/react` con il transport HTTP standard verso `/api/chat`; configurare il modello lato server tramite un resolver provider/modello.
+- **Rationale**: l'API corrente di `useChat` usa un'architettura transport-based, gestisce stato e streaming e mantiene la UI indipendente dal provider. Il resolver può iniziare con Mistral e aggiungere in seguito provider locali/OpenAI-compatible senza cambiare la chat.
+- **Alternatives considered**: mantenere il client `@mistralai/mistralai` direttamente nella UI o nel route handler; scartato perché lega il nuovo flusso a Mistral e duplica la gestione dello streaming.
+- **References**: https://ai-sdk.dev/docs/reference/ai-sdk-ui/use-chat, https://ai-sdk.dev/docs/ai-sdk-ui/transport, https://ai-sdk.dev/providers/ai-sdk-providers/mistral
+
+## Decision 2: assistant-ui come runtime e primitive, senza imporre un nuovo design system
+
+- **Decision**: usare `@assistant-ui/react` e `@assistant-ui/ai-sdk`, con `AssistantRuntimeProvider` e `useChatRuntime`; costruire una superficie minimale composta da primitive assistant-ui e classi CSS già presenti in `globals.css`.
+- **Rationale**: assistant-ui collega direttamente il runtime AI SDK, supporta streaming e tool call/approval e permette di sostituire gli elementi UI con componenti propri. Evitare il vecchio pacchetto pre-stilizzato e template Tailwind riduce il conflitto con il design system plain CSS del repository.
+- **Alternatives considered**: UI custom basata solo su `useChat`; scartata perché richiederebbe reimplementare subito rendering dei messaggi, streaming, tool state e approval. `@assistant-ui/react-ui` legacy; scartato perché non è il percorso corrente di personalizzazione.
+- **References**: https://github.com/assistant-ui/assistant-ui
+
+## Decision 3: MCP in-process, non loopback HTTP
+
+- **Decision**: creare il client MCP in-process con `McpServer` + `InMemoryTransport`, riusando `registerNativeTools` e aggiungendo `registerExternalTools` per lo stesso catalogo disponibile sull'endpoint `/mcp`.
+- **Rationale**: il repository possiede già questo pattern in `lib/scheduler/toolRuntime.ts`; evita una seconda autenticazione, una chiamata HTTP interna e una divergenza tra tool visti dalla chat e tool esposti da Harnios. I tool vengono scoperti con `client.listTools()` e adattati al formato AI SDK.
+- **Alternatives considered**: chiamare `/mcp` via HTTP come client esterno; scartato perché introduce OAuth/token handling interno e loopback fragile in ambienti serverless. Duplicare manualmente le funzioni dei tool; scartato perché crea drift con il catalogo MCP.
+
+## Decision 4: approval AI SDK per tutte le operazioni non read-only
+
+- **Decision**: usare l'approvazione tool dell'AI SDK (`needsApproval`) per ogni tool che può modificare dati, cancellare dati, inviare messaggi, eseguire codice/job o che proviene da un proxy esterno. I tool chiaramente read-only possono essere eseguiti direttamente.
+- **Rationale**: la specifica richiede conferma prima di modifica/cancellazione; il default conservativo protegge anche tool con effetti collaterali non riducibili a un semplice write. Il modello riceve il risultato della conferma/negazione e la UI rende visibile lo stato.
+- **Alternatives considered**: conferma solo per `delete_*`/`update_file`; scartato perché `send_email`, `send_telegram_message`, `run_python`, `run_job` e tool esterni hanno effetti reali. Conferma manuale implementata fuori dal protocollo AI SDK; scartata perché duplica lo stato approval già previsto dal transport.
+
+## Decision 5: contesto base letto server-side a ogni richiesta
+
+- **Decision**: leggere `os/AGENTS.md` dallo storage server-side e includerlo nel system context insieme a una descrizione breve della disponibilità di Harnios MCP; non inviare il file come stato gestito dal browser.
+- **Rationale**: `AGENTS.md` è la fonte operativa corrente del Company OS e può cambiare nello storage. La lettura per richiesta evita cache stale e non espone istruzioni interne nel client prima dell'invio.
+- **Alternatives considered**: includere un duplicato statico nel bundle; scartato perché divergerebbe dal Company OS reale. Usare solo `MCP_BOOTSTRAP_PATH`; scartato perché la specifica richiede sempre `os/AGENTS.md`, indipendentemente dalla configurazione opzionale di bootstrap.
+
+## Decision 6: runtime chat nel root layout
+
+- **Decision**: montare un unico provider/client chat sotto il root layout, attivo solo per sessioni owner e superfici applicative, così lo stato sopravvive alla navigazione client-side.
+- **Rationale**: Next.js mantiene il root layout durante la navigazione tra route; un provider più profondo verrebbe ricreato quando cambia il segmento. La decisione soddisfa la chiarificazione sulla persistenza in memoria senza aggiungere storage locale o S3.
+- **Alternatives considered**: montare il componente dentro ogni pagina; scartato perché duplica la chat e perde lo stato tra route. Montarlo solo nell'header; scartato perché `/files` ha chrome proprio e la chat deve essere globale.
+
+## Decision 7: modello iniziale configurabile con compatibilità futura
+
+- **Decision**: introdurre `CHAT_MODEL` come identificatore provider/modello, con fallback compatibile alla configurazione Mistral già presente; implementare inizialmente il provider Mistral AI SDK e mantenere il resolver separato dalla UI.
+- **Rationale**: il requisito richiede un modello reale configurabile e futura compatibilità con modelli locali. La separazione consente di aggiungere `@ai-sdk/openai-compatible` o un provider Ollama in seguito senza cambiare il contratto `/api/chat`.
+- **Alternatives considered**: usare sempre `MISTRAL_MODEL`; scartato perché non esprime il provider e impedisce una transizione pulita a modelli locali.
