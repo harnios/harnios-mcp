@@ -1,7 +1,7 @@
 import type { Dictionary } from "./types";
 
 export const fr: Dictionary = {
-  chat: { open: "Ouvrir le chat", close: "Fermer le chat", title: "Assistant Harnios", placeholder: "Demandez à Harnios…", send: "Envoyer", thinking: "Réflexion…", error: "Une erreur est survenue.", approve: "Approuver", deny: "Refuser", toolRunning: "Outil en cours", toolComplete: "Outil terminé", toolFailed: "Échec de l’outil" },
+  chat: { open: "Ouvrir le chat", close: "Fermer le chat", title: "Assistant Harnios", placeholder: "Demandez à Harnios…", send: "Envoyer", thinking: "Réflexion…", error: "Une erreur est survenue.", maximize: "Agrandir le chat", restore: "Restaurer le chat", approve: "Approuver", deny: "Refuser", toolRunning: "Outil en cours", toolComplete: "Outil terminé", toolFailed: "Échec de l’outil" },
   init: {
     setupTitle: "Configurez votre Company OS",
     setupDescription:

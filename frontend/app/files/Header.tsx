@@ -1,6 +1,7 @@
 "use client";
 
 import type { Dictionary } from "@/lib/i18n/dictionaries";
+import Link from "next/link";
 import { NAV_ITEMS } from "@/app/_ui/nav";
 import { MenuIcon } from "./Icons";
 
@@ -27,23 +28,23 @@ export function Header({
       >
         <MenuIcon />
       </button>
-      <a href="/" className="home-link" title={homeLinkLabel} aria-label={homeLinkLabel}>
+      <Link href="/" className="home-link" title={homeLinkLabel} aria-label={homeLinkLabel}>
         <span className="logo-mark" aria-hidden="true" />
         <span className="wordmark">HARNIOS</span>
         <span className="instance">{osName}</span>
-      </a>
+      </Link>
       {/* Same primary nav as the shared SiteHeader (spec 034) — the editor is
           chromeless, so without this the rest of the app is unreachable from
           here except via the logo. "Files" is always the current section. */}
       <nav className="editor-nav" aria-label={nav.menuLabel}>
         {NAV_ITEMS.map((item) => (
-          <a
+          <Link
             key={item.href}
             href={item.href}
             aria-current={item.key === "files" ? "page" : undefined}
           >
             {nav[item.key]}
-          </a>
+          </Link>
         ))}
       </nav>
       <style jsx>{`

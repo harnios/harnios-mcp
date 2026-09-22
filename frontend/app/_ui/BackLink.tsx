@@ -4,8 +4,9 @@
  * every other link in these pages. */
 export function BackLink({ href, label }: { href: string; label: string }) {
   return (
-    <a className="backlink" href={href}>
+    <Link className="backlink" href={href}>
       ← {label}
-    </a>
+    </Link>
   );
 }
+import Link from "next/link";

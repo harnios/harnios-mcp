@@ -14,6 +14,8 @@ export interface Dictionary {
     send: string;
     thinking: string;
     error: string;
+    maximize: string;
+    restore: string;
     approve: string;
     deny: string;
     toolRunning: string;
