@@ -15,16 +15,21 @@ Endpoint autenticato usato dal runtime AI SDK/assistant-ui.
 Il body è il payload UI-message del transport AI SDK e contiene:
 
 - messaggi della conversazione corrente;
+- `mode`, enum opzionale `harnios | general`; se assente il server usa `harnios` per compatibilità;
 - eventuali `tool-approval-response` provenienti da una conferma/negazione dell'utente;
 - nessuna credenziale, configurazione provider o contenuto S3 inviato direttamente dal browser come contesto privilegiato.
 
 Il server valida la struttura dei messaggi e costruisce il contesto trusted (`AGENTS.md`, istruzioni base e catalogo MCP) server-side.
+
+Un valore `mode` sconosciuto restituisce `400 invalid_request` prima di creare il client MCP o invocare il provider.
 
 ### Successful response
 
 - Status `200`.
 - Content type e formato stream compatibili con il transport corrente di AI SDK e con `useChat`/`useChatRuntime`.
 - Lo stream può contenere testo assistant, stati tool, richieste di approval, risultati tool ed errori non sensibili.
+- In modalità `harnios`, il primo step generativo richiede una tool call; gli step successivi possono produrre testo o altre tool call.
+- In modalità `general`, la richiesta non espone tool e lo stream non contiene nuove parti tool.
 
 ### Error responses
 
@@ -53,4 +58,6 @@ I messaggi di errore sono adatti alla UI e non contengono API key, token, prompt
 - Il client non può scegliere tool fuori dal catalogo MCP corrente.
 - Il client non può bypassare una approval mutativa alterando il payload: il server riclassifica sempre il tool.
 - I tool disabilitati dall'istanza non vengono esposti al modello.
+- Il client non può rendere opzionali i tool in modalità `harnios`; la policy di scelta viene applicata dal server.
+- La modalità `general` non inizializza il client MCP e non può eseguire tool, anche se la cronologia contiene precedenti parti tool.
 - Le credenziali del provider, dei proxy esterni e dello storage restano server-side.

@@ -8,7 +8,7 @@
 
 ## Summary
 
-Implement a global authenticated chat surface that remains mounted across client-side navigation, streams model responses, and exposes the currently enabled Harnios MCP tools with explicit approval for mutating or side-effecting operations. The browser owns only ephemeral chat state; the server owns authentication, model configuration, `os/AGENTS.md` context, MCP discovery, tool execution, and approval enforcement. The initial model adapter is Mistral through AI SDK, with a provider/model resolver kept separate so local and OpenAI-compatible providers can be added later.
+Implement a global authenticated chat surface that remains mounted across client-side navigation, streams model responses, and offers an explicit `Harnios`/`General` mode. Harnios mode is the default and requires at least one enabled MCP tool call on the first model step of every turn, with explicit approval for mutating or side-effecting operations; General mode exposes no MCP tools. The browser owns only ephemeral chat and mode state; the server owns authentication, mode validation, model configuration, `os/AGENTS.md` context, MCP discovery, tool execution, and approval enforcement. The initial model adapter is Mistral through AI SDK, with a provider/model resolver kept separate so local and OpenAI-compatible providers can be added later.
 
 ## Technical Context
 
@@ -32,9 +32,9 @@ Implement a global authenticated chat surface that remains mounted across client
 
 **Performance Goals**: Open the chat immediately; begin showing model output as soon as the provider streams it; keep tool discovery and each tool call within the existing MCP/proxy timeouts.
 
-**Constraints**: Owner session required; no secrets in client payloads or rendered errors; no automatic chat persistence; root layout must preserve state across client navigation; all mutating/side-effecting/unknown tools require approval; existing routes and forms remain unchanged; no Tailwind or second UI design system.
+**Constraints**: Owner session required; no secrets in client payloads or rendered errors; no automatic chat persistence; root layout must preserve chat and mode state across client navigation; Harnios mode requires provider support for mandatory tool choice; General mode creates no MCP client; all mutating/side-effecting/unknown tools require approval; mode changes are blocked during streaming or unresolved approval; existing routes and forms remain unchanged; no Tailwind or second UI design system.
 
-**Scale/Scope**: One ephemeral conversation per browser tab and owner session; one global launcher/window; all currently enabled native and external MCP tools; no saved threads, attachments, commands, or multi-user identity model.
+**Scale/Scope**: One ephemeral conversation and one ephemeral mode per browser tab and owner session; one global launcher/window; all currently enabled native and external MCP tools in Harnios mode; no tools in General mode; no saved threads, attachments, commands, or multi-user identity model.
 
 ## Constitution Check
 
@@ -94,13 +94,15 @@ Root layout
   └─ ChatShell (server auth/path gate)
        └─ ChatPanel (client)
             └─ assistant-ui runtime
-                 └─ useChat transport → POST /api/chat
+                 └─ useChat transport → POST /api/chat { messages, mode }
                       ├─ requireOwnerSession()
+                      ├─ validate mode (default: harnios)
                       ├─ load os/AGENTS.md
                       ├─ resolve provider/model
-                      ├─ create in-process MCP client
-                      ├─ list enabled native + external tools
-                      ├─ streamText(messages, tools, system)
+                      ├─ Harnios: create MCP client + list enabled tools
+                      ├─ Harnios: require a tool on first step, then auto
+                      ├─ General: omit MCP client and tools
+                      ├─ streamText(messages, mode policy)
                       └─ stream UI message response
 ```
 
@@ -120,6 +122,9 @@ Root layout
 - Allow direct execution only for an explicit read-only allowlist; require approval for writes, deletes, messaging, code/job execution, external tools, and unknown future tools.
 - Reclassify on the server for every request so the browser cannot bypass approval by editing a streamed payload.
 - Close the MCP client in `finally` and preserve existing external timeout/error handling.
+- In Harnios mode, set tool choice to required only for the first generation step of each request, then return to automatic choice so the model can synthesize a final answer after tool results.
+- In General mode, skip MCP client creation and omit the tools option entirely.
+- Treat lack of provider support for mandatory tool calling as a safe provider error; never silently answer without the required grounding.
 
 ### UI and state
 
@@ -128,12 +133,16 @@ Root layout
 - Mount once below the root layout so the runtime survives client-side navigation.
 - Render an accessible fixed launcher at bottom-right and a fixed responsive panel targeting `66.67vw × 33.33vh`, clamped for narrow screens.
 - Provide close/reopen behavior, loading/streaming/error states, tool-call states, and approval controls.
+- Add a localized `Harnios`/`General` mode selector in the panel header, defaulting to Harnios; retain history when switching and disable the selector while the thread is running or has an unresolved approval.
+- Keep one transport/runtime instance and supply the current mode through a mutable request-body resolver so changing mode does not reset messages.
 - Add all visible labels and aria text to the typed dictionaries in six languages.
 
 ### Security and context
 
 - `ChatShell` checks owner session before rendering the client chat; `/api/chat` repeats authorization independently.
 - Read `os/AGENTS.md` only on the server and combine it with short base instructions; do not trust a browser-supplied system prompt.
+- Validate mode server-side: missing mode means `harnios` for compatibility, while unknown values return `400 invalid_request` before model or MCP work.
+- Strengthen Harnios instructions so Company OS facts and actions are grounded in tool results; General mode explicitly states that tools are unavailable.
 - Do not send provider keys, MCP tokens, storage credentials, external URLs, or stack traces to the client.
 - Sanitize/truncate tool input and result previews in the UI while preserving the full model-visible result server-side.
 

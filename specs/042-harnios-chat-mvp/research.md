@@ -43,3 +43,15 @@
 - **Decision**: introdurre `CHAT_MODEL` come identificatore provider/modello, con fallback compatibile alla configurazione Mistral già presente; implementare inizialmente il provider Mistral AI SDK e mantenere il resolver separato dalla UI.
 - **Rationale**: il requisito richiede un modello reale configurabile e futura compatibilità con modelli locali. La separazione consente di aggiungere `@ai-sdk/openai-compatible` o un provider Ollama in seguito senza cambiare il contratto `/api/chat`.
 - **Alternatives considered**: usare sempre `MISTRAL_MODEL`; scartato perché non esprime il provider e impedisce una transizione pulita a modelli locali.
+
+## Decision 8: modalità esplicita invece di classificazione implicita
+
+- **Decision**: mostrare un selettore `Harnios`/`General`, con Harnios predefinita. La modalità viene inviata dal transport a ogni richiesta e resta solo nello stato client della scheda.
+- **Rationale**: un prompt che invita il modello a usare tool “quando utili” non garantisce grounding, mentre un classificatore aggiuntivo introduce latenza e può sbagliare. La scelta esplicita rende l'intento deterministico e comprensibile all'utente.
+- **Alternatives considered**: prompt più forte senza enforcement, scartato perché non garantisce tool use; classificatore modello, scartato per latenza e incertezza; tool obbligatorio su ogni messaggio indipendentemente dalla modalità, scartato perché produce chiamate inutili nelle conversazioni generali.
+
+## Decision 9: tool obbligatorio soltanto sul primo step Harnios
+
+- **Decision**: in modalità Harnios usare tool choice obbligatoria sul primo step di ogni richiesta e automatica nei passi successivi; in modalità General non creare il client MCP e non esporre tool.
+- **Rationale**: il primo step obbligatorio garantisce almeno una fonte MCP, mentre i passi successivi automatici consentono una risposta conclusiva e impediscono loop di tool call. Non creare MCP in modalità General rende la separazione verificabile anche lato server.
+- **Alternatives considered**: tool choice obbligatoria su tutti gli step, scartata perché impedisce una normale risposta finale; lasciare i tool opzionali in General, scartato perché rende la modalità ambigua; fallback prompt-only per provider incompatibili, scartato perché violerebbe la garanzia dichiarata.

@@ -14,6 +14,8 @@ Per ogni richiesta chat il bridge:
 4. esegue `client.listTools()`;
 5. converte nome, descrizione e JSON Schema MCP in tool AI SDK.
 
+Il bridge viene inizializzato esclusivamente per richieste con modalità `harnios`. In modalità `general` il route handler non crea il client MCP e non esegue discovery. Sul primo step Harnios il modello deve scegliere almeno uno dei tool scoperti; dagli step successivi la scelta torna automatica per permettere la sintesi finale.
+
 Il catalogo è ricostruito per richiesta per riflettere i tool disabilitati/abilitati e le connessioni esterne correnti.
 
 ## Tool execution

@@ -23,7 +23,7 @@ Aprire `http://localhost:3000`, autenticarsi e verificare il pulsante flottante 
 2. Fare click sul pulsante chat.
 3. Verificare una finestra di circa due terzi della viewport in larghezza e un terzo in altezza.
 4. Inviare `Rispondi con una frase breve.`
-5. Verificare il messaggio utente e la risposta assistant in streaming.
+5. Verificare che `Harnios` sia la modalità predefinita, che compaia almeno una tool call e poi la risposta assistant in streaming.
 6. Chiudere e riaprire la finestra; verificare che i messaggi restino presenti.
 
 ## Scenario 2 — Navigation state
@@ -59,6 +59,16 @@ Aprire `http://localhost:3000`, autenticarsi e verificare il pulsante flottante 
 - Rimuovere temporaneamente la configurazione del provider: la UI mostra un errore non sensibile.
 - Disabilitare un tool dalla pagina Tools: il tool non appare nella discovery successiva.
 - Rendere irraggiungibile una connessione MCP esterna: la chat mostra un errore proxy senza dichiarare successo.
+- Configurare un provider senza supporto al tool calling obbligatorio: la modalità Harnios mostra un errore sicuro e non risponde senza tool.
+
+## Scenario 7 — Explicit chat modes
+
+1. Con la chat inattiva, selezionare `Generale` e inviare una domanda generale.
+2. Verificare che la risposta non contenga nuove tool call MCP.
+3. Tornare a `Harnios` e verificare che la cronologia precedente resti visibile.
+4. Inviare un nuovo messaggio e verificare almeno una tool call prima della risposta conclusiva.
+5. Durante lo streaming o con un'approvazione MCP pendente, verificare che il selettore modalità sia disabilitato.
+6. Chiamare `POST /api/chat` con una modalità sconosciuta e verificare `400 invalid_request`; omettere la modalità e verificare il default Harnios.
 
 ## Static verification
 

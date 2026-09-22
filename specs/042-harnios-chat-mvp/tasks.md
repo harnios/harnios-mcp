@@ -152,3 +152,10 @@ description: "Task list for Harnios Chat MVP"
 - Every task follows the required checklist format and includes an exact repository path.
 - No Git commit or push is part of this task list.
 - The implementation must not silently fall back to a mock model; missing provider configuration is an explicit user-visible error.
+
+## Phase 7: Convergence
+
+- [X] T030 Implement validated `harnios | general` request mode, Harnios-first-step mandatory MCP tool choice, General-mode tool omission, mode-specific system instructions, and safe provider failure behavior in `frontend/app/api/chat/route.ts` and `frontend/lib/chat/context.ts` per FR-019, FR-020, and FR-022 (missing).
+- [X] T031 Implement the default-Harnios localized mode selector, persistent runtime-safe mode transport, history-preserving switches, and running/unresolved-approval lock in `frontend/app/_ui/ChatPanel.tsx` and `frontend/app/globals.css` per FR-018 and FR-021 (missing).
+- [X] T032 [P] Add mode labels and replace hard-coded tool status/approval text across `frontend/lib/i18n/dictionaries/types.ts` and all six files under `frontend/lib/i18n/dictionaries/` per FR-014 and FR-017 (partial).
+- [ ] T033 Validate Harnios and General mode behavior with `npx tsc --noEmit`, `npm run lint`, `npm run build`, and the mode scenarios in `specs/042-harnios-chat-mvp/quickstart.md` per SC-010, SC-011, and SC-012 (partial).

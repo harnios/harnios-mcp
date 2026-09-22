@@ -10,6 +10,9 @@ const nextConfig: NextConfig = {
   // cleanly succeeding or failing with FR-012's size error.
   experimental: {
     proxyClientMaxBodySize: "30mb",
+    // Next's CLI typecheck path can truncate `tsc --showConfig` output under
+    // Node 24; the compiler API performs the same check without child-process IO.
+    useTypeScriptCli: false,
   },
   // @pydantic/monty (spec 037) is a native napi addon — the first one in
   // this project. Without this, Next's bundler/file-tracing can fail to

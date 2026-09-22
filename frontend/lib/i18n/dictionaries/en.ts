@@ -2,7 +2,7 @@ import type { Dictionary } from "./types";
 
 /** Canonical English dictionary — the key source of truth every other language mirrors (research.md §6). */
 export const en: Dictionary = {
-  chat: { open: "Open chat", close: "Close chat", title: "Harnios assistant", placeholder: "Ask Harnios…", send: "Send", thinking: "Thinking…", error: "Something went wrong.", maximize: "Maximize chat", restore: "Restore chat", approve: "Approve", deny: "Deny", toolRunning: "Running tool", toolComplete: "Tool completed", toolFailed: "Tool failed" },
+  chat: { open: "Open chat", close: "Close chat", title: "Harnios assistant", placeholder: "Ask Harnios…", send: "Send", thinking: "Thinking…", error: "Something went wrong.", maximize: "Maximize chat", restore: "Restore chat", approve: "Approve", deny: "Deny", toolRunning: "Running tool", toolComplete: "Tool completed", toolFailed: "Tool failed", toolPending: "Waiting", approvalPrompt: "Allow this operation?", modeLabel: "Chat mode", modeHarnios: "Harnios", modeGeneral: "General", modeLocked: "Wait for the current operation to finish before changing mode" },
   init: {
     setupTitle: "Set up your Company OS",
     setupDescription:

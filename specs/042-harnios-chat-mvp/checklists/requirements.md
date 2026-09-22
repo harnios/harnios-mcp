@@ -33,3 +33,4 @@
 
 - The specification intentionally names `AGENTS.md` and Harnios MCP because their inclusion in every request is an explicit product requirement from the conversation.
 - The specification does not define S3 persistence behavior; that remains out of scope for this MVP and requires a later feature specification.
+- The explicit Harnios/General mode, default behavior, tool enforcement, history retention, and mode-switch lock are covered by testable requirements and acceptance scenarios.

@@ -10,8 +10,11 @@ Rappresenta la conversazione temporanea gestita dal runtime client.
 | `messages` | array di `ChatMessage` | Ordine cronologico; contiene messaggi e parti tool. |
 | `status` | enum | `ready`, `submitted`, `streaming`, `error`. |
 | `error` | stringa opzionale | Solo messaggio non sensibile per la UI. |
+| `mode` | enum | `harnios` o `general`; default `harnios`, non persistito. |
 
 Lifecycle: creata al mount del provider globale, mantenuta durante la navigazione client-side, azzerata su refresh completo o chiusura della scheda.
+
+La modalità può cambiare solo quando la sessione non sta producendo una risposta e non contiene un'approvazione irrisolta. Il cambio non rimuove i messaggi esistenti e vale dalla richiesta successiva.
 
 ## Chat message
 
@@ -45,6 +48,8 @@ Contesto costruito server-side per ogni richiesta.
 | Base instructions | codice del chat runtime | Istruzioni brevi per il comportamento della chat. |
 | `AGENTS.md` | `os/AGENTS.md` nello storage | Letto server-side; errore leggibile se storage non raggiungibile. |
 | MCP tool catalog | server MCP in-process | Include solo tool abilitati e disponibili al momento della richiesta. |
+
+Il catalogo MCP viene costruito solo in modalità `harnios`. In modalità `general` il contesto mantiene le istruzioni di base e `AGENTS.md`, ma non include strumenti eseguibili.
 
 ## MCP tool invocation
 

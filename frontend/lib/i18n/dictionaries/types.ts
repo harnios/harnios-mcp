@@ -21,6 +21,12 @@ export interface Dictionary {
     toolRunning: string;
     toolComplete: string;
     toolFailed: string;
+    toolPending: string;
+    approvalPrompt: string;
+    modeLabel: string;
+    modeHarnios: string;
+    modeGeneral: string;
+    modeLocked: string;
   };
   init: {
     setupTitle: string;
