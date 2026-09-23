@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import { AssistantRuntimeProvider, AuiIf, ComposerPrimitive, MessagePrimitive, ThreadPrimitive, useAuiState } from "@assistant-ui/react";
 import type { TextMessagePartProps, ToolCallMessagePartProps } from "@assistant-ui/react";
 import { AssistantChatTransport, useChatRuntime } from "@assistant-ui/ai-sdk";
+import { lastAssistantMessageIsCompleteWithApprovalResponses } from "ai";
 import type { UIMessage } from "ai";
 import type { ChatMode } from "@/lib/chat/mode";
 
@@ -98,7 +99,10 @@ export function ChatPanel({ labels }: { labels: ChatLabels }) {
   const [fullscreen, setFullscreen] = useState(false);
   const [mode, setMode] = useState<ChatMode>("harnios");
   const [transport] = useState(() => new ModeChatTransport());
-  const runtime = useChatRuntime({ transport });
+  const runtime = useChatRuntime({
+    transport,
+    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
+  });
   const ToolRenderer = useCallback((props: ToolCallMessagePartProps) => <ToolCallMessage {...props} labels={labels} />, [labels]);
   const changeMode = useCallback((nextMode: ChatMode) => {
     transport.setMode(nextMode);
