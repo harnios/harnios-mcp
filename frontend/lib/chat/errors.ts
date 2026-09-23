@@ -1,4 +1,4 @@
-export type ChatErrorCode = "unauthorized" | "invalid_request" | "approval_required" | "chat_unavailable" | "provider_unreachable";
+export type ChatErrorCode = "unauthorized" | "invalid_request" | "chat_unavailable" | "provider_unreachable";
 
 export class ChatError extends Error {
   constructor(public readonly code: ChatErrorCode, message: string, public readonly status = 500) {

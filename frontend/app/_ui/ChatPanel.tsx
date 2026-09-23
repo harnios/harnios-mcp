@@ -1,18 +1,18 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { AssistantRuntimeProvider, AuiIf, ComposerPrimitive, MessagePrimitive, ThreadPrimitive, useAuiState } from "@assistant-ui/react";
+import { AssistantRuntimeProvider, AuiIf, ComposerPrimitive, MessagePrimitive, ThreadPrimitive, useAui, useAuiState } from "@assistant-ui/react";
 import type { TextMessagePartProps, ToolCallMessagePartProps } from "@assistant-ui/react";
 import { AssistantChatTransport, useChatRuntime } from "@assistant-ui/ai-sdk";
-import { lastAssistantMessageIsCompleteWithApprovalResponses } from "ai";
 import type { UIMessage } from "ai";
 import type { ChatMode } from "@/lib/chat/mode";
 
 export interface ChatLabels {
   open: string; close: string; title: string; placeholder: string; send: string; thinking: string; error: string; maximize: string; restore: string;
-  approve: string; deny: string; toolRunning: string; toolComplete: string; toolFailed: string; toolPending: string; approvalPrompt: string;
+  toolRunning: string; toolComplete: string; toolFailed: string; toolPending: string; toolInput: string; toolResult: string;
+  stop: string; reset: string;
   modeLabel: string; modeHarnios: string; modeGeneral: string; modeLocked: string;
 }
 
@@ -39,10 +39,14 @@ function MarkdownText({ text }: TextMessagePartProps) {
 }
 
 function ToolCallMessage({ labels, ...part }: ToolCallMessagePartProps & { labels: ChatLabels }) {
-  const { toolName, args, result, isError, status, approval, respondToApproval } = part;
-  const argsPreview = JSON.stringify(args ?? {});
+  const { toolName, args, result, isError, status } = part;
+  const argsPreview = JSON.stringify(args ?? {}, null, 2);
   const isWaiting = status.type === "running";
-  const hasApproval = approval && approval.approved === undefined && !approval.resolution;
+  const resultPreview = result === undefined
+    ? null
+    : typeof result === "string"
+      ? result
+      : JSON.stringify(result, null, 2);
 
   return (
     <div className="chat-tool" role="status">
@@ -53,22 +57,24 @@ function ToolCallMessage({ labels, ...part }: ToolCallMessagePartProps & { label
           {isWaiting ? labels.toolRunning : isError ? labels.toolFailed : result === undefined ? labels.toolPending : labels.toolComplete}
         </span>
       </div>
-      {argsPreview !== "{}" ? <code className="chat-tool__args">{argsPreview}</code> : null}
-      {hasApproval ? (
-        <div className="chat-tool__actions">
-          <span>{approval.prompt ?? labels.approvalPrompt}</span>
-          <button type="button" onClick={() => void respondToApproval({ approved: true })}>{labels.approve}</button>
-          <button type="button" onClick={() => void respondToApproval({ approved: false })}>{labels.deny}</button>
-        </div>
+      {argsPreview !== "{}" ? (
+        <details className="chat-tool__result">
+          <summary>{labels.toolInput}</summary>
+          <pre>{argsPreview}</pre>
+        </details>
+      ) : null}
+      {resultPreview !== null ? (
+        <details className="chat-tool__result">
+          <summary>{labels.toolResult}</summary>
+          <pre>{resultPreview}</pre>
+        </details>
       ) : null}
     </div>
   );
 }
 
 function ModeSelector({ labels, mode, onChange }: { labels: ChatLabels; mode: ChatMode; onChange: (mode: ChatMode) => void }) {
-  const locked = useAuiState((state) => state.thread.isRunning || state.thread.messages.some((message) =>
-    message.parts.some((part) => part.type === "tool-call" && part.approval !== undefined && part.approval.approved === undefined && !part.approval.resolution),
-  ));
+  const locked = useAuiState((state) => state.thread.isRunning);
 
   return (
     <div className="chat-mode" role="group" aria-label={labels.modeLabel} title={locked ? labels.modeLocked : undefined}>
@@ -94,33 +100,35 @@ function ModelActivity({ label }: { label: string }) {
   );
 }
 
+function ChatActions({ labels }: { labels: ChatLabels }) {
+  const aui = useAui();
+
+  return (
+    <div className="chat-panel__actions">
+      <button className="chat-panel__action" type="button" aria-label={labels.reset} title={labels.reset} onClick={() => aui.thread.reset()}>
+        <span aria-hidden="true">↺</span>
+      </button>
+    </div>
+  );
+}
+
+function ComposerStop({ labels }: { labels: ChatLabels }) {
+  const aui = useAui();
+
+  return (
+    <button className="chat-composer__send chat-composer__stop" type="button" aria-label={labels.stop} title={labels.stop} onClick={() => aui.thread.cancelRun()}>
+      <span aria-hidden="true">■</span>
+    </button>
+  );
+}
+
 export function ChatPanel({ labels }: { labels: ChatLabels }) {
   const [open, setOpen] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [mode, setMode] = useState<ChatMode>("harnios");
   const [transport] = useState(() => new ModeChatTransport());
-  const resumedApprovalState = useRef<string | null>(null);
-  const sendAutomaticallyWhen = useCallback(({ messages }: { messages: UIMessage[] }) => {
-    if (!lastAssistantMessageIsCompleteWithApprovalResponses({ messages })) return false;
-    const lastMessage = messages.at(-1);
-    if (!lastMessage) return false;
-    const approvalState = lastMessage.parts
-      .map((part) => {
-        const candidate = part as { approval?: { id?: string; approved?: boolean; resolution?: string } };
-        return candidate.approval?.id
-          ? `${candidate.approval.id}:${candidate.approval.approved ?? "pending"}:${candidate.approval.resolution ?? ""}`
-          : "";
-      })
-      .filter(Boolean)
-      .join("|");
-    const stateKey = `${lastMessage.id}:${approvalState}`;
-    if (resumedApprovalState.current === stateKey) return false;
-    resumedApprovalState.current = stateKey;
-    return true;
-  }, []);
   const runtime = useChatRuntime({
     transport,
-    sendAutomaticallyWhen,
   });
   const ToolRenderer = useCallback((props: ToolCallMessagePartProps) => <ToolCallMessage {...props} labels={labels} />, [labels]);
   const changeMode = useCallback((nextMode: ChatMode) => {
@@ -138,6 +146,7 @@ export function ChatPanel({ labels }: { labels: ChatLabels }) {
           <header className="chat-panel__header">
             <h2>{labels.title}</h2>
             <ModeSelector labels={labels} mode={mode} onChange={changeMode} />
+            <ChatActions labels={labels} />
             <div className="chat-panel__actions">
               <button className="chat-panel__action" type="button" aria-label={fullscreen ? labels.restore : labels.maximize} onClick={() => setFullscreen((value) => !value)}>
                 {fullscreen ? "↙" : "□"}
@@ -161,7 +170,12 @@ export function ChatPanel({ labels }: { labels: ChatLabels }) {
                 <ThreadPrimitive.ViewportFooter className="chat-composer-footer">
                   <ComposerPrimitive.Root className="chat-composer">
                     <ComposerPrimitive.Input className="chat-composer__input" placeholder={labels.placeholder} />
-                    <ComposerPrimitive.Send className="chat-composer__send">{labels.send}</ComposerPrimitive.Send>
+                    <AuiIf condition={(state) => state.thread.isRunning}>
+                      <ComposerStop labels={labels} />
+                    </AuiIf>
+                    <AuiIf condition={(state) => !state.thread.isRunning}>
+                      <ComposerPrimitive.Send className="chat-composer__send">{labels.send}</ComposerPrimitive.Send>
+                    </AuiIf>
                   </ComposerPrimitive.Root>
                 </ThreadPrimitive.ViewportFooter>
               </ThreadPrimitive.Viewport>

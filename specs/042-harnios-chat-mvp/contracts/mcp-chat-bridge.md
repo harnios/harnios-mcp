@@ -22,9 +22,11 @@ Il catalogo è ricostruito per richiesta per riflettere i tool disabilitati/abil
 
 Ogni tool AI SDK delega a `client.callTool({ name, arguments })`. Il risultato mantiene il contenuto MCP e il flag di errore, trasformandoli in un risultato serializzabile per lo stream.
 
-## Classification
+## Tool execution
 
-Read-only iniziali:
+Il bridge espone tutti i tool abilitati dall'istanza e li esegue direttamente quando il modello li invoca. Non viene applicata una classificazione read-only e non viene richiesto `needsApproval` nel MVP.
+
+Read-only iniziali già presenti nel catalogo:
 
 - `read_file`
 - `list_directory`
@@ -37,7 +39,7 @@ Read-only iniziali:
 - `get_inbox`
 - `get_docs`
 
-Tutti gli altri tool nativi e tutti i tool esterni richiedono approval. Questa lista è una policy del bridge, non una modifica alle descrizioni MCP.
+Gli altri tool nativi e i tool esterni restano disponibili secondo il catalogo e i permessi dell'istanza.
 
 ## Cleanup and failures
 

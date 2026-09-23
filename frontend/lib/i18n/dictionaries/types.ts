@@ -16,13 +16,14 @@ export interface Dictionary {
     error: string;
     maximize: string;
     restore: string;
-    approve: string;
-    deny: string;
     toolRunning: string;
     toolComplete: string;
     toolFailed: string;
     toolPending: string;
-    approvalPrompt: string;
+    toolInput: string;
+    toolResult: string;
+    stop: string;
+    reset: string;
     modeLabel: string;
     modeHarnios: string;
     modeGeneral: string;

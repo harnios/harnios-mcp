@@ -1,7 +1,7 @@
 import type { Dictionary } from "./types";
 
 export const fr: Dictionary = {
-  chat: { open: "Ouvrir le chat", close: "Fermer le chat", title: "Assistant Harnios", placeholder: "Demandez à Harnios…", send: "Envoyer", thinking: "Réflexion…", error: "Une erreur est survenue.", maximize: "Agrandir le chat", restore: "Restaurer le chat", approve: "Approuver", deny: "Refuser", toolRunning: "Outil en cours", toolComplete: "Outil terminé", toolFailed: "Échec de l’outil", toolPending: "En attente", approvalPrompt: "Autoriser cette opération ?", modeLabel: "Mode de discussion", modeHarnios: "Harnios", modeGeneral: "Général", modeLocked: "Attendez la fin de l’opération en cours avant de changer de mode" },
+  chat: { open: "Ouvrir le chat", close: "Fermer le chat", title: "Assistant Harnios", placeholder: "Demandez à Harnios…", send: "Envoyer", thinking: "Réflexion…", error: "Une erreur est survenue.", maximize: "Agrandir le chat", restore: "Restaurer le chat", toolRunning: "Outil en cours", toolComplete: "Outil terminé", toolFailed: "Échec de l’outil", toolPending: "En attente", toolInput: "Requête", toolResult: "Résultat", stop: "Arrêter", reset: "Réinitialiser le chat", modeLabel: "Mode de discussion", modeHarnios: "Harnios", modeGeneral: "Général", modeLocked: "Attendez la fin de l’opération en cours avant de changer de mode" },
   init: {
     setupTitle: "Configurez votre Company OS",
     setupDescription:

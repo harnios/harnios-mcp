@@ -14,9 +14,9 @@
 
 - Q: La conversazione deve restare disponibile quando l'utente naviga tra pagine dell'app senza fare un refresh completo? → A: Sì, conserva messaggi e stato durante la navigazione client-side; perdi la conversazione con refresh o chiusura della scheda.
 - Q: Nel MVP, cosa deve significare concretamente “Harnios MCP sempre incluso” nel contesto della chat? → A: La chat deve avere accesso reale agli strumenti Harnios MCP disponibili al modello.
-- Q: Quali strumenti Harnios MCP può usare la chat nel MVP? → A: Tutti gli strumenti abilitati dall'istanza; serve conferma esplicita prima delle operazioni di modifica o cancellazione.
+- Q: Quali strumenti Harnios MCP può usare la chat nel MVP? → A: Tutti gli strumenti abilitati dall'istanza; nel MVP vengono eseguiti direttamente senza una conferma intermedia.
 - Q: Come deve distinguere la chat le richieste operative Harnios dalle conversazioni generali? → A: Tramite una modalità esplicita scelta nell'interfaccia, con `Harnios` attiva per impostazione predefinita e `Generale` disponibile senza strumenti MCP.
-- Q: Cosa accade alla conversazione cambiando modalità? → A: La cronologia resta visibile e la nuova modalità si applica ai messaggi successivi; il cambio è bloccato durante una risposta o un'approvazione pendente.
+- Q: Cosa accade alla conversazione cambiando modalità? → A: La cronologia resta visibile e la nuova modalità si applica ai messaggi successivi; il cambio è bloccato durante una risposta.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -75,10 +75,10 @@ Come cliente, voglio che ogni messaggio venga elaborato con le istruzioni operat
 - La finestra è visualizzata su una viewport stretta: resta leggibile, utilizzabile e non copre in modo irreversibile i controlli essenziali.
 - Una pagina applicativa non usa l'header standard: la chat mantiene comunque la regola di visibilità basata sulla sessione e sulla natura della superficie.
 - La sessione owner scade mentre la chat è aperta: la richiesta successiva viene rifiutata senza esporre contenuti del modello o dati dell'app.
-- Un'operazione MCP richiede modifica o cancellazione: la chat mostra cosa sta per fare e attende una conferma esplicita prima di eseguirla.
+- Un'operazione MCP modifica o cancella dati: nel MVP il tool viene eseguito direttamente e la chat mostra comunque stato, risultato o errore.
 - Un tool MCP non è disponibile, è disabilitato o restituisce un errore: la chat mostra un risultato di errore comprensibile e non simula il completamento dell'azione.
 - Il client invia una modalità sconosciuta: la richiesta viene rifiutata come non valida senza avviare il modello o MCP.
-- Il cliente tenta di cambiare modalità mentre il modello risponde o attende un'approvazione: il selettore resta bloccato fino alla conclusione o risoluzione dell'operazione.
+- Il cliente tenta di cambiare modalità mentre il modello risponde: il selettore resta bloccato fino alla conclusione dell'operazione.
 - Il provider configurato non supporta l'uso obbligatorio degli strumenti: la chat mostra un errore sicuro e non degrada silenziosamente a una risposta non verificata.
 
 ## Requirements *(mandatory)*
@@ -100,12 +100,17 @@ Come cliente, voglio che ogni messaggio venga elaborato con le istruzioni operat
 - **FR-013**: Il MVP MUST NOT implementare ancora salvataggio manuale, cancellazione persistente, cronologia S3, allegati o comandi `@`, `#`, `/`; l'architettura MUST lasciare punti di estensione per queste capacità, mentre l'invocazione degli strumenti Harnios MCP autorizzati è inclusa.
 - **FR-014**: Tutti i nuovi testi visibili e le etichette accessibili MUST passare dal sistema di dizionari multilingue esistente.
 - **FR-015**: La chat MUST poter utilizzare tutti gli strumenti Harnios MCP abilitati e disponibili per l'istanza, inclusi gli strumenti provenienti da connessioni esterne già esposte dall'istanza.
-- **FR-016**: Prima di eseguire un'operazione MCP che modifica o cancella dati, il sistema MUST mostrare l'azione prevista e MUST attendere una conferma esplicita del cliente.
+- **FR-016**: Il sistema MUST eseguire direttamente ogni operazione MCP autorizzata dall'istanza, senza richiedere una conferma intermedia nel MVP.
 - **FR-017**: La chat MUST mostrare in modo distinguibile l'inizio, l'esecuzione, il risultato e l'errore di ogni operazione MCP senza esporre credenziali o segreti.
+- **FR-023**: Il risultato di ogni operazione MCP MUST essere disponibile nella chat in un pannello richiudibile; i risultati strutturati MUST essere formattati come JSON leggibile e il pannello MUST essere chiuso inizialmente.
+- **FR-024**: Gli argomenti inviati a ogni operazione MCP MUST essere disponibili nella chat in un pannello richiudibile e formattati come JSON leggibile; il pannello MUST essere chiuso inizialmente.
+- **FR-025**: Durante una risposta in corso la chat MUST offrire un pulsante `Stop` con icona quadrata che annulla la risposta corrente e lascia visibili i contenuti già ricevuti.
+- **FR-026**: La chat MUST offrire un pulsante `Reset` che elimina immediatamente i messaggi dalla conversazione locale corrente senza scrivere o cancellare dati persistenti.
+- **FR-027**: La finestra chat MUST occupare verticalmente tutto lo spazio dal fondo dell'header applicativo alla base della viewport; su viewport mobili il composer MUST restare sempre visibile mentre solo la conversazione scorre.
 - **FR-018**: La chat MUST offrire una scelta esplicita tra modalità `Harnios` e modalità `Generale`, con `Harnios` selezionata per impostazione predefinita.
 - **FR-019**: Per ogni nuovo messaggio inviato in modalità Harnios, il sistema MUST imporre almeno una chiamata a uno strumento MCP disponibile prima che l'assistente produca la risposta conclusiva.
 - **FR-020**: In modalità Generale, il sistema MUST NOT esporre o invocare strumenti MCP per la richiesta.
-- **FR-021**: Il cambio modalità MUST conservare la conversazione corrente, applicarsi ai messaggi successivi e restare disponibile solo quando non sono presenti una risposta in corso o un'approvazione MCP pendente.
+- **FR-021**: Il cambio modalità MUST conservare la conversazione corrente, applicarsi ai messaggi successivi e restare disponibile solo quando non è presente una risposta in corso.
 - **FR-022**: Il sistema MUST validare la modalità lato server, usare `Harnios` quando il campo è assente per compatibilità e rifiutare valori diversi da quelli supportati.
 
 ### Key Entities
@@ -114,7 +119,7 @@ Come cliente, voglio che ogni messaggio venga elaborato con le istruzioni operat
 - **Chat message**: messaggio del cliente o dell'assistente, con ruolo, contenuto, stato e ordine di visualizzazione.
 - **Model configuration**: selezione configurabile del provider e del modello utilizzato per generare le risposte.
 - **Harnios base context**: istruzioni operative di base, `AGENTS.md` e contesto Harnios MCP aggiunti a ogni elaborazione della chat.
-- **MCP tool invocation**: richiesta di esecuzione di uno strumento Harnios MCP, con nome, input, stato, risultato o errore e indicazione della conferma richiesta quando l'operazione modifica dati.
+- **MCP tool invocation**: richiesta di esecuzione di uno strumento Harnios MCP, con nome, input, stato, risultato o errore.
 - **Chat mode**: stato temporaneo della chat con valore `Harnios` o `Generale`; determina la disponibilità e l'obbligatorietà degli strumenti MCP per i messaggi successivi e non viene persistito.
 
 ## Success Criteria *(mandatory)*
@@ -128,8 +133,8 @@ Come cliente, voglio che ogni messaggio venga elaborato con le istruzioni operat
 - **SC-005**: Il 100% delle conversazioni del MVP resta non persistito nello storage, salvo future funzionalità esplicitamente abilitate.
 - **SC-006**: Nessun errore di autenticazione, provider o configurazione espone chiavi, token, prompt interni o dettagli sensibili al cliente.
 - **SC-007**: Le route e i flussi esistenti continuano a funzionare senza variazioni osservabili dopo l'aggiunta della chat globale.
-- **SC-008**: Il 100% delle operazioni MCP di modifica o cancellazione richiede una conferma esplicita prima dell'esecuzione.
-- **SC-009**: Il cliente può distinguere, per ogni operazione MCP, se è in attesa, in esecuzione, completata o fallita.
+- **SC-008**: Il 100% delle operazioni MCP autorizzate viene avviato senza una conferma intermedia e produce uno stato di esecuzione, completamento o errore.
+- **SC-009**: Il cliente può distinguere, per ogni operazione MCP, se è in esecuzione, completata o fallita.
 - **SC-010**: Nel 100% dei turni completati in modalità Harnios è visibile almeno una chiamata MCP precedente alla risposta conclusiva.
 - **SC-011**: Nel 100% dei turni completati in modalità Generale non viene eseguita alcuna chiamata MCP.
 - **SC-012**: Il cliente può cambiare modalità con una sola interazione quando la chat è inattiva, senza perdere alcun messaggio della conversazione corrente.
@@ -142,7 +147,7 @@ Come cliente, voglio che ogni messaggio venga elaborato con le istruzioni operat
 - La chat può essere disponibile anche nell'editor file autenticato, purché il suo layout non la escluda tecnicamente.
 - Le superfici `/oauth/*`, `/init` e `/share/*` restano escluse perché non rappresentano aree operative autenticate del cliente.
 - La persistenza su S3, il pulsante di salvataggio e la pulizia persistente saranno specificati in una feature successiva; un refresh completo o la chiusura della scheda possono perdere la chat MVP.
-- I comandi `@`, `#` e `/`, allegati, diff e cronologia saranno aggiunti dopo il completamento del flusso base; le invocazioni MCP sono invece parte del MVP secondo le regole di conferma definite sopra.
+- I comandi `@`, `#` e `/`, allegati, diff e cronologia saranno aggiunti dopo il completamento del flusso base; le invocazioni MCP sono invece parte del MVP e vengono eseguite direttamente secondo i permessi dell'istanza.
 - Il supporto a provider locali e OpenAI-compatible è un vincolo architetturale futuro; il primo provider concreto può essere quello già configurato nell'ambiente.
 - La modalità vale dal messaggio successivo, resta nello stato temporaneo condiviso della scheda e torna a `Harnios` dopo un refresh completo.
 - La modalità Harnios richiede un provider capace di tool calling obbligatorio; un provider incompatibile produce un errore esplicito invece di un fallback senza strumenti.

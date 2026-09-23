@@ -59,11 +59,11 @@ Rappresenta una richiesta o esecuzione di uno strumento MCP.
 |---|---|---|
 | `toolName` | string | Deve appartenere al catalogo MCP corrente. |
 | `input` | JSON object | Validato dallo schema dichiarato dal tool. |
-| `approval` | enum opzionale | `not-required`, `requested`, `approved`, `denied`. |
+| `approval` | enum opzionale | Campo non utilizzato dal MVP; mantenuto solo per compatibilità con messaggi AI SDK precedenti. |
 | `state` | enum | `queued`, `running`, `completed`, `failed`. |
 | `result` | JSON/text opzionale | Sanitizzato prima del rendering. |
 
-I tool mutativi, side-effecting, esterni o non classificati come read-only richiedono `approval=approved` prima dell'esecuzione.
+Nel MVP tutti i tool presenti nel catalogo autorizzato possono essere eseguiti direttamente; la conferma esplicita sarà una futura estensione.
 
 ## Relationships
 

@@ -46,13 +46,16 @@ Aprire `http://localhost:3000`, autenticarsi e verificare il pulsante flottante 
 2. Inviare una richiesta che richieda la lettura di un file noto, ad esempio `Leggi os/AGENTS.md e riassumi le regole di routing.`
 3. Verificare che il modello possa proporre/eseguire `read_file`.
 4. Verificare che il risultato MCP e lo stato del tool siano visibili nella conversazione.
+5. Aprire il pannello del risultato e verificare che il JSON sia leggibile; richiuderlo e verificare che resti chiuso.
+6. Inviare una richiesta lunga, premere `Stop` e verificare che la risposta si interrompa mantenendo il contenuto già ricevuto.
+7. Premere `Reset` e verificare che i messaggi della chat locale vengano rimossi senza modificare dati persistenti.
+8. Su desktop e mobile verificare che la finestra arrivi fino alla base della viewport, inizi sotto l'header quando presente e mantenga sempre visibile il composer.
 
-## Scenario 5 — Mutating approval
+## Scenario 5 — Direct tool execution
 
 1. Chiedere un'operazione che modifichi un file.
-2. Verificare che compaia una richiesta di conferma prima dell'esecuzione.
-3. Negare la richiesta e verificare che il file non cambi.
-4. Ripetere approvando e verificare risultato o errore esplicito.
+2. Verificare che il tool venga avviato direttamente senza richiesta di conferma.
+3. Verificare che la UI mostri risultato o errore esplicito.
 
 ## Scenario 6 — Failure states
 
@@ -67,7 +70,7 @@ Aprire `http://localhost:3000`, autenticarsi e verificare il pulsante flottante 
 2. Verificare che la risposta non contenga nuove tool call MCP.
 3. Tornare a `Harnios` e verificare che la cronologia precedente resti visibile.
 4. Inviare un nuovo messaggio e verificare almeno una tool call prima della risposta conclusiva.
-5. Durante lo streaming o con un'approvazione MCP pendente, verificare che il selettore modalità sia disabilitato.
+5. Durante lo streaming, verificare che il selettore modalità sia disabilitato.
 6. Chiamare `POST /api/chat` con una modalità sconosciuta e verificare `400 invalid_request`; omettere la modalità e verificare il default Harnios.
 
 ## Static verification

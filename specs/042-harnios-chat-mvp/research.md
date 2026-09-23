@@ -20,11 +20,11 @@
 - **Rationale**: il repository possiede già questo pattern in `lib/scheduler/toolRuntime.ts`; evita una seconda autenticazione, una chiamata HTTP interna e una divergenza tra tool visti dalla chat e tool esposti da Harnios. I tool vengono scoperti con `client.listTools()` e adattati al formato AI SDK.
 - **Alternatives considered**: chiamare `/mcp` via HTTP come client esterno; scartato perché introduce OAuth/token handling interno e loopback fragile in ambienti serverless. Duplicare manualmente le funzioni dei tool; scartato perché crea drift con il catalogo MCP.
 
-## Decision 4: approval AI SDK per tutte le operazioni non read-only
+## Decision 4: esecuzione diretta dei tool MCP nel MVP
 
-- **Decision**: usare l'approvazione tool dell'AI SDK (`needsApproval`) per ogni tool che può modificare dati, cancellare dati, inviare messaggi, eseguire codice/job o che proviene da un proxy esterno. I tool chiaramente read-only possono essere eseguiti direttamente.
-- **Rationale**: la specifica richiede conferma prima di modifica/cancellazione; il default conservativo protegge anche tool con effetti collaterali non riducibili a un semplice write. Il modello riceve il risultato della conferma/negazione e la UI rende visibile lo stato.
-- **Alternatives considered**: conferma solo per `delete_*`/`update_file`; scartato perché `send_email`, `send_telegram_message`, `run_python`, `run_job` e tool esterni hanno effetti reali. Conferma manuale implementata fuori dal protocollo AI SDK; scartata perché duplica lo stato approval già previsto dal transport.
+- **Decision**: eseguire direttamente tutti i tool MCP presenti nel catalogo autorizzato dall'istanza, senza `needsApproval` o conferme intermedie.
+- **Rationale**: il flusso di approvazione è stato rimosso dal MVP per evitare che la conversazione resti bloccata in attesa; la chat continua comunque a mostrare stato, risultato ed errore del tool.
+- **Future extension**: una policy di conferma potrà essere aggiunta in seguito per tool mutativi, side-effecting o esterni.
 
 ## Decision 5: contesto base letto server-side a ogni richiesta
 

@@ -74,20 +74,20 @@ description: "Task list for Harnios Chat MVP"
 
 ## Phase 5: User Story 3 - Contesto Harnios coerente (Priority: P2)
 
-**Goal**: Give the model the live Harnios context and all currently enabled MCP tools, with approval before mutating or side-effecting operations.
+**Goal**: Give the model the live Harnios context and all currently enabled MCP tools, executing authorized calls directly and showing their progress.
 
-**Independent Test**: Ask the chat to read a known file, observe a successful read tool call, then request a file mutation, deny it and verify no change, approve it and verify the result or a clear tool error.
+**Independent Test**: Ask the chat to read a known file and then request an enabled mutation; verify that the tool starts directly and that the UI shows its result or a clear tool error.
 
 ### Implementation for User Story 3
 
 - [X] T017 [US3] Extend the shared MCP transport in `frontend/lib/mcp-tools/inProcessClient.ts` to register both native tools and enabled external proxy tools, preserving collision handling, disabled-tool state, external rate limits, and existing timeout behavior.
 - [X] T018 [US3] Implement MCP-to-AI-SDK tool discovery and execution in `frontend/lib/chat/mcpBridge.ts`, converting the live MCP JSON Schemas, delegating calls to `client.callTool`, preserving `isError`, and closing the client in `finally`.
-- [X] T019 [US3] Implement the read-only allowlist and conservative approval classifier in `frontend/lib/chat/mcpBridge.ts`: allow direct execution only for the documented read-only tools; require approval for writes, deletes, messaging, code/jobs, external tools, and unknown tools.
-- [X] T020 [US3] Extend `frontend/app/api/chat/route.ts` to load `os/AGENTS.md`, expose the live enabled MCP tool set to the model, process AI SDK tool approval responses, reclassify approval server-side, and stream tool-call/tool-result/error states without leaking secrets.
-- [X] T021 [US3] Add tool-call and approval rendering to `frontend/app/_ui/ChatPanel.tsx`, showing tool name, safe input summary, pending/running/completed/failed state, and explicit approve/deny controls for approval-required operations.
-- [X] T022 [US3] Align the public chat behavior with `specs/042-harnios-chat-mvp/contracts/chat-api.md` and `specs/042-harnios-chat-mvp/contracts/mcp-chat-bridge.md`, including `401`, invalid request, approval, provider, MCP, timeout, and safe error responses.
+- [X] T019 [US3] Implement direct execution for all enabled native and external tools in `frontend/lib/chat/mcpBridge.ts`, without an approval classifier.
+- [X] T020 [US3] Extend `frontend/app/api/chat/route.ts` to load `os/AGENTS.md`, expose the live enabled MCP tool set to the model, and stream tool-call/tool-result/error states without leaking secrets.
+- [X] T021 [US3] Add tool-call rendering to `frontend/app/_ui/ChatPanel.tsx`, showing tool name, safe input summary, running/completed/failed state, without approval controls.
+- [X] T022 [US3] Align the public chat behavior with `specs/042-harnios-chat-mvp/contracts/chat-api.md` and `specs/042-harnios-chat-mvp/contracts/mcp-chat-bridge.md`, including `401`, invalid request, provider, MCP, timeout, direct execution, and safe error responses.
 
-**Checkpoint**: The chat can use the enabled Harnios MCP surface, displays tool progress, and cannot execute mutating or side-effecting operations without explicit approval.
+**Checkpoint**: The chat can use the enabled Harnios MCP surface, displays tool progress, and executes authorized tool calls without an approval deadlock.
 
 ---
 
@@ -95,12 +95,12 @@ description: "Task list for Harnios Chat MVP"
 
 **Purpose**: Validate the integrated feature, protect existing behavior, and close documentation/configuration gaps.
 
-- [X] T023 [P] Update the chat usage/configuration notes in `frontend/lib/docs/overview.md` or the appropriate docs topic, covering authentication, `CHAT_MODEL`, provider errors, MCP approval, and the non-persistent MVP behavior.
+- [X] T023 [P] Update the chat usage/configuration notes in `frontend/lib/docs/overview.md` or the appropriate docs topic, covering authentication, `CHAT_MODEL`, provider errors, direct MCP execution, and the non-persistent MVP behavior.
 - [X] T024 [P] Review `frontend/app/globals.css` and `frontend/app/_ui/ChatPanel.tsx` for light/dark theme compatibility, mobile viewport behavior, keyboard accessibility, focus visibility, and no accidental page scroll lock regressions.
 - [X] T025 Run `npx tsc --noEmit` from `frontend/` and resolve type errors across AI SDK, assistant-ui, MCP bridge, translations, and route handlers.
 - [X] T026 Run `npm run lint` from `frontend/` and resolve lint errors without changing unrelated application code.
 - [X] T027 Run `npm run build` from `frontend/` and resolve build/runtime-boundary issues, especially server-only imports from client components.
-- [ ] T028 Execute all scenarios in `specs/042-harnios-chat-mvp/quickstart.md`, including unauthenticated access, client navigation state, `AGENTS.md` context, read tool, denied mutation, approved mutation, disabled tool, provider failure, and external MCP failure.
+- [ ] T028 Execute all scenarios in `specs/042-harnios-chat-mvp/quickstart.md`, including unauthenticated access, client navigation state, `AGENTS.md` context, read tool, direct mutation, disabled tool, provider failure, and external MCP failure.
 - [X] T029 Confirm that no chat history, browser persistence record, provider secret, MCP token, storage credential, or stack trace is written to or exposed by the client, and inspect `git diff --check` before handoff.
 
 ---
@@ -113,7 +113,7 @@ description: "Task list for Harnios Chat MVP"
 - **Phase 2 (Foundational)**: Depends on Phase 1; blocks all stories because every story uses the model, context, translations, or shared MCP seam.
 - **Phase 3 (US1)**: Depends on Phase 2; delivers the first usable chat increment.
 - **Phase 4 (US2)**: Depends on US1's `ChatShell`/`ChatPanel`; global mounting can begin after the client surface exists.
-- **Phase 5 (US3)**: Depends on Phase 2 and the `/api/chat` stream from US1; extends the same route/runtime with MCP tools and approvals.
+- **Phase 5 (US3)**: Depends on Phase 2 and the `/api/chat` stream from US1; extends the same route/runtime with direct MCP tools.
 - **Phase 6 (Polish)**: Depends on all desired stories.
 
 ### User Story Dependencies
@@ -137,14 +137,14 @@ description: "Task list for Harnios Chat MVP"
 1. Complete Setup and Foundational phases.
 2. Complete US1 and validate text streaming manually.
 3. Complete US2 and validate global navigation behavior.
-4. Complete US3 and validate MCP read/approval flows.
+4. Complete US3 and validate MCP tool execution flows.
 5. Run all polish checks and the quickstart before implementation handoff.
 
 ### Incremental Delivery
 
 1. **Increment 1**: Basic authenticated streaming chat, no persistence.
 2. **Increment 2**: Persistent global launcher/runtime across app navigation.
-3. **Increment 3**: Live Harnios MCP tool discovery, execution, UI state, and approvals.
+3. **Increment 3**: Live Harnios MCP tool discovery, execution, and UI state.
 4. **Future feature**: Saved S3 history, `@/#/` commands, attachments, diff UX, and richer coding workflows.
 
 ## Notes
@@ -156,6 +156,6 @@ description: "Task list for Harnios Chat MVP"
 ## Phase 7: Convergence
 
 - [X] T030 Implement validated `harnios | general` request mode, Harnios-first-step mandatory MCP tool choice, General-mode tool omission, mode-specific system instructions, and safe provider failure behavior in `frontend/app/api/chat/route.ts` and `frontend/lib/chat/context.ts` per FR-019, FR-020, and FR-022 (missing).
-- [X] T031 Implement the default-Harnios localized mode selector, persistent runtime-safe mode transport, history-preserving switches, and running/unresolved-approval lock in `frontend/app/_ui/ChatPanel.tsx` and `frontend/app/globals.css` per FR-018 and FR-021 (missing).
+- [X] T031 Implement the default-Harnios localized mode selector, persistent runtime-safe mode transport, history-preserving switches, and running lock in `frontend/app/_ui/ChatPanel.tsx` and `frontend/app/globals.css` per FR-018 and FR-021 (missing).
 - [X] T032 [P] Add mode labels and replace hard-coded tool status/approval text across `frontend/lib/i18n/dictionaries/types.ts` and all six files under `frontend/lib/i18n/dictionaries/` per FR-014 and FR-017 (partial).
 - [ ] T033 Validate Harnios and General mode behavior with `npx tsc --noEmit`, `npm run lint`, `npm run build`, and the mode scenarios in `specs/042-harnios-chat-mvp/quickstart.md` per SC-010, SC-011, and SC-012 (partial).

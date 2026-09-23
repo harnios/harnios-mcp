@@ -1,7 +1,7 @@
 import type { Dictionary } from "./types";
 
 export const ru: Dictionary = {
-  chat: { open: "Открыть чат", close: "Закрыть чат", title: "Помощник Harnios", placeholder: "Спросите Harnios…", send: "Отправить", thinking: "Думаю…", error: "Что-то пошло не так.", maximize: "Развернуть чат", restore: "Восстановить чат", approve: "Разрешить", deny: "Отклонить", toolRunning: "Инструмент выполняется", toolComplete: "Инструмент завершён", toolFailed: "Ошибка инструмента", toolPending: "Ожидание", approvalPrompt: "Разрешить эту операцию?", modeLabel: "Режим чата", modeHarnios: "Harnios", modeGeneral: "Общий", modeLocked: "Дождитесь завершения текущей операции, прежде чем менять режим" },
+  chat: { open: "Открыть чат", close: "Закрыть чат", title: "Помощник Harnios", placeholder: "Спросите Harnios…", send: "Отправить", thinking: "Думаю…", error: "Что-то пошло не так.", maximize: "Развернуть чат", restore: "Восстановить чат", toolRunning: "Инструмент выполняется", toolComplete: "Инструмент завершён", toolFailed: "Ошибка инструмента", toolPending: "Ожидание", toolInput: "Запрос", toolResult: "Результат", stop: "Остановить", reset: "Сбросить чат", modeLabel: "Режим чата", modeHarnios: "Harnios", modeGeneral: "Общий", modeLocked: "Дождитесь завершения текущей операции, прежде чем менять режим" },
   init: {
     setupTitle: "Настройте ваш Company OS",
     setupDescription:

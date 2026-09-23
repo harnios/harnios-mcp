@@ -16,7 +16,7 @@ Il body è il payload UI-message del transport AI SDK e contiene:
 
 - messaggi della conversazione corrente;
 - `mode`, enum opzionale `harnios | general`; se assente il server usa `harnios` per compatibilità;
-- eventuali `tool-approval-response` provenienti da una conferma/negazione dell'utente;
+- eventuali parti di cronologia AI SDK prodotte da versioni precedenti del client; il server non richiede approval per eseguire i tool;
 - nessuna credenziale, configurazione provider o contenuto S3 inviato direttamente dal browser come contesto privilegiato.
 
 Il server valida la struttura dei messaggi e costruisce il contesto trusted (`AGENTS.md`, istruzioni base e catalogo MCP) server-side.
@@ -27,7 +27,7 @@ Un valore `mode` sconosciuto restituisce `400 invalid_request` prima di creare i
 
 - Status `200`.
 - Content type e formato stream compatibili con il transport corrente di AI SDK e con `useChat`/`useChatRuntime`.
-- Lo stream può contenere testo assistant, stati tool, richieste di approval, risultati tool ed errori non sensibili.
+- Lo stream può contenere testo assistant, stati tool, risultati tool ed errori non sensibili.
 - In modalità `harnios`, il primo step generativo richiede una tool call; gli step successivi possono produrre testo o altre tool call.
 - In modalità `general`, la richiesta non espone tool e lo stream non contiene nuove parti tool.
 
@@ -37,26 +37,24 @@ Un valore `mode` sconosciuto restituisce `400 invalid_request` prima di creare i
 |---|---|---|
 | `400` | `invalid_request` | Body o messaggi non validi. |
 | `401` | `unauthorized` | Sessione owner mancante/scaduta. |
-| `409` | `approval_required` | Tentativo di eseguire un'operazione mutativa senza approval valida. |
 | `500` | `chat_unavailable` | Configurazione provider, MCP o errore inatteso non recuperabile. |
 | `502` | `provider_unreachable` | Provider modello o tool esterno non raggiungibile. |
 
 I messaggi di errore sono adatti alla UI e non contengono API key, token, prompt riservati o stack trace.
 
-## Tool approval contract
+## Tool execution contract
 
 1. Il modello genera una tool call.
-2. Il server classifica il tool.
-3. Per tool mutativi, side-effecting, esterni o non classificati come read-only, lo stream espone una richiesta di approval e non esegue il tool.
-4. La UI mostra nome tool e input sintetizzato in modo leggibile.
-5. La UI invia `approved=true` o `approved=false` tramite il protocollo AI SDK.
-6. Solo una approval positiva consente al server di eseguire `client.callTool`.
-7. Il risultato o errore del tool torna nello stream e viene mostrato nella conversazione.
+2. Il server verifica che il tool appartenga al catalogo MCP autorizzato.
+3. Il server esegue direttamente il tool senza una richiesta di approval intermedia nel MVP.
+4. Il risultato o errore del tool torna nello stream e viene mostrato nella conversazione.
+
+Gli argomenti e i risultati strutturati sono serializzabili come JSON e la UI li presenta in pannelli richiudibili, inizialmente chiusi.
 
 ## Security invariants
 
 - Il client non può scegliere tool fuori dal catalogo MCP corrente.
-- Il client non può bypassare una approval mutativa alterando il payload: il server riclassifica sempre il tool.
+- Il client non può invocare tool fuori dal catalogo MCP corrente: il server ricostruisce sempre il catalogo.
 - I tool disabilitati dall'istanza non vengono esposti al modello.
 - Il client non può rendere opzionali i tool in modalità `harnios`; la policy di scelta viene applicata dal server.
 - La modalità `general` non inizializza il client MCP e non può eseguire tool, anche se la cronologia contiene precedenti parti tool.

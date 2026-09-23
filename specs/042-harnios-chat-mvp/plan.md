@@ -8,7 +8,7 @@
 
 ## Summary
 
-Implement a global authenticated chat surface that remains mounted across client-side navigation, streams model responses, and offers an explicit `Harnios`/`General` mode. Harnios mode is the default and requires at least one enabled MCP tool call on the first model step of every turn, with explicit approval for mutating or side-effecting operations; General mode exposes no MCP tools. The browser owns only ephemeral chat and mode state; the server owns authentication, mode validation, model configuration, `os/AGENTS.md` context, MCP discovery, tool execution, and approval enforcement. The initial model adapter is Mistral through AI SDK, with a provider/model resolver kept separate so local and OpenAI-compatible providers can be added later.
+Implement a global authenticated chat surface that remains mounted across client-side navigation, streams model responses, and offers an explicit `Harnios`/`General` mode. Harnios mode is the default and requires at least one enabled MCP tool call on the first model step of every turn; enabled tools execute directly in the MVP. General mode exposes no MCP tools. The browser owns only ephemeral chat and mode state; the server owns authentication, mode validation, model configuration, `os/AGENTS.md` context, MCP discovery, and tool execution. The initial model adapter is Mistral through AI SDK, with a provider/model resolver kept separate so local and OpenAI-compatible providers can be added later.
 
 ## Technical Context
 
@@ -32,7 +32,7 @@ Implement a global authenticated chat surface that remains mounted across client
 
 **Performance Goals**: Open the chat immediately; begin showing model output as soon as the provider streams it; keep tool discovery and each tool call within the existing MCP/proxy timeouts.
 
-**Constraints**: Owner session required; no secrets in client payloads or rendered errors; no automatic chat persistence; root layout must preserve chat and mode state across client navigation; Harnios mode requires provider support for mandatory tool choice; General mode creates no MCP client; all mutating/side-effecting/unknown tools require approval; mode changes are blocked during streaming or unresolved approval; existing routes and forms remain unchanged; no Tailwind or second UI design system.
+**Constraints**: Owner session required; no secrets in client payloads or rendered errors; no automatic chat persistence; root layout must preserve chat and mode state across client navigation; Harnios mode requires provider support for mandatory tool choice; General mode creates no MCP client; mode changes are blocked during streaming; existing routes and forms remain unchanged; no Tailwind or second UI design system.
 
 **Scale/Scope**: One ephemeral conversation and one ephemeral mode per browser tab and owner session; one global launcher/window; all currently enabled native and external MCP tools in Harnios mode; no tools in General mode; no saved threads, attachments, commands, or multi-user identity model.
 
@@ -114,13 +114,12 @@ Root layout
 - Return a clear server error for unsupported provider identifiers or missing credentials.
 - Leave the resolver interface open for `@ai-sdk/openai-compatible`, Ollama, LM Studio, and other future providers.
 
-### MCP bridge and approval
+### MCP bridge and execution
 
 - Extract the existing in-process client setup from `scheduler/toolRuntime.ts` into a shared module.
 - Register native tools with current disabled-tool state and register external tools with existing catalog/collision/rate-limit behavior.
 - Convert the live MCP catalog's JSON Schema to AI SDK tool schemas; every execution delegates to `client.callTool`.
-- Allow direct execution only for an explicit read-only allowlist; require approval for writes, deletes, messaging, code/job execution, external tools, and unknown future tools.
-- Reclassify on the server for every request so the browser cannot bypass approval by editing a streamed payload.
+- Expose and execute the enabled native and external MCP tools directly through the server-side bridge.
 - Close the MCP client in `finally` and preserve existing external timeout/error handling.
 - In Harnios mode, set tool choice to required only for the first generation step of each request, then return to automatic choice so the model can synthesize a final answer after tool results.
 - In General mode, skip MCP client creation and omit the tools option entirely.
@@ -132,8 +131,8 @@ Root layout
 - Build a minimal custom assistant-ui thread/composer using existing CSS tokens, not the legacy pre-styled package or Tailwind templates.
 - Mount once below the root layout so the runtime survives client-side navigation.
 - Render an accessible fixed launcher at bottom-right and a fixed responsive panel targeting `66.67vw × 33.33vh`, clamped for narrow screens.
-- Provide close/reopen behavior, loading/streaming/error states, tool-call states, and approval controls.
-- Add a localized `Harnios`/`General` mode selector in the panel header, defaulting to Harnios; retain history when switching and disable the selector while the thread is running or has an unresolved approval.
+- Provide close/reopen behavior, loading/streaming/error states, and tool-call states.
+- Add a localized `Harnios`/`General` mode selector in the panel header, defaulting to Harnios; retain history when switching and disable the selector while the thread is running.
 - Keep one transport/runtime instance and supply the current mode through a mutable request-body resolver so changing mode does not reset messages.
 - Add all visible labels and aria text to the typed dictionaries in six languages.
 
