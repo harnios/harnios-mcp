@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { AssistantRuntimeProvider, AuiIf, ComposerPrimitive, MessagePrimitive, ThreadPrimitive, useAuiState } from "@assistant-ui/react";
@@ -99,9 +99,28 @@ export function ChatPanel({ labels }: { labels: ChatLabels }) {
   const [fullscreen, setFullscreen] = useState(false);
   const [mode, setMode] = useState<ChatMode>("harnios");
   const [transport] = useState(() => new ModeChatTransport());
+  const resumedApprovalState = useRef<string | null>(null);
+  const sendAutomaticallyWhen = useCallback(({ messages }: { messages: UIMessage[] }) => {
+    if (!lastAssistantMessageIsCompleteWithApprovalResponses({ messages })) return false;
+    const lastMessage = messages.at(-1);
+    if (!lastMessage) return false;
+    const approvalState = lastMessage.parts
+      .map((part) => {
+        const candidate = part as { approval?: { id?: string; approved?: boolean; resolution?: string } };
+        return candidate.approval?.id
+          ? `${candidate.approval.id}:${candidate.approval.approved ?? "pending"}:${candidate.approval.resolution ?? ""}`
+          : "";
+      })
+      .filter(Boolean)
+      .join("|");
+    const stateKey = `${lastMessage.id}:${approvalState}`;
+    if (resumedApprovalState.current === stateKey) return false;
+    resumedApprovalState.current = stateKey;
+    return true;
+  }, []);
   const runtime = useChatRuntime({
     transport,
-    sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
+    sendAutomaticallyWhen,
   });
   const ToolRenderer = useCallback((props: ToolCallMessagePartProps) => <ToolCallMessage {...props} labels={labels} />, [labels]);
   const changeMode = useCallback((nextMode: ChatMode) => {
