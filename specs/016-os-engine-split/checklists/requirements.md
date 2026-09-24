@@ -33,3 +33,4 @@
 
 - All decisions in this spec were converged through prior discussion with the user (engine as an MCP-only resource, routing file kept under `os/` not `data/`, simple staleness check for triggering business setup, English-only engine internals with owner-facing text staying localized) — no [NEEDS CLARIFICATION] markers were needed.
 - Mentions of "MCP", "resource", "bucket" in the user's original request were deliberately translated to technology-agnostic language in this spec ("OS provider's connection", "storage location") per spec-writing guidelines; the `plan.md` phase is where these map back to the project's actual MCP-based implementation.
+- Revalidated 2026-09-24 after adding the mandatory `AGENTS.md` task-bootstrap story and FR-016–FR-019: all checklist items remain satisfied and no clarification markers were introduced.

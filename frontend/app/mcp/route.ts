@@ -2,17 +2,16 @@ import { createMcpHandler, withMcpAuth } from "mcp-handler";
 import { EXTERNAL_PROXY_HOP_HEADER } from "@/lib/external-mcp/client";
 import { registerExternalTools } from "@/lib/mcp-tools/externalTools";
 import { registerNativeTools } from "@/lib/mcp-tools/register";
+import { MCP_BOOTSTRAP_INSTRUCTIONS } from "@/lib/mcp-tools/toolGate";
 import { verifyPersonalAccessToken } from "@/lib/oauth/personalAccessTokens";
 import { verifyAccessToken } from "@/lib/oauth/tokens";
 
-// mcp-handler's ServerOptions type only declares name/version, but it
-// forwards serverInfo as-is to the SDK's McpServer, which also accepts
-// description. Keeping this untyped avoids TS excess-property checks.
 const serverInfo = {
   name: "harness-mcp-s3",
   version: "0.1.0",
-  description: "read assistant/AGENTS.md; call get_os_engine/get_os_upgrade/get_os_init to set up or repair it (spec 016)",
 };
+
+const mcpServerOptions = { serverInfo, instructions: MCP_BOOTSTRAP_INSTRUCTIONS };
 
 /**
  * Two handler variants, split on whether the inbound request itself carries
@@ -30,7 +29,7 @@ const handlerWithExternal = createMcpHandler(
     const disabledTools = await registerNativeTools(server);
     await registerExternalTools(server, disabledTools);
   },
-  { serverInfo },
+  mcpServerOptions,
   { maxDuration: 60, verboseLogs: true },
 );
 
@@ -38,7 +37,7 @@ const handlerWithoutExternal = createMcpHandler(
   async (server) => {
     await registerNativeTools(server);
   },
-  { serverInfo },
+  mcpServerOptions,
   { maxDuration: 60, verboseLogs: true },
 );
 

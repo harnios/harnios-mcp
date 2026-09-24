@@ -44,6 +44,14 @@ Source: `frontend/lib/os/engine/init.md`.
 
 `list_directory`/`read_file`/`create_file`/etc. never expose these three — their content only ever exists as these tools' return values, never written to the bucket (SC-003). Unlike the original resource-based design, these three **do** appear in the same `tools/list` a client already shows for `create_file`/`read_file`/etc. — that's the point: it's the one MCP primitive proven, by the same client that failed to see resources, to be reliably surfaced.
 
+## Mandatory task bootstrap
+
+The MCP initialization result carries server instructions requiring the assistant's first storage call for every task to be `read_file` with `path: "AGENTS.md"`, followed by compliance with that file before any other tool call. If the read returns `not_found`, the instructions direct the assistant to `get_os_engine` to repair the control file before continuing.
+
+The same rule is prepended at the common registration boundary to every tool description, including these engine tools, storage shortcuts such as `get_inbox`, messaging/docs tools, and proxied external tools. `read_file`'s description identifies itself as the bootstrap entry and names the required path. This duplicated protocol metadata is deliberate: correctness must not depend on which tool the model considers first or whether a client prominently surfaces server-level instructions.
+
+No chat prompt or chat-specific context participates in this contract.
+
 ## AGENTS.md stub wording
 
 `contracts/init-skeleton.md`'s stub `AGENTS.md` text names `get_os_init` explicitly (not a vague "through its own MCP connection") — concreteness that the original resource-based wording lacked, and that live testing showed matters.

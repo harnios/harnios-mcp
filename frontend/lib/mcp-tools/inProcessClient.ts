@@ -3,6 +3,7 @@ import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { registerExternalTools } from "@/lib/mcp-tools/externalTools";
 import { registerNativeTools } from "@/lib/mcp-tools/register";
+import { MCP_BOOTSTRAP_INSTRUCTIONS } from "@/lib/mcp-tools/toolGate";
 
 export interface ToolCallResult {
   content: unknown;
@@ -10,7 +11,10 @@ export interface ToolCallResult {
 }
 
 export async function createInProcessMcpClient(options: { includeExternal?: boolean } = {}): Promise<Client> {
-  const server = new McpServer({ name: "harness-mcp-in-process", version: "0.1.0" });
+  const server = new McpServer(
+    { name: "harness-mcp-in-process", version: "0.1.0" },
+    { instructions: MCP_BOOTSTRAP_INSTRUCTIONS },
+  );
   const disabledTools = await registerNativeTools(server);
   if (options.includeExternal !== false) await registerExternalTools(server, disabledTools);
   const [serverTransport, clientTransport] = InMemoryTransport.createLinkedPair();

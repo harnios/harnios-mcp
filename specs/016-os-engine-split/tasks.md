@@ -159,6 +159,19 @@ Single Next.js app (`frontend/`), per plan.md's Project Structure — no `backen
 
 ---
 
+## Phase 9: Bootstrap-order correction — AGENTS.md before every tool
+
+**Purpose**: Prevent a model's arbitrary first-tool choice from bypassing the Company OS control file, while keeping the fix entirely inside the MCP surface.
+
+- [X] T033 Extend the feature specification and MCP engine-tool contract with the invariant that every task begins by reading root `AGENTS.md`, with `get_os_engine` as the missing-file recovery path (FR-016–FR-019).
+- [X] T034 Add MCP initialization instructions to the HTTP and in-process MCP server constructors, requiring `read_file` of `AGENTS.md` before any other task operation.
+- [X] T035 Prepend the same bootstrap rule at the common gated-tool registration boundary so every native and proxied tool description carries it; make the `read_file` wording explicitly identify the required first path.
+- [ ] T036 Inspect a live MCP `initialize` response and `tools/list`, then start an inbox task in a fresh assistant session and confirm `read_file({"path":"AGENTS.md"})` precedes `get_inbox` (SC-006, SC-007).
+
+**Checkpoint**: Correct bootstrap order no longer depends on which tool the model happens to select first, and no chat code or prompt has changed.
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies

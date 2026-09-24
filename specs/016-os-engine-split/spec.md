@@ -83,6 +83,23 @@ Right now, one and the same file both governs low-level Company OS mechanics (ho
 2. **Given** the owner completes the interview, **When** the assistant finishes, **Then** `data/`, the owner's identity, applicable policies, applicable domain skills, and the routing table all exist and reflect the interview's answers, with no placeholder content invented on the owner's behalf.
 3. **Given** a Company OS that already has business data, **When** the owner or an assistant adds or removes a skill later, **Then** only the routing file needs to change to reflect it — `AGENTS.md` itself is untouched.
 
+---
+
+### User Story 5 - Every MCP task starts from AGENTS.md (Priority: P1)
+
+A connected assistant can choose any exposed operation as its first action, including a purpose-built shortcut such as inbox retrieval or business setup. Regardless of which operation it considers first, it must be told by the Company OS connection itself to read and follow `AGENTS.md` before doing anything else, so the owner's routing and operating rules cannot be skipped because of tool-selection order.
+
+**Why this priority**: `AGENTS.md` is the control point for every Company OS task. If its rules only appear on selected operations, the assistant can bypass them accidentally simply by selecting a different first tool.
+
+**Independent Test**: Connect a new assistant session, inspect the connection-level guidance and several unrelated operation descriptions, and confirm all of them direct the assistant to read `AGENTS.md` first. Then ask for an inbox-related task and confirm the first storage call reads `AGENTS.md`, not the inbox.
+
+**Acceptance Scenarios**:
+
+1. **Given** a newly connected assistant that has not yet read the Company OS instructions, **When** the connection is initialized, **Then** it is explicitly told to read and follow `AGENTS.md` before selecting or calling any other operation.
+2. **Given** the assistant considers any available operation first, including inbox, setup, messaging, documentation, or an externally connected operation, **When** it reads that operation's description, **Then** the description repeats the same mandatory `AGENTS.md` bootstrap rule.
+3. **Given** `AGENTS.md` is present, **When** the owner starts any task, **Then** the assistant's first storage call reads that file and follows it before continuing.
+4. **Given** `AGENTS.md` is missing, **When** the required first read reports that absence, **Then** the assistant is directed to the OS engine repair flow rather than continuing without control instructions.
+
 ### Edge Cases
 
 - What happens if the owner asks to check for an upgrade while offline from the OS provider (the engine's current version can't be reached)? The assistant should report it cannot check right now rather than guessing or silently skipping the check.
@@ -90,6 +107,8 @@ Right now, one and the same file both governs low-level Company OS mechanics (ho
 - What happens if the business-setup interview is interrupted partway (owner answers some questions, then the connection drops)? Nothing partial should be written — the existing "interview first, writing after" rule (no writes before all answers are in) already covers this and continues to apply.
 - What happens if an owner manually edits the routing file to reference a skill that doesn't exist, or removes an entry for one that does? Out of scope for this feature to reconcile automatically (see Assumptions) — the assistant follows the routing file as given.
 - What happens when the confirmed OS language (from the existing multilingual feature) is missing entirely (a pre-multilingual, pre-this-feature OS)? The upgrade/repair flow falls back to English for its own explanations, consistent with how the existing language feature already falls back today.
+- What happens when a client ignores connection-level guidance? Every operation description repeats the bootstrap rule, so correct behavior does not depend on the client surfacing only one protocol field.
+- What happens when the first operation considered is itself `read_file`? Its description identifies `AGENTS.md` as the required first path, rather than asking for a second preliminary operation.
 
 ## Requirements *(mandatory)*
 
@@ -113,6 +132,10 @@ Right now, one and the same file both governs low-level Company OS mechanics (ho
 - **FR-013**: The business-setup flow MUST produce only the business-specific content applicable to the owner's stated activity type (e.g., no empty product backlog for a pure consulting business), matching today's behavior.
 - **FR-014**: The system MUST leave a Company OS's existing business data untouched when only an engine repair or upgrade runs — engine changes never rewrite `data/`, identity, policies, or domain skills.
 - **FR-015**: Explanations shown to the owner (upgrade descriptions, business-setup prompts and reports) MUST be presented in the OS's confirmed language; the engine's own internal rules are exempt from translation since owners never read them directly.
+- **FR-016**: At connection initialization, the system MUST instruct every connected assistant to read and follow the root `AGENTS.md` before selecting or calling any other operation for a task.
+- **FR-017**: Every operation exposed through the Company OS connection, including native, purpose-built, and externally connected operations, MUST repeat the mandatory `AGENTS.md` bootstrap rule in its description so behavior does not depend on which operation the assistant considers first.
+- **FR-018**: The bootstrap guidance MUST direct the assistant to the OS engine repair flow when `AGENTS.md` cannot be found; it MUST NOT permit the task to continue without the control file.
+- **FR-019**: The bootstrap behavior MUST be implemented entirely through the Company OS connection and its operation metadata; it MUST NOT depend on the product's chat interface or chat-specific prompting.
 
 ### Key Entities
 
@@ -130,6 +153,8 @@ Right now, one and the same file both governs low-level Company OS mechanics (ho
 - **SC-003**: No engine rules text is ever discoverable as an editable file inside any Company OS bucket, for both newly created and previously existing instances after their first repair/upgrade.
 - **SC-004**: An owner can add or remove a skill's routing entry without triggering any change to `AGENTS.md`.
 - **SC-005**: A new owner completes business setup (the interview) exactly once per Company OS, with no duplicate or repeated interviews triggered by later unrelated tasks.
+- **SC-006**: In 100% of inspected connection initializations and operation descriptions, the assistant receives the same instruction to read `AGENTS.md` before any task operation.
+- **SC-007**: In a fresh-session inbox test, the assistant reads `AGENTS.md` before calling the inbox operation, with no chat-specific instruction required.
 
 ## Assumptions
 
@@ -138,3 +163,4 @@ Right now, one and the same file both governs low-level Company OS mechanics (ho
 - The naming of the engine's connection points and the business-setup flow's trigger phrasing are implementation details to be settled during planning, not specified here.
 - The existing multilingual behavior (owners see content in their confirmed language, falling back to English when none is confirmed) is assumed unchanged and is reused rather than redefined by this feature.
 - Existing Company OS instances continue operating exactly as they do today until the owner's first repair or upgrade request touches them — this feature introduces no forced, automatic migration.
+- `AGENTS.md` refers to the root control file created by the existing Company OS initialization flow. Optional additional bootstrap documents do not replace this mandatory first read.
