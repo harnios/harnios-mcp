@@ -167,6 +167,8 @@ Single Next.js app (`frontend/`), per plan.md's Project Structure — no `backen
 - [X] T034 Add MCP initialization instructions to the HTTP and in-process MCP server constructors, requiring `read_file` of `AGENTS.md` before any other task operation.
 - [X] T035 Prepend the same bootstrap rule at the common gated-tool registration boundary so every native and proxied tool description carries it; make the `read_file` wording explicitly identify the required first path.
 - [ ] T036 Inspect a live MCP `initialize` response and `tools/list`, then start an inbox task in a fresh assistant session and confirm `read_file({"path":"AGENTS.md"})` precedes `get_inbox` (SC-006, SC-007).
+- [X] T037 Replace advisory-only bootstrap behavior with a common server-side gate: reject every non-bootstrap tool before handler execution, authorize a bounded task window after a successful root `AGENTS.md` read, and admit `get_os_engine` as the missing-file recovery path (FR-020–FR-022).
+- [ ] T038 Against a live MCP session, call `get_inbox`, a write tool, and a proxied external tool before bootstrap and confirm each returns `agents_bootstrap_required` with no side effect; then read `AGENTS.md` and confirm the same operations can proceed (SC-008).
 
 **Checkpoint**: Correct bootstrap order no longer depends on which tool the model happens to select first, and no chat code or prompt has changed.
 

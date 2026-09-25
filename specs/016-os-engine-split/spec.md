@@ -87,11 +87,11 @@ Right now, one and the same file both governs low-level Company OS mechanics (ho
 
 ### User Story 5 - Every MCP task starts from AGENTS.md (Priority: P1)
 
-A connected assistant can choose any exposed operation as its first action, including a purpose-built shortcut such as inbox retrieval or business setup. Regardless of which operation it considers first, it must be told by the Company OS connection itself to read and follow `AGENTS.md` before doing anything else, so the owner's routing and operating rules cannot be skipped because of tool-selection order.
+A connected assistant can choose any exposed operation as its first action, including a purpose-built shortcut such as inbox retrieval or business setup. Regardless of which operation it considers first, the Company OS connection must prevent that operation from running until the assistant has read and followed `AGENTS.md`, so the owner's routing and operating rules cannot be skipped because of tool-selection order or ignored advisory text.
 
 **Why this priority**: `AGENTS.md` is the control point for every Company OS task. If its rules only appear on selected operations, the assistant can bypass them accidentally simply by selecting a different first tool.
 
-**Independent Test**: Connect a new assistant session, inspect the connection-level guidance and several unrelated operation descriptions, and confirm all of them direct the assistant to read `AGENTS.md` first. Then ask for an inbox-related task and confirm the first storage call reads `AGENTS.md`, not the inbox.
+**Independent Test**: Connect a new assistant session and call an inbox-related operation before reading `AGENTS.md`; confirm the operation is rejected without reading the inbox. Read `AGENTS.md`, repeat the operation, and confirm it now succeeds.
 
 **Acceptance Scenarios**:
 
@@ -99,6 +99,8 @@ A connected assistant can choose any exposed operation as its first action, incl
 2. **Given** the assistant considers any available operation first, including inbox, setup, messaging, documentation, or an externally connected operation, **When** it reads that operation's description, **Then** the description repeats the same mandatory `AGENTS.md` bootstrap rule.
 3. **Given** `AGENTS.md` is present, **When** the owner starts any task, **Then** the assistant's first storage call reads that file and follows it before continuing.
 4. **Given** `AGENTS.md` is missing, **When** the required first read reports that absence, **Then** the assistant is directed to the OS engine repair flow rather than continuing without control instructions.
+5. **Given** the assistant ignores all connection and operation-description guidance, **When** it calls any operation other than the required bootstrap read, **Then** the server rejects the call without executing the operation or causing side effects.
+6. **Given** the assistant has successfully read `AGENTS.md`, **When** it calls another operation within the active task window, **Then** the server permits the operation normally.
 
 ### Edge Cases
 
@@ -107,8 +109,10 @@ A connected assistant can choose any exposed operation as its first action, incl
 - What happens if the business-setup interview is interrupted partway (owner answers some questions, then the connection drops)? Nothing partial should be written — the existing "interview first, writing after" rule (no writes before all answers are in) already covers this and continues to apply.
 - What happens if an owner manually edits the routing file to reference a skill that doesn't exist, or removes an entry for one that does? Out of scope for this feature to reconcile automatically (see Assumptions) — the assistant follows the routing file as given.
 - What happens when the confirmed OS language (from the existing multilingual feature) is missing entirely (a pre-multilingual, pre-this-feature OS)? The upgrade/repair flow falls back to English for its own explanations, consistent with how the existing language feature already falls back today.
-- What happens when a client ignores connection-level guidance? Every operation description repeats the bootstrap rule, so correct behavior does not depend on the client surfacing only one protocol field.
+- What happens when a client ignores connection-level guidance? The server returns a distinct bootstrap-required failure and does not invoke the requested operation.
 - What happens when the first operation considered is itself `read_file`? Its description identifies `AGENTS.md` as the required first path, rather than asking for a second preliminary operation.
+- What happens when `read_file` targets a file other than `AGENTS.md` before bootstrap? It is rejected like every other non-bootstrap operation.
+- What happens when the process restarts or the bootstrap authorization expires? The next non-bootstrap operation is rejected until `AGENTS.md` is read again; this fails closed.
 
 ## Requirements *(mandatory)*
 
@@ -136,6 +140,9 @@ A connected assistant can choose any exposed operation as its first action, incl
 - **FR-017**: Every operation exposed through the Company OS connection, including native, purpose-built, and externally connected operations, MUST repeat the mandatory `AGENTS.md` bootstrap rule in its description so behavior does not depend on which operation the assistant considers first.
 - **FR-018**: The bootstrap guidance MUST direct the assistant to the OS engine repair flow when `AGENTS.md` cannot be found; it MUST NOT permit the task to continue without the control file.
 - **FR-019**: The bootstrap behavior MUST be implemented entirely through the Company OS connection and its operation metadata; it MUST NOT depend on the product's chat interface or chat-specific prompting.
+- **FR-020**: Before a successful read of root `AGENTS.md`, the system MUST reject every other operation with a distinguishable bootstrap-required result and MUST NOT invoke that operation's handler or produce its side effects.
+- **FR-021**: A successful read of root `AGENTS.md` MUST authorize subsequent operations only for a bounded task window; expiry or process restart MUST restore the blocked state.
+- **FR-022**: If root `AGENTS.md` is missing, the system MUST permit retrieval of the OS engine repair instructions while continuing to block unrelated operations.
 
 ### Key Entities
 
@@ -155,6 +162,7 @@ A connected assistant can choose any exposed operation as its first action, incl
 - **SC-005**: A new owner completes business setup (the interview) exactly once per Company OS, with no duplicate or repeated interviews triggered by later unrelated tasks.
 - **SC-006**: In 100% of inspected connection initializations and operation descriptions, the assistant receives the same instruction to read `AGENTS.md` before any task operation.
 - **SC-007**: In a fresh-session inbox test, the assistant reads `AGENTS.md` before calling the inbox operation, with no chat-specific instruction required.
+- **SC-008**: In 100% of direct pre-bootstrap calls across read-only, write, messaging, execution, and external operations, the requested handler is not executed and the response identifies the required `AGENTS.md` read.
 
 ## Assumptions
 

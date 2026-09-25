@@ -50,6 +50,10 @@ The MCP initialization result carries server instructions requiring the assistan
 
 The same rule is prepended at the common registration boundary to every tool description, including these engine tools, storage shortcuts such as `get_inbox`, messaging/docs tools, and proxied external tools. `read_file`'s description identifies itself as the bootstrap entry and names the required path. This duplicated protocol metadata is deliberate: correctness must not depend on which tool the model considers first or whether a client prominently surfaces server-level instructions.
 
+Advisory metadata is not the enforcement boundary. The common tool-registration wrapper rejects every call before invoking its handler until `read_file` has successfully read root `AGENTS.md`. A pre-bootstrap `read_file` for any other path is rejected too. The rejection is an MCP error result with code `agents_bootstrap_required`, and therefore cannot accidentally execute inbox reads, writes, messages, code, jobs, documentation, or proxied external calls.
+
+A successful `AGENTS.md` read opens a bounded in-memory task window for the authenticated MCP client. The window fails closed on expiry or process restart. When the file is absent, only `get_os_engine` is admitted next so the assistant can retrieve repair instructions; successful retrieval then opens the same bounded window needed to rebuild the missing control file.
+
 No chat prompt or chat-specific context participates in this contract.
 
 ## AGENTS.md stub wording
