@@ -19,7 +19,7 @@
 - [x] Success criteria are technology-agnostic
 - [x] All acceptance scenarios are defined
 - [x] Edge cases are identified
-- [x] Scope is clearly bounded
+- [x] Scope is clearly bounded, including the `/processes/<process>`-only creation action
 - [x] Dependencies and assumptions identified
 - [x] Modal editing and persistence boundaries are explicitly defined
 
@@ -34,3 +34,4 @@
 
 - The first version includes standard visual modeling in a modal; advanced properties, collaboration, validation, and process execution remain out of scope.
 - Specification and design artifacts cover the viewer, XML mode, and modal Modeler flow; implementation validation remains tracked in `tasks.md`.
+- The dedicated creation action is limited to direct process folders; generic file operations remain unchanged.

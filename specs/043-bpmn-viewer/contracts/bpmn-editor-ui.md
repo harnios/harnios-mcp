@@ -11,6 +11,13 @@ This contract describes the behavior exposed by the existing file editor when th
 - `loadedContent` and existing ETag/save state: supplied by the existing editor session.
 - Owner authentication and file access: enforced by the existing editor route and file access behavior.
 
+## Create diagram
+
+- Only folder menus for direct child folders of `/processes` expose New BPMN diagram and prompt for a plain file name using the existing folder action pattern. The root, `/processes` itself, deeper descendants, and unrelated folders do not expose it.
+- A missing `.bpmn` suffix is added; an existing suffix is kept. Empty, cancelled, or invalid names send no request.
+- Creation submits `{ path, content, createOnly: true }` with valid BPMN 2.0 starter XML through the existing `POST /api/file` endpoint. The optional `createOnly` field makes storage creation exclusive and returns HTTP 409 on an existing file; omitted/false retains the endpoint's existing overwrite behavior.
+- On success, the folder listing refreshes and the new file opens in Diagram mode. On failure, the folder and selected file remain unchanged and the owner sees an error.
+
 ## Modes
 
 | Mode | Visible content | Editable | Expected action |

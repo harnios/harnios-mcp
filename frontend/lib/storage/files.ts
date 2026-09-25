@@ -32,12 +32,18 @@ export interface FileContent extends FileMetadata {
 }
 
 /**
- * Creates a file at `path`, overwriting it if a file already exists there.
+ * Creates a file at `path`, overwriting it if a file already exists there
+ * unless `createOnly` requests atomic exclusive creation.
  * Rejects with `already_exists` if a directory occupies `path` (FR-002, FR-012).
  * `content` is raw bytes — never decoded/re-encoded as text, so binary
  * uploads survive byte-for-byte (spec 028 FR-003).
  */
-export async function createFile(path: string, content: Buffer, contentType?: string): Promise<FileMetadata> {
+export async function createFile(
+  path: string,
+  content: Buffer,
+  contentType?: string,
+  options: { createOnly?: boolean } = {},
+): Promise<FileMetadata> {
   const key = normalizeFilePath(path);
   if (isReservedStoragePath(key)) throw notFound(path);
   const resolvedContentType = contentType || mimeTypeForPath(path);
@@ -48,7 +54,13 @@ export async function createFile(path: string, content: Buffer, contentType?: st
     }
 
     const result = await s3Client.send(
-      new PutObjectCommand({ Bucket: BUCKET, Key: key, Body: content, ContentType: resolvedContentType }),
+      new PutObjectCommand({
+        Bucket: BUCKET,
+        Key: key,
+        Body: content,
+        ContentType: resolvedContentType,
+        ...(options.createOnly ? { IfNoneMatch: "*" } : {}),
+      }),
     );
 
     return {
@@ -59,6 +71,12 @@ export async function createFile(path: string, content: Buffer, contentType?: st
       contentType: resolvedContentType,
     };
   } catch (err) {
+    if (options.createOnly && (
+      (err as { name?: string })?.name === "PreconditionFailed" ||
+      (err as { $metadata?: { httpStatusCode?: number } })?.$metadata?.httpStatusCode === 412
+    )) {
+      throw alreadyExists(path);
+    }
     throw wrapStorageError(err, `creating file "${path}"`);
   }
 }

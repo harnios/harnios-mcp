@@ -14,7 +14,7 @@ Add graphical rendering and visual editing for stored `.bpmn` files while preser
 
 **Primary Dependencies**: Existing SWR/editor components; `bpmn-js` 18.28.0 for BPMN 2.0 viewing; existing CodeMirror/plain-text editor path for XML editing
 
-**Storage**: Existing S3-backed storage and `/api/file` contract remain unchanged. BPMN content continues to be fetched and saved as UTF-8 text.
+**Storage**: Existing S3-backed storage is reused. BPMN content continues to be fetched and saved as UTF-8 text; the file-create request gains an optional exclusive-create flag for the dedicated action.
 
 **Testing**: Existing project has no automated test runner. Validate with `npm run lint`, `npm run build`, and the feature-specific browser walkthrough in [quickstart.md](quickstart.md), including valid, malformed, empty, edited, and externally changed BPMN files.
 
@@ -66,7 +66,7 @@ frontend/
 └── package-lock.json        # lock dependency graph
 ```
 
-**Structure Decision**: Keep the feature inside the existing file editor. `FileEditor` owns session content, dirty state, save, and conflict handling; `BpmnViewer` owns read-only rendering; `BpmnModelerDialog` owns only the temporary visual editing lifecycle and XML export. No API, storage, route, or new page is required.
+**Structure Decision**: Keep viewing and editing inside the existing file editor. `FileEditor` owns session content, dirty state, save, and conflict handling; `BpmnViewer` owns read-only rendering; `BpmnModelerDialog` owns only the temporary visual editing lifecycle and XML export. Creation reuses the existing file API and storage with an optional exclusive-create flag; no new route or page is required.
 
 ## Implementation Design
 
@@ -80,6 +80,8 @@ frontend/
 - Add a `BpmnModelerDialog` modal opened from Diagram mode. It imports `session.currentContent` into `bpmn-js/lib/Modeler`, exposes the standard palette/modeling controls, tracks whether the modeler has changed, and calls `onApply(xml)` only after successful `saveXML`.
 - On Apply, call the existing `handleContentChange(xml)` and close the modal; do not call the storage API from the modal. The main Save button remains the only persistence action.
 - On Cancel, close immediately when clean; when dirty, require explicit discard confirmation. On import/export failure, keep the modal open and preserve the current modeler state where the library permits.
+- Offer New BPMN diagram only in folder menus whose path is exactly `processes/<process>` (allowing the tree's trailing slash). Generate valid BPMN 2.0 XML with a process and its diagram plane, submit it through the existing `POST /api/file`, refresh the folder, and open the new file. Normalize the `.bpmn` suffix.
+- The existing POST operation normally overwrites files. Add an optional `createOnly: true` request field for this action and pass it to storage as an atomic conditional put (`IfNoneMatch: "*"`); return an already-exists response on a collision. Omitted/false `createOnly` retains existing callers' overwrite behavior.
 
 ### Styling and dependency integration
 
@@ -92,7 +94,7 @@ frontend/
 
 - Add typed dictionary entries for Diagram, XML, BPMN import failure, and any accessible viewer status text to the existing `editor.file` dictionary slice.
 - Mirror the entries in all supported dictionaries (`en`, `it`, `es`, `de`, `fr`, `ru`), preserving the repository’s current translation shape.
-- Do not change `/api/file`, storage file types, file download behavior, file sharing, or the rendering path for other extensions. The modeler uses the existing in-memory content and save path.
+- Apart from the optional create-only flag on `/api/file`, do not change file types, download behavior, sharing, or the rendering path for other extensions. The modeler uses the existing in-memory content and save path.
 
 ### Validation and failure handling
 

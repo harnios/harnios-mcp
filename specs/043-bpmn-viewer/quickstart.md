@@ -77,6 +77,15 @@ Expected result: visual changes flow through Apply into the existing editor sess
 
 Expected result: modeler failures do not lose or silently persist content.
 
+## Scenario 7: Create a BPMN diagram
+
+1. In the menu of `/processes/example`, choose **New BPMN diagram** and enter `new-process`.
+2. Confirm `new-process.bpmn` appears and opens in Diagram mode without an import error.
+3. Open Modify diagram, add a task, Apply and Save; reload to confirm it persists.
+4. Attempt to create `new-process.bpmn` again and confirm the original file is unchanged.
+5. Cancel the name prompt and confirm no file is created.
+6. Confirm the action is absent from `/`, `/processes`, `/processes/example/subfolder`, and an unrelated folder.
+
 ## Validation record
 
 Record the browser, sample file size, rendering time after content availability, and pass/fail result for each scenario. The v1 target is rendering within 3 seconds for valid files up to 5 MB in at least 95% of repeated acceptance opens.

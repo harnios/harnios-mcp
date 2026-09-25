@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import useSWR from "swr";
 import { authedFetch } from "@/lib/editorFetch";
+import { BPMN_STARTER_XML } from "@/lib/bpmn/starter";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { ALL_ALLOWED_EXTENSIONS, categoryForPath, isAllowedExtension, isNativelyRenderable } from "@/lib/storage/fileTypes";
 import {
@@ -121,9 +122,14 @@ function joinPath(dirPath: string, name: string): string {
   return trimmed === "" ? name : `${trimmed}/${name}`;
 }
 
+/** The dedicated BPMN creation action belongs only to a direct process folder. */
+function isProcessFolder(path: string): boolean {
+  return /^processes\/[^/]+\/?$/.test(path);
+}
+
 /** Prompts for a new file/folder name, rejecting path separators and
  * treating a blank or cancelled entry as "nothing to create" (FR-007).
- * Shared by the New file (US2) and New folder (US3) actions. */
+ * Shared by the New file, New BPMN diagram, and New folder actions. */
 function promptForEntryName(promptMessage: string, dict: Dictionary["editor"]["tree"]): string | null {
   const raw = window.prompt(promptMessage);
   if (raw === null) return null;
@@ -513,6 +519,37 @@ function DirectoryNode({
     }
   }
 
+  async function handleCreateBpmn() {
+    if (!isProcessFolder(path)) return;
+    const enteredName = promptForEntryName(dict.promptNewBpmn, dict);
+    if (!enteredName) return;
+
+    const name = enteredName.toLowerCase().endsWith(".bpmn") ? enteredName : `${enteredName}.bpmn`;
+    const targetPath = joinPath(path, name);
+
+    setBusy(true);
+    try {
+      const res = await authedFetch("/api/file", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: targetPath, content: BPMN_STARTER_XML, createOnly: true }),
+      });
+      const data = await res.json();
+      if (res.status === 409 && data.code === "already_exists") {
+        throw new Error(dict.bpmnAlreadyExists(name));
+      }
+      if (!res.ok) throw new Error(data.message ?? dict.createFailedLabel);
+
+      setExpanded(true);
+      await refreshEntries();
+      onSelectFile(targetPath);
+    } catch (err) {
+      window.alert(dict.createFailed((err as Error).message));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   /** Deletes this folder and everything inside it, after confirmation.
    * Notifies the parent (via `onDeleted`) to refresh its listing, and the
    * top-level tree (via `onFolderDeleted`) so the editor can close a file
@@ -566,6 +603,9 @@ function DirectoryNode({
 
   const menuItems: MenuItem[] = [
     { label: dict.menuNewFile, icon: <NewFileIcon />, onClick: handleCreateFile },
+    ...(isProcessFolder(path)
+      ? [{ label: dict.menuNewBpmn, icon: <DiagramIcon />, onClick: handleCreateBpmn }]
+      : []),
     { label: dict.menuNewFolder, icon: <NewFolderIcon />, onClick: handleCreateFolder },
     { label: dict.menuUploadFiles, icon: <UploadIcon />, onClick: () => uploadFilesInputRef.current?.click() },
     { label: dict.menuUploadFolder, icon: <UploadIcon />, onClick: () => uploadFolderInputRef.current?.click() },

@@ -54,6 +54,20 @@ As an authenticated owner, I want to open a BPMN modeler in a modal window so th
 4. **Given** the main editor contains applied modeler changes, **When** the owner selects Save, **Then** the existing file-saving flow persists the updated XML.
 5. **Given** the modeler has unapplied changes, **When** the owner tries to close or cancel the modal, **Then** the owner is asked to confirm discarding those modal-only changes.
 
+### User Story 4 - Create a BPMN diagram (Priority: P1)
+
+As an authenticated owner browsing a process folder at `/processes/<process>`, I want to create a new BPMN diagram there and start editing it without supplying XML.
+
+**Independent Test**: Create a diagram from a `/processes/<process>` folder menu, open it in Diagram mode, add a task in the Modeler, apply and save, then reload the file. Confirm the action is absent elsewhere.
+
+**Acceptance Scenarios**:
+
+1. **Given** a folder exactly one level below `/processes`, **When** the owner selects New BPMN diagram and enters a name, **Then** a `.bpmn` file containing a valid starter process is created in that folder and opens in Diagram mode.
+2. **Given** the entered name already ends in `.bpmn`, **When** the diagram is created, **Then** the extension is not duplicated.
+3. **Given** a file of the chosen name already exists, **When** the owner tries to create the diagram, **Then** the existing file is preserved and a clear error is shown.
+4. **Given** the new diagram is open, **When** the owner uses Modify diagram, **Then** the Modeler imports the starter process and supports adding elements and saving through the existing Apply then Save flow.
+5. **Given** the owner browses `/`, `/processes`, a nested folder under `/processes/<process>`, or any other folder, **When** its folder menu opens, **Then** New BPMN diagram is not offered.
+
 ### Edge Cases
 
 - If the BPMN XML is malformed or cannot be rendered, the editor MUST show a clear, non-technical error and keep the XML available for inspection or correction.
@@ -64,6 +78,7 @@ As an authenticated owner, I want to open a BPMN modeler in a modal window so th
 - If the owner is not authorized, the existing authentication and access-denied behavior MUST apply; rendering a BPMN file MUST not bypass file permissions.
 - If exporting the modeler content fails, the modal MUST remain open and preserve the editable diagram state.
 - If the modeler is opened on a narrow viewport, the modal MUST use the available screen and keep the core modeling controls usable.
+- If diagram creation is cancelled, the name is empty, or the folder cannot be written, the system MUST not leave a partially created diagram.
 
 ## Requirements *(mandatory)*
 
@@ -81,6 +96,8 @@ As an authenticated owner, I want to open a BPMN modeler in a modal window so th
 - **FR-010**: Applying modeler changes MUST update the existing in-memory editor content but MUST NOT persist to storage until the owner uses the main Save action.
 - **FR-011**: Closing the modeler with unapplied changes MUST require explicit discard confirmation.
 - **FR-012**: Existing behavior for non-BPMN file types MUST remain unchanged.
+- **FR-013**: Only folder menus for paths exactly matching `/processes/<process>` MUST offer a dedicated New BPMN diagram action that creates a valid BPMN 2.0 starter process rather than an empty file; all other folder menus MUST omit the action.
+- **FR-014**: Diagram creation MUST normalize the `.bpmn` suffix without duplication and MUST not overwrite an existing file.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -100,6 +117,8 @@ As an authenticated owner, I want to open a BPMN modeler in a modal window so th
 - **SC-005**: Existing file-editor acceptance checks for text, Markdown, CSV, HTML, and Python files continue to pass without behavior changes.
 - **SC-006**: An owner can open visual editing, make a basic BPMN change, apply it, and reach the existing Save action in under 30 seconds for a valid diagram.
 - **SC-007**: 100% of close attempts with unapplied modeler changes require an explicit discard decision.
+- **SC-008**: In the acceptance walkthrough, a newly created BPMN file opens as a diagram and can be modified visually without editing XML first.
+- **SC-009**: In the acceptance walkthrough, the New BPMN diagram action appears in 100% of `/processes/<process>` folder menus and in none of the other folder menus tested.
 
 ## Assumptions
 
@@ -111,3 +130,4 @@ As an authenticated owner, I want to open a BPMN modeler in a modal window so th
 - Diagram rendering occurs in the browser and does not change the stored file format or storage contract.
 - Standard BPMN 2.0 XML is the expected input; vendor-specific extensions may render partially or produce warnings.
 - The existing responsive editor layout is reused, including mobile browser support where the diagram remains usable through zoom and pan.
+- `<process>` is one non-empty direct child folder name under `/processes`; deeper descendants are not eligible for the dedicated creation action.

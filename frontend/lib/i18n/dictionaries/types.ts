@@ -152,6 +152,7 @@ export interface Dictionary {
       loading: string;
       empty: string;
       menuNewFile: string;
+      menuNewBpmn: string;
       menuNewFolder: string;
       menuUploadFiles: string;
       menuUploadFolder: string;
@@ -161,6 +162,8 @@ export interface Dictionary {
       menuDelete: string;
       moreActions: string;
       promptNewFile: string;
+      promptNewBpmn: string;
+      bpmnAlreadyExists: (name: string) => string;
       promptNewFolder: string;
       invalidName: (name: string) => string;
       nothingToUpload: string;

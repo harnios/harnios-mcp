@@ -12,7 +12,7 @@ description: "Task list for BPMN Diagram Viewer"
 
 **Tests**: No automated test tasks are included because the feature specification requests browser walkthrough validation and the project has no automated test runner. Lint/build and the feature quickstart are included in the final phase.
 
-**Organization**: Tasks are grouped by user story so the diagram viewer, XML mode, and visual modeler can be delivered incrementally without changing the storage contract.
+**Organization**: Tasks are grouped by user story so the diagram viewer, XML mode, and visual modeler can be delivered incrementally; dedicated creation adds an optional exclusive-create storage flag.
 
 ## Format: `[ID] [P?] [Story?] Description`
 
@@ -98,12 +98,20 @@ Single Next.js project under `frontend/`; feature design artifacts live under `s
 
 ---
 
-## Phase 6: Polish & Cross-Cutting Concerns
+## Phase 6: User Story 4 - Create a BPMN diagram (Priority: P1)
+
+- [X] T021 [US4] Add a valid BPMN 2.0 starter XML generator in `frontend/lib/bpmn/starter.ts` for a process and its diagram plane.
+- [X] T022 [US4] Add optional `createOnly: true` to `POST /api/file` in `frontend/app/api/file/route.ts` and implement atomic conditional creation in `frontend/lib/storage/files.ts`, mapping existing-key rejection to HTTP 409 without changing other callers.
+- [X] T023 [US4] Add the New BPMN diagram label and name prompt to `frontend/lib/i18n/dictionaries/types.ts` and all six dictionary files.
+- [X] T024 [US4] Offer New BPMN diagram only in direct process folder menus (`/processes/<process>`) in `frontend/app/files/FileTree.tsx`, normalize the `.bpmn` suffix, submit with `createOnly: true`, refresh the folder, and open the file.
+- [ ] T025 [US4] Validate the new file in viewer and Modeler, plus cancellation, collision, and menu scope handling, using `specs/043-bpmn-viewer/quickstart.md` scenario 7.
+
+## Phase 7: Polish & Cross-Cutting Concerns
 
 **Purpose**: Validate the complete feature and protect existing editor behavior.
 
 - [X] T017 [P] Run `npm run lint` from `frontend/` and resolve any TypeScript, import, CSS, or accessibility issues caused by the BPMN integration.
-- [ ] T018 [P] Run `npm run build` from `frontend/` and resolve any server-rendering, bundling, or client-only dependency issues.
+- [X] T018 [P] Run `npm run build` from `frontend/` and resolve any server-rendering, bundling, or client-only dependency issues.
 - [ ] T019 Execute all scenarios in `specs/043-bpmn-viewer/quickstart.md` with valid, malformed, empty, edited, modeler-applied, and externally changed BPMN files, and verify Markdown, CSV, HTML, Python, and plain-text behavior remains unchanged.
 - [X] T020 Review the final diff against `specs/043-bpmn-viewer/spec.md`, `plan.md`, `data-model.md`, and `contracts/bpmn-editor-ui.md`; update comments or documentation only if the implementation reveals a behavior mismatch.
 
@@ -118,13 +126,15 @@ Single Next.js project under `frontend/`; feature design artifacts live under `s
 - **User Story 1 (Phase 3)**: T004-T007 depend on the foundational phase; T005 depends on T003 and T004.
 - **User Story 2 (Phase 4)**: T008-T011 depend on User Story 1's editor classification and viewer branch.
 - **User Story 3 (Phase 5)**: T012-T016 depend on User Stories 1 and 2 because the modal applies XML through the established editor session.
-- **Polish (Phase 6)**: T017-T020 run after the desired user stories are complete.
+- **User Story 4 (Phase 6)**: T021-T024 depend on the existing file tree and BPMN viewer; T025 follows their implementation.
+- **Polish (Phase 7)**: T017-T020 run after the desired user stories are complete.
 
 ### User Story Dependencies
 
 - **User Story 1 (P1)**: Depends only on Setup and Foundational phases.
 - **User Story 2 (P2)**: Depends on User Story 1 because it adds mode switching around the BPMN rendering branch, but it does not change storage or API behavior.
 - **User Story 3 (P1)**: Depends on User Stories 1 and 2 for the viewer entry point and XML/editor state integration; it does not change storage or API behavior.
+- **User Story 4 (P1)**: Depends on the BPMN viewer and existing file tree; the create-only API option does not change existing POST callers.
 
 ### Parallel Opportunities
 

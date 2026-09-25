@@ -127,13 +127,15 @@ export async function POST(request: NextRequest) {
   const authError = await requireOwnerSession();
   if (authError) return authError;
 
-  const body = (await request.json()) as { path?: string; content?: string };
+  const body = (await request.json()) as { path?: string; content?: string; createOnly?: boolean };
   if (!body.path) {
     return NextResponse.json({ code: "not_found", message: "path is required" }, { status: 404 });
   }
 
   try {
-    const result = await createFile(body.path, Buffer.from(body.content ?? "", "utf-8"));
+    const result = await createFile(body.path, Buffer.from(body.content ?? "", "utf-8"), undefined, {
+      createOnly: body.createOnly === true,
+    });
     return NextResponse.json(result, { status: 201 });
   } catch (err) {
     return errorResponse(err, "Unexpected error creating file");

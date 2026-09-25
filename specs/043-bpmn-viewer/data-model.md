@@ -1,6 +1,6 @@
 # Data Model: BPMN Diagram Viewer
 
-This feature adds no persisted entities and changes no storage or API schema. It extends the existing browser-only editor session with a BPMN presentation state.
+This feature adds no new persisted entity. It extends the existing browser-only editor session with a BPMN presentation state and adds an optional exclusive-create flag to the existing file-create request.
 
 ## Editor Session
 
@@ -56,6 +56,8 @@ Transient state for the visual editing modal:
 
 ## Validation rules
 
+- The dedicated New BPMN diagram action is available only in direct process folders at `/processes/<process>`; other folders keep their existing file actions.
+- New diagrams contain starter BPMN XML, and the exclusive-create request must not overwrite a file with the same path.
 - Classification is based on the `.bpmn` extension, case-insensitively.
 - The diagram mode accepts only the current file content as XML text.
 - Empty, malformed, non-BPMN, and unrenderable BPMN content must result in a recoverable error, never silent data replacement.
