@@ -8,7 +8,7 @@
 
 ## Summary
 
-Implement a global authenticated chat surface that remains mounted across client-side navigation, streams model responses, and offers an explicit `Harnios`/`General` mode. Harnios mode is the default and requires at least one enabled MCP tool call on the first model step of every turn; enabled tools execute directly in the MVP. General mode exposes no MCP tools. The browser owns only ephemeral chat and mode state; the server owns authentication, mode validation, model configuration, `os/AGENTS.md` context, MCP discovery, and tool execution. The initial model adapter is Mistral through AI SDK, with a provider/model resolver kept separate so local and OpenAI-compatible providers can be added later.
+Implement a global authenticated chat surface that remains mounted across client-side navigation, streams model responses, and offers an explicit `Harnios`/`General` mode. Harnios mode is the default and the server executes `read_file({"path":"AGENTS.md"})` as the first MCP call of every turn; enabled tools execute directly in the MVP. General mode exposes no MCP tools. The browser owns only ephemeral chat and mode state; the server owns authentication, mode validation, model configuration, `os/AGENTS.md` context, MCP discovery, and tool execution. The initial model adapter is Mistral through AI SDK, with a provider/model resolver kept separate so local and OpenAI-compatible providers can be added later.
 
 ## Technical Context
 
@@ -121,7 +121,7 @@ Root layout
 - Convert the live MCP catalog's JSON Schema to AI SDK tool schemas; every execution delegates to `client.callTool`.
 - Expose and execute the enabled native and external MCP tools directly through the server-side bridge.
 - Close the MCP client in `finally` and preserve existing external timeout/error handling.
-- In Harnios mode, set tool choice to required only for the first generation step of each request, then return to automatic choice so the model can synthesize a final answer after tool results.
+- In Harnios mode, execute `read_file({"path":"AGENTS.md"})` server-side before starting each new turn while keeping the full MCP catalog exposed to the model for every generation step.
 - In General mode, skip MCP client creation and omit the tools option entirely.
 - Treat lack of provider support for mandatory tool calling as a safe provider error; never silently answer without the required grounding.
 
@@ -131,7 +131,7 @@ Root layout
 - Build a minimal custom assistant-ui thread/composer using existing CSS tokens, not the legacy pre-styled package or Tailwind templates.
 - Mount once below the root layout so the runtime survives client-side navigation.
 - Render an accessible fixed launcher at bottom-right and a fixed responsive panel targeting `66.67vw × 33.33vh`, clamped for narrow screens.
-- Provide close/reopen behavior, loading/streaming/error states, and tool-call states.
+- Provide close/reopen behavior, loading/streaming/error states, and tool-call states; keep tool activity in the UI rather than duplicating it in assistant prose unless the user asks for details.
 - Add a localized `Harnios`/`General` mode selector in the panel header, defaulting to Harnios; retain history when switching and disable the selector while the thread is running.
 - Keep one transport/runtime instance and supply the current mode through a mutable request-body resolver so changing mode does not reset messages.
 - Add all visible labels and aria text to the typed dictionaries in six languages.

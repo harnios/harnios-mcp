@@ -5,7 +5,7 @@ import { errorResponse } from "@/lib/chat/errors";
 import { discoverFromClient } from "@/lib/chat/mcpBridge";
 import { isChatMode, type ChatMode } from "@/lib/chat/mode";
 import { resolveChatModel } from "@/lib/chat/model";
-import { createInProcessMcpClient } from "@/lib/mcp-tools/inProcessClient";
+import { callTool, createInProcessMcpClient } from "@/lib/mcp-tools/inProcessClient";
 
 export const runtime = "nodejs";
 
@@ -43,14 +43,18 @@ export async function POST(request: Request): Promise<Response> {
     try {
       const tools = await discoverFromClient(client);
       if (Object.keys(tools).length === 0) throw new Error("No Harnios MCP tools are available.");
-      const requireFirstTool = isNewUserTurn(body.messages);
+      if (!Object.hasOwn(tools, "read_file")) throw new Error("The required AGENTS.md tool is unavailable.");
+      if (isNewUserTurn(body.messages)) {
+        const bootstrap = await callTool(client, "read_file", { path: "AGENTS.md" });
+        if (bootstrap.isError) throw new Error("AGENTS.md could not be loaded.");
+      }
       const result = streamText({
         model,
         system,
         messages,
         tools,
         stopWhen: stepCountIs(5),
-        prepareStep: ({ stepNumber }) => ({ toolChoice: requireFirstTool && stepNumber === 0 ? "required" : "auto" }),
+        prepareStep: () => ({ toolChoice: "auto" }),
       });
       return result.toUIMessageStreamResponse({
         onFinish: async () => { await client.close().catch(() => undefined); },

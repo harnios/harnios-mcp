@@ -46,10 +46,11 @@ Aprire `http://localhost:3000`, autenticarsi e verificare il pulsante flottante 
 2. Inviare una richiesta che richieda la lettura di un file noto, ad esempio `Leggi os/AGENTS.md e riassumi le regole di routing.`
 3. Verificare che il modello possa proporre/eseguire `read_file`.
 4. Verificare che il risultato MCP e lo stato del tool siano visibili nella conversazione.
-5. Aprire il pannello del risultato e verificare che il JSON sia leggibile; richiuderlo e verificare che resti chiuso.
-6. Inviare una richiesta lunga, premere `Stop` e verificare che la risposta si interrompa mantenendo il contenuto già ricevuto.
-7. Premere `Reset` e verificare che i messaggi della chat locale vengano rimossi senza modificare dati persistenti.
-8. Su desktop e mobile verificare che la finestra arrivi fino alla base della viewport, inizi sotto l'header quando presente e mantenga sempre visibile il composer.
+5. Verificare che la prima chiamata di ogni nuovo turno sia `read_file` con `{"path":"AGENTS.md"}` prima di qualsiasi altro tool.
+6. Aprire il pannello del risultato e verificare che il JSON sia leggibile; richiuderlo e verificare che resti chiuso.
+7. Inviare una richiesta lunga, premere `Stop` e verificare che la risposta si interrompa mantenendo il contenuto già ricevuto.
+8. Premere `Reset` e verificare che i messaggi della chat locale vengano rimossi senza modificare dati persistenti.
+9. Su desktop e mobile verificare che la finestra arrivi fino alla base della viewport, inizi sotto l'header quando presente e mantenga sempre visibile il composer.
 
 ## Scenario 5 — Direct tool execution
 

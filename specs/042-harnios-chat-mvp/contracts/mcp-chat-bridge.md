@@ -16,7 +16,7 @@ Per ogni richiesta chat il bridge:
 
 Il bridge viene inizializzato esclusivamente per richieste con modalità `harnios`. In modalità `general` il route handler non crea il client MCP e non esegue discovery. Sul primo step Harnios il modello deve scegliere almeno uno dei tool scoperti; dagli step successivi la scelta torna automatica per permettere la sintesi finale.
 
-Il catalogo è ricostruito per richiesta per riflettere i tool disabilitati/abilitati e le connessioni esterne correnti.
+Il catalogo è ricostruito per richiesta per riflettere i tool disabilitati/abilitati e le connessioni esterne correnti. Per ogni nuovo turno Harnios, il server esegue `read_file` con `{"path":"AGENTS.md"}` prima di avviare il modello, nella stessa sessione MCP; il catalogo completo resta esposto al modello per tutti gli step successivi.
 
 ## Tool execution
 

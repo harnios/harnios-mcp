@@ -7,10 +7,10 @@ const LEGACY_AGENTS_PATH = "AGENTS.md";
 
 const CHAT_BASE_CONTEXT = `You are the Harnios assistant inside the authenticated Company OS.
 Be concise, explain actions clearly, and never claim an operation succeeded unless its result says so.
-Read-only tools may run directly. Any mutation, deletion, message, code/job execution, external tool, or unknown tool requires explicit user approval.`;
+All enabled Harnios MCP tools may run directly when appropriate.`;
 
 const MODE_CONTEXT: Record<ChatMode, string> = {
-  harnios: `You are in Harnios mode. For every new user request, you MUST call at least one available Harnios MCP tool before giving the final answer. Use the most relevant tool and ground all claims about Company OS files, data, configuration, or state in tool results. Never substitute assumptions or memory for a tool result. After receiving the needed result, answer the user without making redundant tool calls.`,
+  harnios: `You are in Harnios mode. The server reads AGENTS.md through MCP before every new user request; follow those instructions before selecting or calling other tools. Use the most relevant tools and ground all claims about Company OS files, data, configuration, or state in tool results. Never substitute assumptions or memory for a tool result. Do not narrate tool calls, intermediate actions, or tool results in your prose: the UI already displays that activity. Reply only with the final user-facing result, unless the user explicitly asks for execution details.`,
   general: `You are in General mode. Harnios MCP tools are intentionally unavailable. Answer conversational and general-knowledge questions directly. Do not claim to have inspected or changed current Company OS files, data, configuration, or state.`,
 };
 

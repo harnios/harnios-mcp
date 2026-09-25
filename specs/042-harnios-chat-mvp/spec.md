@@ -107,8 +107,9 @@ Come cliente, voglio che ogni messaggio venga elaborato con le istruzioni operat
 - **FR-025**: Durante una risposta in corso la chat MUST offrire un pulsante `Stop` con icona quadrata che annulla la risposta corrente e lascia visibili i contenuti già ricevuti.
 - **FR-026**: La chat MUST offrire un pulsante `Reset` che elimina immediatamente i messaggi dalla conversazione locale corrente senza scrivere o cancellare dati persistenti.
 - **FR-027**: La finestra chat MUST occupare verticalmente tutto lo spazio dal fondo dell'header applicativo alla base della viewport; su viewport mobili il composer MUST restare sempre visibile mentre solo la conversazione scorre.
+- **FR-028**: In modalità Harnios, il testo dell'assistente MUST NOT narrare chiamate tool o passaggi intermedi, poiché tali informazioni sono già rese dalla UI; l'assistente può descriverli solo se il cliente li richiede esplicitamente.
 - **FR-018**: La chat MUST offrire una scelta esplicita tra modalità `Harnios` e modalità `Generale`, con `Harnios` selezionata per impostazione predefinita.
-- **FR-019**: Per ogni nuovo messaggio inviato in modalità Harnios, il sistema MUST imporre almeno una chiamata a uno strumento MCP disponibile prima che l'assistente produca la risposta conclusiva.
+- **FR-019**: Per ogni nuovo messaggio inviato in modalità Harnios, il server MUST eseguire come prima chiamata MCP `read_file` con `{"path":"AGENTS.md"}` nella stessa sessione MCP usata dal modello; solo dopo questa lettura il modello può selezionare altri strumenti o produrre la risposta conclusiva.
 - **FR-020**: In modalità Generale, il sistema MUST NOT esporre o invocare strumenti MCP per la richiesta.
 - **FR-021**: Il cambio modalità MUST conservare la conversazione corrente, applicarsi ai messaggi successivi e restare disponibile solo quando non è presente una risposta in corso.
 - **FR-022**: Il sistema MUST validare la modalità lato server, usare `Harnios` quando il campo è assente per compatibilità e rifiutare valori diversi da quelli supportati.
