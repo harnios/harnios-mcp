@@ -9,10 +9,11 @@ import { registerPythonTools } from "@/lib/mcp-tools/pythonTools";
 import { registerJobTools } from "@/lib/mcp-tools/jobTools";
 import { getDisabledTools } from "@/lib/mcp-tools/store";
 import { registerTreeTools } from "@/lib/mcp-tools/treeTools";
+import { registerBehaviorTestTools } from "@/lib/mcp-tools/behaviorTestTools";
 
 /**
  * Registers every native (non-proxied) tool this server exposes — file
- * operations, engine bootstrap, messaging, inbox, tree search — with
+ * operations, engine bootstrap, messaging, inbox, tree search, behavior testing — with
  * owner-managed disabled-tool gating already applied. Shared by the real
  * `/mcp` HTTP endpoint (app/mcp/route.ts) and the scheduler's in-process
  * tool runtime (lib/scheduler/toolRuntime.ts, spec 032), so a Scheduled
@@ -32,5 +33,6 @@ export async function registerNativeTools(server: McpServer): Promise<ReadonlySe
   await registerIngestTools(server, disabledTools);
   await registerTreeTools(server, disabledTools);
   await registerDocsTools(server, disabledTools);
+  await registerBehaviorTestTools(server, disabledTools);
   return disabledTools;
 }

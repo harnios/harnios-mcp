@@ -8,6 +8,7 @@ MCP server.
 - **Enabling/disabling**: each native tool can be turned on or off individually. A disabled tool
   disappears from what a connected assistant can call — it behaves as if it doesn't exist, not as
   a tool that exists but errors when called.
+- **Agent behavior tests**: `test_agent_behavior` runs one scenario through the configured chat model and the same enabled tool schemas. Native read tools execute normally; mutating tools and all external tools return a simulated success and are marked as not applied in the JSON report.
 - **External connections** (`/tools/connections`): additional MCP servers can be connected, so
   their tools show up alongside the built-in ones. Each connection can be edited, refreshed
   (re-fetching its tool catalog), enabled/disabled, or removed here.

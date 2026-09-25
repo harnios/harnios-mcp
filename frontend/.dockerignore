@@ -3,6 +3,8 @@ node_modules/
 .git/
 .github/
 coverage/
+build/
+dist/
 *.log
 .env*
 !.env.example

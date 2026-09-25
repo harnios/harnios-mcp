@@ -34,4 +34,5 @@ export const TOOL_CATALOG: ToolCatalogEntry[] = [
   { name: "find_files_by_name", group: "Tree Search" },
   { name: "search_file_content", group: "Tree Search" },
   { name: "get_docs", group: "Docs" },
+  { name: "test_agent_behavior", group: "Agent Testing" },
 ];
