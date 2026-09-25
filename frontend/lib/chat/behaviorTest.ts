@@ -1,4 +1,4 @@
-import { generateText, stepCountIs } from "ai";
+import { generateText, Output, stepCountIs } from "ai";
 import { z } from "zod";
 import { createInProcessMcpClient } from "@/lib/mcp-tools/inProcessClient";
 import { createBehaviorTestExecutor, type BehaviorToolTraceEntry } from "@/lib/mcp-tools/behaviorTestBridge";
@@ -75,7 +75,7 @@ class BehaviorTestError extends Error {
   }
 }
 
-const BASE_INSTRUCTIONS = `You are simulating one turn of the Harnios assistant in Harnios mode. Follow the trusted Company OS context and the supplied test instructions. Use the available MCP tools as the live assistant would. The server may simulate selected tool outcomes. Do not claim to have inspected data unless a read tool returned it. Return only a JSON object with exactly these fields: {"response":"the final assistant response for the scenario","proposed_changes":[{"summary":"short change","rationale":"why","suggested_change":"concrete proposed text or action"}]}. Always include at least one useful proposed change or recommendation for the main assistant, even when the current instructions appear adequate. Do not apply proposed changes outside the tools available to you.`;
+const BASE_INSTRUCTIONS = `You are simulating one turn of the Harnios assistant in Harnios mode. Follow the trusted Company OS context and the supplied test instructions. Use the available MCP tools as the live assistant would. The server may simulate selected tool outcomes. Do not claim to have inspected data unless a read tool returned it. Put only the final assistant message for the test scenario in the response field, preserving any exact wording or format required by the tested instructions. The report format is handled separately and must not change the simulated assistant message. Always include at least one useful proposed change or recommendation for the main assistant, even when the current instructions appear adequate. Do not apply proposed changes outside the tools available to you.`;
 
 function buildSystemPrompt(baseContext: string, input: BehaviorTestInput): string {
   const inline = input.instructions?.trim();
@@ -104,17 +104,21 @@ function buildAssertions(response: string, input: BehaviorTestInput): BehaviorTe
   return assertions;
 }
 
-function parseFinalResponse(raw: string): z.infer<typeof finalResponseSchema> {
-  let value: unknown;
-  try {
-    value = JSON.parse(raw);
-  } catch {
-    throw new BehaviorTestError("invalid_test_response", "The model did not return valid JSON for the behavior test.");
+function parseFinalResponse(value: unknown): z.infer<typeof finalResponseSchema> {
+  const serialized = JSON.stringify(value);
+  if (!serialized || serialized.length > 120_000) {
+    throw new BehaviorTestError("invalid_test_response", "The model response exceeded the behavior test output limit.");
   }
   const parsed = finalResponseSchema.safeParse(value);
   if (!parsed.success) throw new BehaviorTestError("invalid_test_response", "The model response is missing a valid response or proposed changes.");
-  if (raw.length > 120_000) throw new BehaviorTestError("invalid_test_response", "The model response exceeded the behavior test output limit.");
   return parsed.data;
+}
+
+function isInvalidStructuredOutputError(error: unknown): boolean {
+  return error instanceof Error && (
+    error.name === "AI_NoObjectGeneratedError" ||
+    error.name === "AI_NoOutputGeneratedError"
+  );
 }
 
 function safeFailure(error: unknown): { code: string; message: string } {
@@ -192,20 +196,33 @@ export async function runBehaviorTest(input: BehaviorTestInput): Promise<Behavio
     assertWithinDeadline();
     if (!Object.hasOwn(tools, "read_file")) throw new BehaviorTestError("chat_unavailable", "The required read_file tool is unavailable.");
 
-    const result = await Promise.race([
-      generateText({
-        model: resolvedModel,
-        system: buildSystemPrompt(baseContext, input),
-        prompt: input.prompt,
-        tools,
-        stopWhen: stepCountIs(5),
-        abortSignal: controller.signal,
-        maxOutputTokens: 8_000,
-      }),
-      timedOut,
-    ]);
+    const generateBehaviorResponse = async () => {
+      try {
+        return await generateText({
+          model: resolvedModel,
+          system: buildSystemPrompt(baseContext, input),
+          prompt: input.prompt,
+          tools,
+          output: Output.object({
+            schema: finalResponseSchema,
+            name: "behavior_test_report",
+            description: "The simulated assistant reply and a concrete recommendation for the main assistant.",
+          }),
+          // Structured output takes one additional generation step after tool use.
+          stopWhen: stepCountIs(6),
+          abortSignal: controller.signal,
+          maxOutputTokens: 8_000,
+        });
+      } catch (error) {
+        if (isInvalidStructuredOutputError(error)) {
+          throw new BehaviorTestError("invalid_test_response", "The model did not return a valid structured behavior-test report.");
+        }
+        throw error;
+      }
+    };
+    const result = await Promise.race([generateBehaviorResponse(), timedOut]);
     assertWithinDeadline();
-    const parsed = parseFinalResponse(result.text);
+    const parsed = parseFinalResponse(result.output);
     return {
       status: "completed",
       ...parsed,
