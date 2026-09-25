@@ -18,6 +18,8 @@ Il bridge viene inizializzato esclusivamente per richieste con modalità `harnio
 
 Il catalogo è ricostruito per richiesta per riflettere i tool disabilitati/abilitati e le connessioni esterne correnti. Per ogni nuovo turno Harnios, il server esegue `read_file` con `{"path":"AGENTS.md"}` prima di avviare il modello, nella stessa sessione MCP; il catalogo completo resta esposto al modello per tutti gli step successivi.
 
+Il contesto trusted della chat include la data e l'ora correnti calcolate server-side nella timezone `Europe/Rome`; le richieste temporali devono usare questo valore come fonte autorevole.
+
 ## Tool execution
 
 Ogni tool AI SDK delega a `client.callTool({ name, arguments })`. Il risultato mantiene il contenuto MCP e il flag di errore, trasformandoli in un risultato serializzabile per lo stream.

@@ -4,6 +4,17 @@ import type { ChatMode } from "./mode";
 
 const AGENTS_PATH = "os/AGENTS.md";
 const LEGACY_AGENTS_PATH = "AGENTS.md";
+const CHAT_TIME_ZONE = "Europe/Rome";
+
+function currentDateTimeContext(): string {
+  const now = new Date();
+  const local = new Intl.DateTimeFormat("it-IT", {
+    timeZone: CHAT_TIME_ZONE,
+    dateStyle: "full",
+    timeStyle: "long",
+  }).format(now);
+  return `Authoritative current date and time: ${local} (${CHAT_TIME_ZONE}); ISO timestamp: ${now.toISOString()}. Use this server-provided value for today, tomorrow, yesterday, deadlines, schedules, and relative dates. Do not infer the current date or time from memory.`;
+}
 
 const CHAT_BASE_CONTEXT = `You are the Harnios assistant inside the authenticated Company OS.
 Be concise, explain actions clearly, and never claim an operation succeeded unless its result says so.
@@ -25,5 +36,5 @@ export async function loadChatContext(mode: ChatMode = "harnios"): Promise<strin
     loadedPath = LEGACY_AGENTS_PATH;
   }
   const agents = content.toString("utf-8").slice(0, 120_000);
-  return `${CHAT_BASE_CONTEXT}\n\n${MODE_CONTEXT[mode]}\n\nTrusted instructions from ${loadedPath}:\n${agents}`;
+  return `${CHAT_BASE_CONTEXT}\n\n${currentDateTimeContext()}\n\n${MODE_CONTEXT[mode]}\n\nTrusted instructions from ${loadedPath}:\n${agents}`;
 }

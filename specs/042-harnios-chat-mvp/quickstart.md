@@ -51,6 +51,7 @@ Aprire `http://localhost:3000`, autenticarsi e verificare il pulsante flottante 
 7. Inviare una richiesta lunga, premere `Stop` e verificare che la risposta si interrompa mantenendo il contenuto già ricevuto.
 8. Premere `Reset` e verificare che i messaggi della chat locale vengano rimossi senza modificare dati persistenti.
 9. Su desktop e mobile verificare che la finestra arrivi fino alla base della viewport, inizi sotto l'header quando presente e mantenga sempre visibile il composer.
+10. Verificare che i JSON di richiesta e risultato tool siano nascosti per impostazione predefinita, quindi usare il toggle vicino a `Harnios`/`Generale` per mostrarli e nasconderli senza perdere la conversazione.
 
 ## Scenario 5 — Direct tool execution
 

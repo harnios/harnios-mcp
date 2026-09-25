@@ -131,7 +131,7 @@ Root layout
 - Build a minimal custom assistant-ui thread/composer using existing CSS tokens, not the legacy pre-styled package or Tailwind templates.
 - Mount once below the root layout so the runtime survives client-side navigation.
 - Render an accessible fixed launcher at bottom-right and a fixed responsive panel targeting `66.67vw × 33.33vh`, clamped for narrow screens.
-- Provide close/reopen behavior, loading/streaming/error states, and tool-call states; keep tool activity in the UI rather than duplicating it in assistant prose unless the user asks for details.
+- Provide close/reopen behavior, loading/streaming/error states, and tool-call states; keep tool activity in the UI rather than duplicating it in assistant prose unless the user asks for details. Keep JSON input/output hidden by default behind a local detail toggle next to the chat mode selector.
 - Add a localized `Harnios`/`General` mode selector in the panel header, defaulting to Harnios; retain history when switching and disable the selector while the thread is running.
 - Keep one transport/runtime instance and supply the current mode through a mutable request-body resolver so changing mode does not reset messages.
 - Add all visible labels and aria text to the typed dictionaries in six languages.

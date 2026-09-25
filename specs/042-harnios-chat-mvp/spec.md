@@ -108,6 +108,8 @@ Come cliente, voglio che ogni messaggio venga elaborato con le istruzioni operat
 - **FR-026**: La chat MUST offrire un pulsante `Reset` che elimina immediatamente i messaggi dalla conversazione locale corrente senza scrivere o cancellare dati persistenti.
 - **FR-027**: La finestra chat MUST occupare verticalmente tutto lo spazio dal fondo dell'header applicativo alla base della viewport; su viewport mobili il composer MUST restare sempre visibile mentre solo la conversazione scorre.
 - **FR-028**: In modalità Harnios, il testo dell'assistente MUST NOT narrare chiamate tool o passaggi intermedi, poiché tali informazioni sono già rese dalla UI; l'assistente può descriverli solo se il cliente li richiede esplicitamente.
+- **FR-029**: La chat MUST offrire accanto al selettore modalità un interruttore per mostrare o nascondere gli input e i risultati JSON delle chiamate tool; il valore predefinito MUST essere nascosto, lo stato del tool MUST restare visibile e la preferenza MUST restare solo nello stato locale della conversazione.
+- **FR-030**: Ogni richiesta chat MUST includere nel contesto trusted la data e l'ora correnti del server nella timezone `Europe/Rome`; il modello MUST usare quel valore per date, orari e riferimenti temporali relativi e MUST NOT calcolarli o indovinarli autonomamente.
 - **FR-018**: La chat MUST offrire una scelta esplicita tra modalità `Harnios` e modalità `Generale`, con `Harnios` selezionata per impostazione predefinita.
 - **FR-019**: Per ogni nuovo messaggio inviato in modalità Harnios, il server MUST eseguire come prima chiamata MCP `read_file` con `{"path":"AGENTS.md"}` nella stessa sessione MCP usata dal modello; solo dopo questa lettura il modello può selezionare altri strumenti o produrre la risposta conclusiva.
 - **FR-020**: In modalità Generale, il sistema MUST NOT esporre o invocare strumenti MCP per la richiesta.
@@ -121,6 +123,7 @@ Come cliente, voglio che ogni messaggio venga elaborato con le istruzioni operat
 - **Model configuration**: selezione configurabile del provider e del modello utilizzato per generare le risposte.
 - **Harnios base context**: istruzioni operative di base, `AGENTS.md` e contesto Harnios MCP aggiunti a ogni elaborazione della chat.
 - **MCP tool invocation**: richiesta di esecuzione di uno strumento Harnios MCP, con nome, input, stato, risultato o errore.
+- **Tool detail visibility**: preferenza temporanea della chat che determina se input e risultati JSON delle chiamate tool sono mostrati; non viene persistita.
 - **Chat mode**: stato temporaneo della chat con valore `Harnios` o `Generale`; determina la disponibilità e l'obbligatorietà degli strumenti MCP per i messaggi successivi e non viene persistito.
 
 ## Success Criteria *(mandatory)*
@@ -139,6 +142,7 @@ Come cliente, voglio che ogni messaggio venga elaborato con le istruzioni operat
 - **SC-010**: Nel 100% dei turni completati in modalità Harnios è visibile almeno una chiamata MCP precedente alla risposta conclusiva.
 - **SC-011**: Nel 100% dei turni completati in modalità Generale non viene eseguita alcuna chiamata MCP.
 - **SC-012**: Il cliente può cambiare modalità con una sola interazione quando la chat è inattiva, senza perdere alcun messaggio della conversazione corrente.
+- **SC-013**: Il 100% delle nuove chat apre con dettagli JSON dei tool nascosti, mantenendo visibile il relativo stato; il cliente può mostrarli o nasconderli con una sola interazione.
 
 ## Assumptions
 
@@ -152,4 +156,5 @@ Come cliente, voglio che ogni messaggio venga elaborato con le istruzioni operat
 - Il supporto a provider locali e OpenAI-compatible è un vincolo architetturale futuro; il primo provider concreto può essere quello già configurato nell'ambiente.
 - La modalità vale dal messaggio successivo, resta nello stato temporaneo condiviso della scheda e torna a `Harnios` dopo un refresh completo.
 - La modalità Harnios richiede un provider capace di tool calling obbligatorio; un provider incompatibile produce un errore esplicito invece di un fallback senza strumenti.
+- La visibilità dei dettagli tool torna nascosta dopo un refresh completo o un reset della conversazione.
 - Nessun commit Git o push remoto fa parte della feature.

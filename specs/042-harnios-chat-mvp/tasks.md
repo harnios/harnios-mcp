@@ -159,3 +159,5 @@ description: "Task list for Harnios Chat MVP"
 - [X] T031 Implement the default-Harnios localized mode selector, persistent runtime-safe mode transport, history-preserving switches, and running lock in `frontend/app/_ui/ChatPanel.tsx` and `frontend/app/globals.css` per FR-018 and FR-021 (missing).
 - [X] T032 [P] Add mode labels and replace hard-coded tool status/approval text across `frontend/lib/i18n/dictionaries/types.ts` and all six files under `frontend/lib/i18n/dictionaries/` per FR-014 and FR-017 (partial).
 - [ ] T033 Validate Harnios and General mode behavior with `npx tsc --noEmit`, `npm run lint`, `npm run build`, and the mode scenarios in `specs/042-harnios-chat-mvp/quickstart.md` per SC-010, SC-011, and SC-012 (partial).
+- [X] T034 Add the default-hidden local tool JSON detail toggle next to the chat mode selector in `frontend/app/_ui/ChatPanel.tsx` and `frontend/app/globals.css` per FR-029 and SC-013.
+- [X] T035 Add the server-provided current date/time context in `frontend/lib/chat/context.ts`, using `Europe/Rome` and including an ISO timestamp per FR-030.
