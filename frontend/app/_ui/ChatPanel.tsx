@@ -11,7 +11,7 @@ import type { ChatMode } from "@/lib/chat/mode";
 
 export interface ChatLabels {
   open: string; close: string; title: string; placeholder: string; send: string; thinking: string; error: string; maximize: string; restore: string;
-  toolRunning: string; toolComplete: string; toolFailed: string; toolPending: string; toolInput: string; toolResult: string;
+  toolRunning: string; toolComplete: string; toolFailed: string; toolPending: string; toolInput: string; toolResult: string; toolDetails: string;
   stop: string; reset: string;
   modeLabel: string; modeHarnios: string; modeGeneral: string; modeLocked: string;
 }
@@ -38,7 +38,7 @@ function MarkdownText({ text }: TextMessagePartProps) {
   );
 }
 
-function ToolCallMessage({ labels, ...part }: ToolCallMessagePartProps & { labels: ChatLabels }) {
+function ToolCallMessage({ labels, showDetails, ...part }: ToolCallMessagePartProps & { labels: ChatLabels; showDetails: boolean }) {
   const { toolName, args, result, isError, status } = part;
   const argsPreview = JSON.stringify(args ?? {}, null, 2);
   const isWaiting = status.type === "running";
@@ -57,19 +57,35 @@ function ToolCallMessage({ labels, ...part }: ToolCallMessagePartProps & { label
           {isWaiting ? labels.toolRunning : isError ? labels.toolFailed : result === undefined ? labels.toolPending : labels.toolComplete}
         </span>
       </div>
-      {argsPreview !== "{}" ? (
+      {showDetails && argsPreview !== "{}" ? (
         <details className="chat-tool__result">
           <summary>{labels.toolInput}</summary>
           <pre>{argsPreview}</pre>
         </details>
       ) : null}
-      {resultPreview !== null ? (
+      {showDetails && resultPreview !== null ? (
         <details className="chat-tool__result">
           <summary>{labels.toolResult}</summary>
           <pre>{resultPreview}</pre>
         </details>
       ) : null}
     </div>
+  );
+}
+
+function ToolDetailsToggle({ checked, labels, onChange }: { checked: boolean; labels: ChatLabels; onChange: (checked: boolean) => void }) {
+  return (
+    <button
+      className={checked ? "chat-tool-details-toggle chat-tool-details-toggle--active" : "chat-tool-details-toggle"}
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={labels.toolDetails}
+      title={labels.toolDetails}
+      onClick={() => onChange(!checked)}
+    >
+      {"{}"}
+    </button>
   );
 }
 
@@ -126,11 +142,12 @@ export function ChatPanel({ labels }: { labels: ChatLabels }) {
   const [open, setOpen] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [mode, setMode] = useState<ChatMode>("harnios");
+  const [showToolDetails, setShowToolDetails] = useState(false);
   const [transport] = useState(() => new ModeChatTransport());
   const runtime = useChatRuntime({
     transport,
   });
-  const ToolRenderer = useCallback((props: ToolCallMessagePartProps) => <ToolCallMessage {...props} labels={labels} />, [labels]);
+  const ToolRenderer = useCallback((props: ToolCallMessagePartProps) => <ToolCallMessage {...props} labels={labels} showDetails={showToolDetails} />, [labels, showToolDetails]);
   const changeMode = useCallback((nextMode: ChatMode) => {
     transport.setMode(nextMode);
     setMode(nextMode);
@@ -146,6 +163,7 @@ export function ChatPanel({ labels }: { labels: ChatLabels }) {
           <header className="chat-panel__header">
             <h2>{labels.title}</h2>
             <ModeSelector labels={labels} mode={mode} onChange={changeMode} />
+            <ToolDetailsToggle checked={showToolDetails} labels={labels} onChange={setShowToolDetails} />
             <ChatActions labels={labels} />
             <div className="chat-panel__actions">
               <button className="chat-panel__action" type="button" aria-label={fullscreen ? labels.restore : labels.maximize} onClick={() => setFullscreen((value) => !value)}>

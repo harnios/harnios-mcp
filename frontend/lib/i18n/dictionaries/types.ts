@@ -22,6 +22,7 @@ export interface Dictionary {
     toolPending: string;
     toolInput: string;
     toolResult: string;
+    toolDetails: string;
     stop: string;
     reset: string;
     modeLabel: string;
