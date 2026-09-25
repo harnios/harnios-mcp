@@ -5,7 +5,7 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Local env overrides (see .env.example for documented defaults)
+# Local env overrides (see frontend/.env.example for documented defaults)
 .env
 .env*.local
 
@@ -20,7 +20,7 @@ next-env.d.ts
 npm-debug.log*
 tsconfig.tsbuildinfo
 
-# Local MinIO storage data (bind-mounted, see docker-compose.yml)
+# Legacy local storage data; preserve it even though the bundled service is removed.
 /data/
 .vercel
 .env*

@@ -2,156 +2,93 @@
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/harnios/harnios-mcp&root-directory=frontend)
 
-Harnios is a self-hosted, MCP-based storage system that gives every AI assistant you use — Claude, ChatGPT, Cursor, or anything else — a shared, persistent memory of your business: knowledge base, skills, projects, operational tables, and reports, all in one place. Connect a new tool once, and it reads and writes through the same store instead of starting from zero.
+Harnios gives AI assistants and the owner-facing web app one shared Company OS workspace. Files, operating instructions, scheduled tasks, and app state live in a configured S3-compatible bucket. The same Next.js application serves the web interface and the authenticated MCP endpoint at `/mcp`.
 
-Under the hood, it's an autonomous, serverless system for running an AI-based Company OS. It can be deployed to serverless platforms like Vercel (or similar) or run locally on Node.js, and requires an external S3-compatible object storage backend — either your own, or a local self-hosted MinIO instance for development.
+The app lives in [`frontend/`](frontend/). This repository does **not** include a local MinIO service or a ready-made MCP client configuration; bring an existing S3-compatible bucket and your own credentials. A separately hosted MinIO service remains compatible.
 
-This repo pairs that local MinIO setup with the Next.js app that uses it. See [specs/001-s3-self-hosted-storage/quickstart.md](specs/001-s3-self-hosted-storage/quickstart.md) for a full end-to-end validation walkthrough.
+## What you can do
 
-The Next.js app (web editor + MCP server) lives entirely in [`frontend/`](frontend/) — that's the folder to point a future Vercel project's Root Directory setting at (see [specs/006-frontend-folder-structure](specs/006-frontend-folder-structure/spec.md)). Everything else at the repo root (`docker-compose.yml`, `data/`, `scripts/`) is local-dev infrastructure that isn't deployed.
+- Browse, upload, create, edit, delete, and download files at `/files`. Markdown, CSV, HTML, Python, and other text files have editor or preview modes; binary files can be opened or downloaded where supported. Moving or renaming a file is available through the `move` MCP tool.
+- Open `.bpmn` files as diagrams, inspect or edit their XML, and make visual changes in a Modeler modal. **Apply** updates the unsaved editor state; **Save** persists it. **New BPMN diagram** is offered only in direct process folders at `/processes/<process>` and creates a valid starter file without replacing an existing one. [BPMN specification](specs/043-bpmn-viewer/spec.md)
+- Create expiring, read-only file links with optional password protection. View supported formats in the browser, use native sharing where available, and revoke links at `/shares`. Shares last at most 30 days. [Sharing specification](specs/041-temporary-file-sharing/spec.md)
+- Use the floating chat on authenticated pages. **Harnios** mode can use enabled MCP tools; **General** mode has no MCP tools. Tool activity, Stop, and Reset controls are visible. The conversation survives client-side navigation but not a full reload. [Chat specification](specs/042-harnios-chat-mvp/spec.md)
+- Manage native and connected tools at `/tools`, connect external MCP servers at `/tools/connections`, and create or run Scheduled Tasks at `/schedules`. In-app help is at `/docs`; the same topics are available to assistants through `get_docs`.
 
-For production Docker delivery, GitHub Actions validates the app and publishes `ghcr.io/harnios/harnios-mcp` on successful pushes to `main`. Coolify runs that published image; runtime environment variables remain configured in Coolify. To build locally, run `docker build -t harnios-mcp:local frontend/`.
+## Get started
 
-## Technical Overview
+1. Prepare an existing S3-compatible bucket and credentials that can read and write it. Harnios does not create the bucket.
+2. From the repository root, copy the application environment template and fill in its required values:
 
-- **App**: [`frontend/`](frontend/) is a single Next.js 16 (App Router) application in TypeScript, serving both the web editor UI and the MCP server from one deployable unit — no separate backend service.
-- **MCP server**: built on `@modelcontextprotocol/sdk` + `mcp-handler`, exposed as a Streamable HTTP endpoint at `/mcp` (see [S3 Storage MCP Server](#s3-storage-mcp-server) below).
-- **Storage**: all persisted state — files/directories exposed via MCP and the editor, plus OAuth clients/sessions and personal access tokens — lives in a single S3-compatible bucket, accessed via `@aws-sdk/client-s3`. No database is used; the bucket *is* the datastore.
-- **Auth**: two independent ways to authenticate to the MCP server — full OAuth 2.0 (for hosted AI assistants like ChatGPT/Claude adding it as a connector, spec [008-mcp-oauth](specs/008-mcp-oauth/)) and owner-generated, non-expiring personal access tokens (for scripts/CLI tools/`.mcp.json`, spec [013-mcp-token-auth](specs/013-mcp-token-auth/)). The web editor at `/files` is gated by the same owner credential (spec [009-editor-login-gate](specs/009-editor-login-gate/)).
-- **Statelessness**: because all state lives in the S3 bucket rather than on local disk or in-memory, the app is safe to run as ephemeral serverless functions (e.g. on Vercel) — any instance can serve any request.
-- **No code changes to switch storage backend**: any S3-compatible provider works (self-hosted MinIO, AWS S3, or another compatible service) — swap it via environment variables only; see below.
-
-## Getting Started
-
-This project includes a self-hosted, S3-compatible object storage service (MinIO) for local development. It runs entirely on your machine — no cloud account or credentials required.
-
-Start it:
-
-```sh
-docker compose up -d
-```
-
-The S3 API is available at `http://localhost:9000` and the web console at `http://localhost:9001` (default credentials: `minioadmin` / `minioadmin`). Override the ports via `MINIO_API_PORT` / `MINIO_CONSOLE_PORT` (see `.env.example`) if either default port is already in use on your machine — startup will otherwise fail fast with a clear "port already in use" error rather than silently picking a different port.
-
-Stop it:
-
-```sh
-docker compose stop
-```
-
-Always use `docker compose` (not the legacy `docker-compose`).
-
-## Buckets & Objects
-
-No buckets are created automatically — create whatever buckets you need with any S3-compatible client (e.g. the [MinIO Client `mc`](https://min.io/docs/minio/linux/reference/minio-mc.html) or the AWS CLI) pointed at `http://localhost:9000` using the credentials above. See [quickstart.md](specs/001-s3-self-hosted-storage/quickstart.md) for a full walkthrough.
-
-## Resetting local data
-
-To permanently wipe all locally stored buckets/objects and start fresh:
-
-```sh
-./scripts/reset-storage.sh
-```
-
-This stops the service, clears its data, and starts it back up with no buckets present.
-
-## Where the data lives
-
-Storage data is bind-mounted to `./data/minio` on the host (not a Docker-managed volume), so bucket/object structure is visible outside Docker. Note that MinIO stores each object's content wrapped in its own binary `xl.meta` format (small objects are inlined directly into it) rather than as a plain file — so you can browse the bucket/key folder layout under `./data/minio`, but you can't open an object's content directly in a text editor from there. Use the S3 API (or the web console) to read/write actual content. This folder is git-ignored and owned by `root` on Linux hosts (MinIO's container runs as root); use `./scripts/reset-storage.sh` rather than a manual `rm -rf` to clear it without needing `sudo`.
-
-## Configuring the app's storage connection
-
-The Next.js app (`frontend/`) connects to any S3-compatible storage backend — not only the local MinIO instance above — via environment variables it reads at startup (see [specs/007-s3-storage-config](specs/007-s3-storage-config/spec.md)). These are separate from the repo-root `.env.example` above, which only configures the local MinIO *container*: Next.js loads env files from its own project root, so the app's own settings belong in `frontend/.env.local`, copied from [`frontend/.env.example`](frontend/.env.example):
-
-```sh
-cp frontend/.env.example frontend/.env.local
-```
-
-The defaults match the local MinIO instance started above. To point the app at a different S3-compatible provider, edit `frontend/.env.local` (endpoint, region, access key, secret key, bucket, and path-style vs. virtual-hosted-style addressing) and restart the app — no code changes required.
-
-The configured bucket (`S3_BUCKET`) **must already exist**. The app validates the connection at startup and logs a clear warning if required settings are missing, the endpoint is unreachable, credentials are rejected, or the bucket doesn't exist — but it no longer refuses to start over this (spec 014-os-init-page superseding spec 007's original fail-fast behavior): every request is instead sent to [`/init`](#connecting-storage-from-the-app-init) until storage is reachable, so the app is always up to guide you through fixing it. For the local MinIO instance, create the bucket once via the web console (`http://localhost:9001`) or any S3-compatible CLI before starting the app — see [specs/007-s3-storage-config/quickstart.md](specs/007-s3-storage-config/quickstart.md) for the full walkthrough.
-
-## Connecting storage from the app (`/init`)
-
-If storage isn't connected yet (missing configuration, unreachable endpoint, rejected credentials, or a missing bucket) — including a completely fresh clone or deploy with no configuration at all — every page redirects to `/init`, which shows a setup helper covering everything the app needs to run in one place: the storage connection, the owner sign-in credential, and an optional system name. Fill it in and it generates one ready-to-paste configuration snippet, plus plain instructions for applying it either locally (`frontend/.env.local`) or on a hosting provider (e.g. Vercel: Project → Settings → Environment Variables → paste). Nothing typed into this helper is ever sent to the server; apply the snippet yourself and restart/redeploy.
-
-Once storage is connected and signed in as the owner (see below), `/init` also bootstraps a fresh Company OS skeleton on an empty bucket — one confirmation click, no questions asked — creating `os/`, `data/`, a root `AGENTS.md`, and `os/skills/init.md`. Either right after that or on any later visit once the structure already exists, `/init` shows the MCP server URL and OAuth instructions for connecting Claude or ChatGPT as a connector, plus a link to `/files` — connecting an assistant is the actual next step, since it's the assistant (reading `os/skills/init.md`) that interviews you and fills in the business's own details (`os/identity.md` and everything else), not this app. See [specs/014-os-init-page](specs/014-os-init-page/spec.md) for the full spec.
-
-## Running with external storage (no local MinIO)
-
-The repo-root `docker-compose.yml`/MinIO setup above is only for local development convenience — it is not a dependency of the app itself. `frontend/` runs against **any** S3-compatible bucket, so you can skip `docker compose` entirely and point it at storage you already have (AWS S3, or any other S3-compatible provider/self-hosted instance reachable from where the app runs).
-
-**Locally, against external storage:**
-
-1. `cp frontend/.env.example frontend/.env.local`
-2. Fill in `S3_ENDPOINT`, `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_BUCKET` for your external provider (set `S3_FORCE_PATH_STYLE=false` if it needs virtual-hosted-style addressing — most providers other than self-hosted MinIO do), and set `OAUTH_OWNER_USERNAME`/`OAUTH_OWNER_PASSWORD`.
-3. Make sure the bucket already exists (it's never created automatically).
-4. `cd frontend && npm install && npm run dev` — no `docker compose up` needed.
-
-**Deployed serverless (e.g. Vercel):**
-
-1. Import the repo and set the project's **Root Directory** to `frontend/` (see [specs/006-frontend-folder-structure](specs/006-frontend-folder-structure/spec.md)) — this repo has no root-level `package.json`, only `frontend/` is a deployable Next.js app.
-2. In the platform's environment variables UI (not a `.env` file — those aren't deployed), set the same variables listed in [`frontend/.env.example`](frontend/.env.example): `S3_ENDPOINT`, `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_BUCKET`, `S3_FORCE_PATH_STYLE`, `OAUTH_OWNER_USERNAME`, `OAUTH_OWNER_PASSWORD`, and optionally `MCP_BOOTSTRAP_PATH`/`OS_NAME`.
-3. Deploy. Because all app state (files, OAuth clients, personal access tokens) lives in the external bucket rather than on local disk, the deployment is stateless and safe to run as ephemeral serverless functions — no persistent volume or database needed.
-4. Once live, `/mcp` and `/files` work exactly as in local dev, just at your deployment URL instead of `http://localhost:3000`.
-
-## S3 Storage MCP Server
-
-An MCP server exposes the configured storage above as filesystem-like tools (create/read/update/delete files; create/list/delete directories, recursively; move/rename either) — see [specs/002-s3-mcp-server/contracts/mcp-tools.md](specs/002-s3-mcp-server/contracts/mcp-tools.md) for the full tool list, and [specs/002-s3-mcp-server/quickstart.md](specs/002-s3-mcp-server/quickstart.md) for a runnable walkthrough.
-
-Three additional tools — `list_directory_tree`, `find_files_by_name`, `search_file_content` — let a connected assistant map or search a large nested tree (e.g. a Company OS with many skills/policies folders) in a single call instead of one `list_directory` call per level; see [specs/022-mcp-tree-search/contracts/mcp-tools-tree.md](specs/022-mcp-tree-search/contracts/mcp-tools-tree.md) for the full contract, and [specs/022-mcp-tree-search/quickstart.md](specs/022-mcp-tree-search/quickstart.md) for a runnable walkthrough.
-
-Prerequisites: the storage backend must be running and reachable (e.g. `docker compose up -d` for local MinIO), its bucket must already exist, and `frontend/.env.local` must be set up per the section above.
-
-Install dependencies once:
-
-```sh
-cd frontend
-npm install
-```
-
-Start the MCP server:
-
-```sh
-cd frontend
-npm run dev
-```
-
-This exposes the MCP endpoint (Streamable HTTP) at `http://localhost:3000/mcp`. It operates against a single, configured bucket (`S3_BUCKET` in `frontend/.env.example`, default `mcp-storage`) on whichever S3-compatible backend `frontend/.env.local` points at — separate from any bucket you create manually via the local-MinIO section above.
-
-### Dynamic tool descriptions from a bootstrap file
-
-Optionally set `MCP_BOOTSTRAP_PATH` in `frontend/.env.local` (e.g. `MCP_BOOTSTRAP_PATH=assistant/AGENTS.md`) to a Markdown file already in storage. When set, every tool's description shown to a connecting client is prepended with guidance generated from that file's optional `<!-- mcp-context: ... -->` and `<!-- mcp-triggers: ... -->` HTML-comment markers — telling the client what the storage is for, when to use it, and to read the bootstrap file first. Edits to the file are picked up within about a minute, with no restart or redeploy. If the variable is unset, the file is missing, or neither marker is present, every tool simply falls back to its plain original description — see [specs/010-dynamic-tool-descriptions/quickstart.md](specs/010-dynamic-tool-descriptions/quickstart.md) for a runnable walkthrough.
-
-### Managing which tools are active
-
-Sign in as the owner and open [`/tools`](http://localhost:3000/tools) to see every tool's current active/disabled status, and to disable or re-enable any of them right there — no environment variable, no restart. A change is confirmed explicitly (naming the tool and the new status) before it's applied, and takes effect on the very next MCP request; the page also warns that AI assistant sessions already connected before the change may not see it until they reconnect. See [specs/025-manage-tools-page/quickstart.md](specs/025-manage-tools-page/quickstart.md) for a runnable walkthrough. (Earlier versions of this app used an `MCP_DISABLED_TOOLS` environment variable for this — spec 023-mcp-tool-toggle — which this page's storage-backed mechanism has superseded; that variable is no longer read.)
-
-### Connecting external MCP servers (proxy)
-
-An assistant connected to this MCP server can also reach tools from *other* remote MCP servers, without a second connector: sign in as the owner and open [`/tools/connections`](http://localhost:3000/tools/connections) to register one (its URL and a static bearer token). Once connected, its tools are re-exposed on this same `/mcp` endpoint alongside the built-in ones — a connected assistant just sees more tools, with no separate configuration on its end. A tool name that would collide with a built-in one (or one from another connection) is refused, not silently overridden, and the collision is shown on `/tools/connections`; the same enable/disable page above ([`/tools`](http://localhost:3000/tools)) also covers externally-sourced tools individually, and `/tools/connections` additionally lets the owner pause/resume a whole connection or remove it outright. The stored token is write-only — never shown again once saved, only replaceable. See [specs/031-external-mcp-proxy/quickstart.md](specs/031-external-mcp-proxy/quickstart.md) for a runnable walkthrough.
-
-### Connecting AI assistants (ChatGPT, Claude, etc.) via OAuth
-
-The MCP server requires OAuth (spec 008-mcp-oauth) before any tool call is allowed — this is what lets you add it as a remote connector in hosted AI assistants. One-time setup, in addition to the storage setup above:
-
-1. Set an owner sign-in credential in `frontend/.env.local` (separate from the S3/MinIO credentials above — this one gates who can approve AI assistants, not storage access):
+   ```sh
+   cp frontend/.env.example frontend/.env.local
    ```
-   OAUTH_OWNER_USERNAME=owner
-   OAUTH_OWNER_PASSWORD=<choose a password>
+
+   Set `S3_ENDPOINT`, `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_BUCKET`, `OAUTH_OWNER_USERNAME`, and `OAUTH_OWNER_PASSWORD`. Set `S3_FORCE_PATH_STYLE` for your provider (`false` for providers requiring virtual-hosted-style bucket addresses). Keep `frontend/.env.local` private.
+
+3. Install and start the application:
+
+   ```sh
+   cd frontend
+   npm ci
+   npm run dev
    ```
-2. Start the server (`npm run dev`) — it logs a clear warning at startup if these are missing (same as the storage settings above), but still starts; sign-in simply fails until they're set.
 
-To add the server as a connector: in ChatGPT or Claude's "add connector"/"add MCP server" flow, point it at `http://localhost:3000/mcp` (or your deployed URL). The assistant discovers the OAuth flow automatically; you'll be prompted to sign in with the credential from step 1 and approve the connection. See [specs/008-mcp-oauth/quickstart.md](specs/008-mcp-oauth/quickstart.md) for the full walkthrough, including reviewing and revoking connected assistants at `/settings/connected-apps`.
+4. Open `http://localhost:3000/init`. If storage is unavailable, this page explains what configuration is missing; enter the values locally or in your hosting platform and restart. After connecting storage and signing in, use `/init` to bootstrap an empty Company OS, then open `/files` or connect an assistant to `http://localhost:3000/mcp`.
 
-## Web File Explorer & Markdown Editor
+The bucket holds workspace files and application state; no separate application database is required. The old bundled MinIO setup has been removed. If you previously used it, ignored data under `data/minio` is **not deleted or migrated**: copy anything you still need into your chosen bucket with an appropriate storage client. Older SpecKit quickstarts may still describe that historical setup; use the steps above for current installations.
 
-A browser UI at `/files` (same app/dependencies as the MCP server above — `docker compose up -d` then `npm run dev` must both be running) lets you browse the `MCP_STORAGE_BUCKET` folder/file tree and edit *existing* files directly: `.md` files open in a split view (raw Markdown left, live-rendered preview right); other text files (`.txt`, `.html`, `.xml`, `.css`, `.bpmn`, `.json`, and more) open in a plain-text editor. Binary files (PDF, JPG/PNG, DOC/DOCX, XLS/XLSX, ZIP) are detected and shown with a clear "can't be edited here" message instead, with an Open/Download action to retrieve them regardless — PDFs and images open directly in a new browser tab. Uploads accept this same broad set of document, spreadsheet, image, diagram, and markup types (up to 25 MB per file), and every file in the tree shows an icon for its type. Saves are explicit (no autosave) — unsaved changes are indicated, and you're warned before navigating away or closing the tab with changes pending. A file's path is part of the URL itself (e.g. `/files/notes/todo.md`), so any file can be opened directly via a bookmarked or shared link (spec [018-editor-file-deep-link](specs/018-editor-file-deep-link/)); the previous `/editor` URL still works and redirects here. See [specs/003-web-file-editor/contracts/api-routes.md](specs/003-web-file-editor/contracts/api-routes.md) for the underlying API, [specs/003-web-file-editor/quickstart.md](specs/003-web-file-editor/quickstart.md) for a full walkthrough, and [specs/028-file-storage-upload](specs/028-file-storage-upload/) for the mixed-file-type upload/view support.
+### Configuration by capability
 
-`/files` requires signing in first, with the same owner credential used for the MCP connector flow above — a signed-out visit redirects to the sign-in screen, and a session started from either entry point covers both. See [specs/009-editor-login-gate/quickstart.md](specs/009-editor-login-gate/quickstart.md) for the full walkthrough.
+| Capability | Environment variables | Notes |
+|---|---|---|
+| Storage and owner sign-in | `S3_ENDPOINT`, `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_BUCKET`, `S3_FORCE_PATH_STYLE`, `OAUTH_OWNER_USERNAME`, `OAUTH_OWNER_PASSWORD` | The bucket must already exist. Next.js reads local settings from `frontend/.env.local`, not a repo-root env file. |
+| Chat and Scheduled Tasks | `MISTRAL_API_KEY`; optionally `CHAT_MODEL`, `MISTRAL_MODEL`, `SCHEDULER_TIMEZONE`, `SCHEDULER_ENABLED` | The current chat adapter supports Mistral models. The in-process scheduler is disabled on Vercel and should be disabled on extra replicas to avoid duplicate runs. |
+| Public share and upload links | `PUBLIC_APP_URL` | Use the public HTTPS origin (or localhost during development), not an internal bind address. Required when generating these links. |
+| Email and Telegram tools | `SMTP_*`, `TELEGRAM_BOT_TOKEN`; optionally `TELEGRAM_CHAT_ID` and `MESSAGING_RATE_LIMIT_*` | Configure only the delivery channels you use. Tool availability does not imply delivery credentials are configured. |
+| Optional tool-description context | `MCP_BOOTSTRAP_PATH` | Adds guidance from markers in a stored Markdown file. It does not replace the mandatory `AGENTS.md` first-read rule. |
 
-Open it at: `http://localhost:3000/files`
+See [`frontend/.env.example`](frontend/.env.example) for the complete variable list and comments. Secrets belong in private environment settings, never in the README or a committed client configuration.
+
+## MCP access and tools
+
+`/mcp` is a Streamable HTTP endpoint. Clients authenticate with OAuth 2.0 or an owner-created personal access token; the owner manages connections and tokens under `/settings`. For each task, the first storage call must read `AGENTS.md` via `read_file`. The server rejects other tool calls until that bootstrap succeeds; if `AGENTS.md` is missing, it directs the client to the OS repair flow. [Bootstrap specification](specs/016-os-engine-split/spec.md)
+
+The application registers **22 native tools**. The table reflects the registration code, not merely the `/tools` display catalog. An owner may disable tools; a disabled tool is absent from the live MCP list. Externally connected servers may add more tools, so the live set depends on configuration and connection state.
+
+| Area | Native tools | Purpose |
+|---|---|---|
+| Files and directories | `create_file`, `read_file`, `update_file`, `delete_file`, `create_directory`, `list_directory`, `delete_directory`, `move` | Read and manage workspace paths. `create_file` overwrites an existing file. Deletes outside Trash move data into Trash; deleting inside Trash is permanent. |
+| Tree search | `list_directory_tree`, `find_files_by_name`, `search_file_content` | Explore nested paths, search names, or search Markdown content. |
+| Company OS instructions | `get_os_engine`, `get_os_upgrade`, `get_os_init`, `get_change_process` | Obtain OS build/repair, upgrade, business setup, and structural-change procedures. |
+| Messaging | `send_email`, `send_telegram_message` | Send through the configured SMTP account or Telegram bot; email supports plain text and HTML. |
+| Execution | `run_python`, `run_job` | Run limited Python without network/filesystem/env access, or a registered job under `os/jobs` with manifest-authorized file access. |
+| Inbox and upload | `get_inbox`, `get_upload_link` | Read `data/inbox.md`, or get the authenticated browser upload URL and inbox destination without transferring file contents through the conversation. |
+| Help | `get_docs` | Read the same application documentation available at `/docs`. |
+
+`run_python` accepts inline code or a stored `.py` file, not both, and has a maximum 20-second timeout. `run_job` returns a summary and output metadata rather than file contents. External MCP tools are exposed through the same endpoint when their connection is enabled, their names do not collide with native tools, and they have not been disabled. The internal scheduler uses the native tool set, not external proxy tools. [External connections](specs/031-external-mcp-proxy/spec.md) · [Scheduled Tasks](specs/032-scheduled-tasks/spec.md)
+
+Note: `get_change_process` is registered but is currently missing from the owner-facing `/tools` catalog. It is still subject to the server's tool gate; its status just cannot be changed from that page until the catalog is corrected.
+
+## Web interface
+
+| Route | Use |
+|---|---|
+| `/init` | Show storage-setup guidance or initialize a fresh Company OS. |
+| `/files` | Browse, edit, upload, download, share, and model BPMN files. File paths are reflected in the URL for deep links. |
+| `/shares` | Review and revoke temporary file shares. |
+| `/tools` and `/tools/connections` | Enable/disable catalogued tools and manage external MCP servers. |
+| `/schedules` | Create, edit, enable, run, and review Scheduled Tasks. |
+| `/settings/connected-apps` and `/settings/personal-access-tokens` | Manage assistant OAuth connections and personal access tokens. |
+| `/docs` | Read in-app documentation. |
+
+The `/files` area and management pages require an owner session. Temporary visitor links are limited to the shared file; they do not grant access to the workspace or its edit controls. The previous `/editor` path redirects to `/files`.
+
+## Deploy
+
+For Vercel, import this repository with **Root Directory** set to `frontend/` and configure the same environment variables in the project settings. Set `PUBLIC_APP_URL` to the deployed public origin for visitor-facing links. The app is stateless apart from its external bucket, but the in-process scheduler does **not** run on Vercel; use a persistent single-instance deployment when Scheduled Tasks must run automatically.
+
+GitHub Actions builds and publishes `ghcr.io/harnios/harnios-mcp` after successful pushes to `main`. Coolify can run that image with its own runtime environment settings. For a local application image build, use `docker build -t harnios-mcp:local frontend/`. The image does not contain an object-storage server. No commit or deployment occurs merely by changing this README.
 
 ## License
 
-Licensed under the [PolyForm Internal Use License 1.0.0](LICENSE) — free to use, run, and modify for your own or your company's internal operations; distribution (including selling or offering a product/service based on it) requires a separate agreement with the copyright holder.
+Licensed under the [PolyForm Internal Use License 1.0.0](LICENSE): internal use is permitted; distribution or offering a product or service based on it requires a separate agreement with the copyright holder.
